@@ -82,25 +82,23 @@ export default function HomePage() {
                     style={{ background: 'radial-gradient(ellipse 60% 50% at 70% 40%, hsl(224 100% 62% / 0.08), transparent 70%)' }}
                 />
                 <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 pb-24 pt-32 lg:grid-cols-[1.15fr_0.85fr]">
+                    {/* El hero NO usa Reveal: entra con CSS, que se aplica en el
+                        primer pintado. Con framer-motion quedaba invisible hasta
+                        que cargaban 411 KB de JS. El H1 solo se desplaza —nunca
+                        se desvanece— porque es el elemento LCP.
+                        Ver docs/06-backlog.md → P2-03. */}
                     <div>
-                        <Reveal>
-                            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-                                4D — Cuarta Dimensión ES S.A.S.
-                            </p>
-                        </Reveal>
-                        <Reveal delay={0.1}>
-                            <h1 className="mt-6 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
-                                Diseñamos y desarrollamos{' '}
-                                <span className="text-primary">producto</span>: calzado, ropa y dotaciones.
-                            </h1>
-                        </Reveal>
-                        <Reveal delay={0.2}>
-                            <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                                Somos una comercializadora internacional colombiana. No comercializamos catálogos: desarrollamos producto a medida, con dirección de diseño propia y producción verificable.
-                            </p>
-                        </Reveal>
-                        <Reveal delay={0.3}>
-                            <div className="mt-9 flex flex-wrap gap-4">
+                        <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+                            4D — Cuarta Dimensión ES S.A.S.
+                        </p>
+                        <h1 className="rise-solid mt-6 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+                            Diseñamos y desarrollamos{' '}
+                            <span className="text-primary">producto</span>: calzado, ropa y dotaciones.
+                        </h1>
+                        <p className="rise-in rise-delay-2 mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                            Somos una comercializadora internacional colombiana. No comercializamos catálogos: desarrollamos producto a medida, con dirección de diseño propia y producción verificable.
+                        </p>
+                        <div className="rise-in rise-delay-3 mt-9 flex flex-wrap gap-4">
                                 <Link
                                     to="/nosotros"
                                     className="inline-flex items-center gap-2 border border-foreground/25 px-6 py-3.5 text-sm font-semibold tracking-wide transition-all duration-200 hover:border-foreground hover:bg-foreground hover:text-background active:scale-[0.98]"
@@ -113,18 +111,17 @@ export default function HomePage() {
                                 >
                                     Qué hacemos
                                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
-                                </a>
-                            </div>
-                        </Reveal>
+                            </a>
+                        </div>
                     </div>
-                    <Reveal delay={0.25} y={0}>
+                    <div className="rise-in rise-delay-2">
                         <Tesseract />
-                    </Reveal>
+                    </div>
                 </div>
             </section>
 
             {/* MARQUEE */}
-            <div className="overflow-hidden border-y border-border/60 py-4" aria-hidden="true">
+            <div className="marquee-mask overflow-hidden border-y border-border/60 py-4" aria-hidden="true">
                 <div className="marquee-track flex w-max items-center gap-10 whitespace-nowrap">
                     {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
                         <span key={i} className="flex items-center gap-10 text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
@@ -261,7 +258,9 @@ export default function HomePage() {
             </section>
 
             {/* METODOLOGÍA */}
-            <section id="metodologia" ref={methodRef} className="border-t border-border/60 bg-card/40">
+            {/* La clase relative es obligatoria: useScroll mide contra este contenedor y
+                con position: static los offsets salen mal (P2-07). */}
+            <section id="metodologia" ref={methodRef} className="relative border-t border-border/60 bg-card/40">
                 <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Metodología</p>

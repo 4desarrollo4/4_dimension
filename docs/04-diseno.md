@@ -57,9 +57,10 @@ Si el azul empieza a dominar una sección, está mal usado.
 El **eyebrow en versalitas con `tracking-[0.3em]`** encima de cada H2 es la
 firma del sitio. Toda sección nueva lo lleva.
 
-⚠️ La fuente se carga con `@import` dentro del CSS: bloquea el render.
-Debería ser `<link rel="preconnect">` + `<link>` en el HTML, y bajar de 7 pesos
-a 3. → Backlog **P2-01**.
+✅ *(2026-09-01)* La fuente entra por `<link rel="preconnect">` + `<link>` en
+[`index.html`](../apps/web/index.html), con la **variable** de Manrope: un solo
+archivo cubre los pesos 400–800. Antes se cargaba con `@import` dentro del CSS,
+que bloquea el render y encadena dos peticiones.
 
 ---
 
@@ -87,8 +88,8 @@ a 3. → Backlog **P2-01**.
 | `Footer.jsx` | Pie en 4 columnas |
 | `ProjectCard.jsx` · `ProductLine.jsx` | Tarjetas de proyecto y de línea |
 | `PageTransition.jsx` | Fundido entre rutas |
-| `ScrollToTop.jsx` | Scroll al tope al navegar (⚠️ bug con anclas — P1-02) |
-| `Seo.jsx` | OG/Twitter/canonical — ⚠️ **existe pero ninguna página lo usa** (P0-04) |
+| `ScrollToTop.jsx` | Scroll al tope al navegar; respeta el hash para las anclas |
+| `Seo.jsx` | OG/Twitter/canonical. Se usa en las 6 páginas; toma el dominio de `lib/site.js` |
 
 `components/ui/` es shadcn generado — no lo edites a mano.
 
@@ -99,15 +100,52 @@ a 3. → Backlog **P2-01**.
 Reglas:
 
 1. **Todo lo que anime debe respetar `prefers-reduced-motion`.** Ya lo hacen
-   `Reveal` (vía `useReducedMotion`), `CountUp` (vía `matchMedia`) e `index.css`
-   (marquee y cubo). Mantén esa disciplina.
+   `Reveal` y `PageTransition` (vía `useReducedMotion`), `CountUp` (vía
+   `matchMedia`) e `index.css` (marquee, cubo, entradas del hero y subrayado del
+   navbar). Mantén esa disciplina.
 2. Curva estándar: `ease: [0.22, 1, 0.36, 1]`, duración `0.6s`.
 3. Desplazamiento de entrada: `y: 24`.
 4. Escalonado entre hermanos: `delay: i * 0.05` … `0.06`.
 5. Hover: `duration-200`, y `active:scale-[0.98]` en elementos pulsables.
 
-⚠️ **El H1 del hero no debería animar.** Es el elemento LCP y hoy entra desde
-`opacity: 0`, quedando invisible ~0.6–1s. → Backlog **P2-03**.
+---
+
+## Entradas: cuándo CSS y cuándo framer-motion ✅ *(2026-09-01)*
+
+Es la regla de motion más importante del proyecto, y no es estética: es de
+rendimiento.
+
+| Zona | Cómo entra | Por qué |
+|---|---|---|
+| **Hero** (home y páginas de línea) | **CSS**: `.rise-in` / `.rise-solid` | El CSS bloquea el render, así que se ve en el primer pintado. Con framer-motion la portada quedaba en negro hasta cargar 411 KB de JS |
+| **H1 del hero** | `.rise-solid` — **solo desplaza, nunca desvanece** | Es el elemento LCP. Si empieza en `opacity: 0`, el navegador no lo cuenta como pintado |
+| **Todo lo demás** | `Reveal` (framer-motion, `whileInView`) | Está bajo el pliegue: nadie lo ve antes de hacer scroll |
+| **Cambio de ruta** | `PageTransition` | — |
+
+Clases disponibles en [`index.css`](../apps/web/src/index.css):
+`.rise-in` (desvanece y sube), `.rise-solid` (solo sube) y los retardos
+`.rise-delay-1` … `.rise-delay-4`.
+
+⚠️ **Nunca pongas un `Reveal` en la primera pantalla.** El sitio se prerenderiza:
+un `Reveal` se sirve con `opacity: 0` en el HTML, y ahí es donde mira el
+visitante antes de que cargue nada.
+
+### La primera carga no se anima
+
+[`PageTransition`](../apps/web/src/components/PageTransition.jsx) se salta su
+animación de entrada la primera vez, con una bandera a nivel de módulo. Si no,
+el envoltorio de la página entera se prerenderiza con `opacity: 0` y el sitio
+completo queda invisible hasta que arranca el JavaScript.
+
+❌ **No lo "arregles" poniendo `initial={false}` en el `<AnimatePresence>` de
+`App.jsx`.** Lo heredan los `Reveal` y se pierden las 25 entradas al hacer
+scroll. Ya se probó.
+
+### Sin JavaScript
+
+[`index.html`](../apps/web/index.html) lleva un `<noscript>` que revela todo lo
+que tenga `data-reveal` — el atributo que pone `Reveal`. El HTML ya viene
+prerenderizado: no tendría sentido servirlo invisible.
 
 ---
 
@@ -121,7 +159,19 @@ Reglas:
 - Objetivos táctiles de 44px (`h-11 w-11`) en los botones del menú móvil
 - Sin desbordamiento horizontal a 375px (verificado)
 
+Añadido el **2026-09-01** (**P2-04**, **P2-05**):
+
+- Landmark `<main id="contenido">` en [`App.jsx`](../apps/web/src/App.jsx)
+- Enlace **"Saltar al contenido"** (`.skip-link`), primero en el orden de foco
+- Anillo de foco global con `:focus-visible`, en el azul de marca — solo con
+  teclado, no al hacer clic
+- `scroll-margin-top: 6.5rem` en todo `[id]`: sin eso, un ancla deja el título
+  debajo del navbar fijo
+- Menú móvil: `role="dialog"`, `aria-modal`, `aria-expanded`, cierre con
+  `Escape`, foco atrapado dentro, scroll de fondo bloqueado y foco devuelto al
+  botón al cerrar
+
 ### Pendiente de accesibilidad
-- El menú móvil no atrapa el foco (`focus trap`) ni cierra con `Escape`
-- No hay enlace "saltar al contenido"
-- Falta `aria-expanded` en el botón del menú
+
+- Nada crítico conocido. Al añadir un componente nuevo, comprueba que se puede
+  usar con teclado y que el foco se ve.

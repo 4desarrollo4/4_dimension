@@ -34,6 +34,102 @@
 
 ---
 
+## 2026-09-01 · Pulido de frontend y motion
+
+**Qué se hizo**
+
+Pasada de calidad sobre el frontend, sin rediseñar nada — `04-diseno.md` dice
+que el diseño visual es lo más sólido del proyecto y sigue siéndolo. Lo que se
+tocó es cómo **entra**, cómo **responde** y cómo se **navega**.
+
+**El hallazgo: la página entera se servía invisible**
+
+Buscando qué pulir, apareció que el HTML prerenderizado traía **31 elementos con
+`opacity: 0`**, y el primero envolvía el documento completo: `PageTransition`
+arranca en `opacity: 0`, y ese estado también se renderiza en el servidor.
+
+Es decir: desde P0-04 el HTML llegaba completo y correcto para los rastreadores,
+pero **una persona veía una pantalla en negro hasta que se descargaban y
+ejecutaban 411 KB de JavaScript**. El prerender servía para el SEO y no para el
+visitante.
+
+| Comprobación | Antes | Ahora |
+|---|---|---|
+| `opacity: 0` en el HTML servido | **31** | **0** en el envoltorio y la primera pantalla |
+| Qué se ve sin ejecutar JavaScript | nada | el sitio completo |
+| Qué depende de JS en el hero | todo | nada |
+
+**Cómo se resolvió**
+
+- `PageTransition` se salta su animación **solo en la primera carga**, con una
+  bandera a nivel de módulo. Las transiciones entre rutas siguen igual.
+- El hero de la home y el de las páginas de línea entran con **CSS**
+  (`.rise-in`), no con framer-motion.
+- El **H1 usa `.rise-solid`**: solo se desplaza, nunca se desvanece. Es el
+  elemento LCP y con `opacity: 0` el navegador no lo cuenta como pintado.
+- `<noscript>` en `index.html` que revela todo lo que tenga `data-reveal`.
+
+⚠️ **Callejón sin salida documentado.** La solución obvia —`initial={false}` en
+el `<AnimatePresence>` de `App.jsx`— se probó y **rompe los 25 reveals de
+scroll**, porque los hereda. Se midió: los 25 pasaban a `opacity: 1` de entrada.
+Quedó escrito en `04-diseno.md` para que nadie lo repita.
+
+**Accesibilidad (P2-04, P2-05)**
+
+Landmark `<main>`, enlace "Saltar al contenido", anillo de foco global con
+`:focus-visible` en el azul de marca, y `scroll-margin-top` en todo `[id]` para
+que las anclas no queden tapadas por el navbar fijo.
+
+El menú móvil pasó de ser un div a un diálogo de verdad: `role="dialog"`,
+`aria-modal`, `aria-expanded`, `aria-controls`, foco atrapado, scroll de fondo
+bloqueado, cierre con `Escape` y foco devuelto al botón. Probado: al pulsar
+Escape, `aria-expanded` vuelve a `false` y el scroll se restaura.
+
+**Motion y detalle**
+
+- Transición de ruta más corta: 0.28 s de entrada y 0.16 s de salida. Con
+  `mode="wait"` el usuario espera las dos, así que cada 100 ms cuentan doble.
+- Subrayado animado en el navbar para el enlace activo y en hover.
+- Desvanecido en los bordes del marquee, que antes cortaba en seco.
+- `text-wrap: balance` en H1 y H2, `pretty` en párrafos: se acabaron las
+  líneas sueltas con una palabra.
+- Fuente Manrope **variable** por `<link>` en vez de `@import` (**P2-01**): un
+  archivo en lugar de siete, y deja de bloquear el render.
+- **P2-07** cerrado: la sección de Metodología ya es `position: relative` y la
+  barra de progreso mide bien.
+
+**P2-12 · Un problema de build que apareció de paso**
+
+`build:client` no vaciaba `dist`: Vite no lo hace solo cuando el `outDir` está
+fuera de la raíz. Cada build dejaba el CSS y el JS anteriores. Al comprobar las
+reglas compiladas aparecieron **tres** hojas de estilo donde debía haber una.
+Resuelto con `--emptyOutDir`.
+
+**Nota metodológica**
+
+Tres veces en esta sesión el panel de previsualización dio falsos positivos: no
+dispara `IntersectionObserver`, congela las animaciones y no aplica
+`scrollIntoView({ behavior: 'smooth' })`. Además, la consola **retiene errores de
+cargas anteriores de la misma pestaña**: los errores de hidratación que
+aparecieron eran de un bundle viejo, con un hash que ya no existía. Cada
+verificación se rehízo en pestaña limpia o se comprobó por diff.
+
+**Estado del backlog**
+
+P0: 4 ✅, 2 🟡, 1 ⬜. P1: 3 ✅, 1 ⚠️, 2 ⬜. P2: 6 ✅, 6 ⬜.
+
+**Decisiones tomadas**
+
+Ninguna nueva. `04-diseno.md` gana una sección — *Entradas: cuándo CSS y cuándo
+framer-motion* — que es ahora la regla de motion del proyecto.
+
+**Dónde quedó / qué sigue**
+
+Sin cambios de contenido: ni una palabra ni un dato. Sigue pendiente **P0-06**
+(hosting) y el material del propietario.
+
+---
+
 ## 2026-09-01 · P1-01: el sitio deja de vender
 
 **Qué se hizo**

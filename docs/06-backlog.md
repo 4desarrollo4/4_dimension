@@ -35,7 +35,7 @@
 |---|---|---|---|---|
 | **P0** | 4 | 2 | 1 | 7 |
 | **P1** | 3 | 1 | 2 | 6 |
-| **P2** | 0 | 0 | 11 | 11 |
+| **P2** | 6 | 0 | 6 | 12 |
 
 **Siguiente tarea recomendada:** **P0-06** — confirmar cómo sirve las rutas el
 hosting. Es lo único de P0 que no depende de datos del propietario, y de ello
@@ -364,14 +364,14 @@ de redes sociales.
 
 ---
 
-### P2-01 · Carga de la fuente Manrope — `S` — ⬜
+### P2-01 · Carga de la fuente Manrope — `S` — ✅ *(2026-09-01)*
 
-Se carga con `@import` dentro del CSS, lo que **bloquea el render**. Debe ser un
-`<link>` en el HTML — el `preconnect` ya está puesto desde P0-03 — y bajar de 7
-pesos a 3 (400 / 600 / 800).
+Sale del CSS y entra en el HTML como `<link>`, precedido del `preconnect` que ya
+estaba. Además se pasó a la **fuente variable**: un solo archivo cubre los pesos
+400–800, en vez de siete peticiones de pesos estáticos.
 
-📁 [`apps/web/src/index.css`](../apps/web/src/index.css)
-
+El `@import` anterior bloqueaba el render y encadenaba dos peticiones: el
+navegador tenía que descargar el CSS para descubrir que necesitaba la fuente.
 ---
 
 ### P2-02 · Logo e imágenes alojadas en CDN externo — `M` — ⬜
@@ -386,37 +386,58 @@ servirlos desde el dominio de la empresa.
 
 ---
 
-### P2-03 · El H1 del hero no debería animar — `S` — ⬜
+### P2-03 · El H1 del hero no debería animar — `S` — ✅ *(2026-09-01)*
 
-Es el elemento **LCP** de la home y entra desde `opacity: 0` con `Reveal`.
+Resultó ser mucho más grave de lo documentado. El problema no era solo el H1:
+**`PageTransition` envolvía la página entera y se prerenderizaba con
+`opacity: 0`**. El HTML llegaba completo y correcto… e invisible, hasta que el
+navegador descargaba y ejecutaba 411 KB de JavaScript.
 
-El prerender de P0-04 mejoró esto a medias: el HTML ya llega con el contenido,
-así que un rastreador lo ve. Pero para una persona el texto sigue empezando
-invisible hasta que framer-motion lo anima.
+Medido sobre el HTML del build: **31 elementos con `opacity: 0`**, empezando por
+el envoltorio de todo el documento.
 
-El hero (eyebrow, H1, párrafo y botones) debería renderizarse visible; anima solo
-lo que está por debajo del pliegue.
+**Cómo quedó:**
 
+- `PageTransition` se salta su animación solo en la **primera** carga, con una
+  bandera a nivel de módulo. Las transiciones entre rutas siguen intactas.
+- El hero de la home y el de las páginas de línea entran con **CSS**
+  (`.rise-in`), no con framer-motion: el CSS bloquea el render, así que se ve
+  desde el primer pintado.
+- El **H1 usa `.rise-solid`**, que solo desplaza y nunca desvanece: es el
+  elemento LCP y con `opacity: 0` el navegador no lo cuenta como pintado.
+- `index.html` lleva un `<noscript>` que revela todo lo que tenga `data-reveal`.
+
+**Verificado:** de **31 `opacity: 0`** a **0** en el envoltorio y la primera
+pantalla. Los 25 que quedan son `Reveal` bajo el pliegue, que es justo su
+función.
+
+⚠️ **Trampa:** poner `initial={false}` en el `<AnimatePresence>` de `App.jsx`
+parece la solución obvia y **rompe los 25 reveals**, porque los hereda. Probado
+y descartado. Ver [`04-diseno.md`](04-diseno.md).
 ---
 
-### P2-04 · `<main>`, "saltar al contenido" y `:focus-visible` — `S` — ⬜
+### P2-04 · `<main>`, "saltar al contenido" y `:focus-visible` — `S` — ✅ *(2026-09-01)*
 
-- [`App.jsx`](../apps/web/src/App.jsx) envuelve las rutas en un `<div>` — **no hay
-  landmark `<main>`**
-- No hay enlace "saltar al contenido"
-- No hay ni un estilo `:focus-visible` en `index.css`
+- Landmark `<main id="contenido">` en [`App.jsx`](../apps/web/src/App.jsx).
+- Enlace **"Saltar al contenido"**, primero en el orden de foco y oculto hasta
+  recibirlo.
+- Anillo de foco global con `:focus-visible` en el azul de marca. Solo con
+  teclado: al hacer clic con el ratón no aparece.
+- `scroll-margin-top: 6.5rem` en todo `[id]` — sin eso, cualquier ancla dejaba
+  el título tapado por el navbar fijo.
 
-✅ El contraste de color **sí** cumple WCAG AA con holgura (medido 2026-09-01:
-texto principal 18:1, secundario 7.08:1, azul primario 4.72:1). No lo rompas.
-
+✅ El contraste sigue cumpliendo WCAG AA (18:1 / 7.08:1 / 4.72:1).
 ---
 
-### P2-05 · Menú móvil: foco, Escape y `aria-expanded` — `S` — ⬜
+### P2-05 · Menú móvil: foco, Escape y `aria-expanded` — `S` — ✅ *(2026-09-01)*
 
-[`Navbar.jsx`](../apps/web/src/components/Navbar.jsx) abre un menú a pantalla
-completa que no atrapa el foco, no cierra con `Escape` y cuyo botón no declara
-`aria-expanded`.
+[`Navbar.jsx`](../apps/web/src/components/Navbar.jsx) declara ahora
+`role="dialog"`, `aria-modal`, `aria-expanded` y `aria-controls`. Al abrirse
+bloquea el scroll de fondo, lleva el foco dentro y lo atrapa con Tab y
+Shift+Tab; cierra con `Escape` y devuelve el foco al botón que lo abrió.
 
+**Verificado el 2026-09-01:** al pulsar Escape, `aria-expanded` vuelve a
+`false` y el scroll del cuerpo se restaura.
 ---
 
 ### P2-06 · Eliminar el código muerto del scaffold — `M` — ⬜
@@ -438,18 +459,12 @@ y [`ProtectedRoute.jsx`](../apps/web/src/components/ProtectedRoute.jsx): no hay
 
 ---
 
-### P2-07 · La barra de progreso de Metodología calcula mal — `S` — ⬜
+### P2-07 · La barra de progreso de Metodología calcula mal — `S` — ✅ *(2026-09-01)*
 
-`HomePage.jsx` usa `useScroll({ target: methodRef })`, pero la sección de destino
-**no tiene `position: relative`**. framer-motion emite el aviso *"Please ensure
-that the container has a non-static position…"* y los offsets salen mal.
+La sección de destino de `useScroll` ya es `position: relative`. framer-motion
+deja de emitir el aviso y los offsets se miden contra el contenedor correcto.
 
-⚠️ El aviso no se ve en consola porque
-[`vite.config.js`](../apps/web/vite.config.js) hace `console.warn = () => {}`.
-Quedó registrado en `vault/temp/SESSION_JOURNAL.md`.
-
-**Solución:** añadir `relative` a la clase de la sección.
-
+Verificado en el navegador: `getComputedStyle(#metodologia).position === 'relative'`.
 ---
 
 ### P2-08 · Columna "Proyectos" del footer — `S` — ⬜
@@ -469,6 +484,20 @@ El build sale en **un solo bundle de 411 KB JS (130 KB gzip)** + 80 KB CSS.
 ⚠️ Cuidado al hacerlo: el prerender renderiza todas las rutas en Node, así que
 cualquier `lazy` necesita su `Suspense` con un fallback que también funcione en
 servidor.
+
+---
+
+### P2-12 · El build acumulaba archivos viejos en `dist` — `S` — ✅ *(2026-09-01)*
+
+`build:client` no vaciaba su directorio de salida — Vite no lo hace solo cuando
+el `outDir` está fuera de la raíz del proyecto. Cada build dejaba el CSS y el JS
+anteriores en `dist/apps/web/assets`, con sus hashes viejos.
+
+En local es ruido; al desplegar es peor: se sube basura y, si el hosting sirve
+un `index.html` cacheado, puede acabar apuntando a un bundle que ya no existe.
+
+Resuelto con `--emptyOutDir` en `build:client`. Verificado: tras un build
+limpio quedan exactamente **dos** archivos en `assets/`.
 
 ---
 
@@ -520,5 +549,8 @@ listados en [`02-empresa.md`](02-empresa.md):
 6. **P0-06** — Confirmar el hosting. Sin esto, P0-04 puede no servir de nada.
 7. Cuando llegue el material del propietario: cerrar **P0-02** (logo y
    `og-image`), **P0-05** (página de política) y **P1-06** (JSON-LD).
-8. Luego P2: empezar por **P2-04** (accesibilidad) y **P2-07** (bug de la barra
-   de progreso), que son de minutos.
+8. ~~P2: accesibilidad, entradas del hero, fuente, menú móvil y el bug de la
+   barra de progreso.~~ ✅
+9. P2 que queda: **P2-02** (bajar las imágenes del CDN externo), **P2-06**
+   (código muerto), **P2-08** (columna del footer), **P2-09** (code-splitting)
+   y **P2-11** (scripts de Horizons en producción).

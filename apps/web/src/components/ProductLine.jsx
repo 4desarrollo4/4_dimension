@@ -7,18 +7,20 @@ import ProjectCard from './ProjectCard';
 export function LineHero({ index, title, claim, description, image, imageAlt }) {
     return (
         <section className="relative overflow-hidden pt-32 md:pt-40">
+            {/* Mismo criterio que el hero de la home: entrada por CSS para que se
+                vea en el primer pintado, y el H1 solo se desplaza (P2-03). */}
             <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 md:pb-24 lg:grid-cols-2">
-                <Reveal>
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Dimensión {index}</p>
-                    <h1 className="mt-4 text-5xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
-                    <p className="mt-4 text-xl font-medium text-foreground/90">{claim}</p>
-                    <p className="mt-4 max-w-lg leading-relaxed text-muted-foreground">{description}</p>
-                </Reveal>
-                <Reveal delay={0.15}>
+                <div>
+                    <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-primary">Dimensión {index}</p>
+                    <h1 className="rise-solid mt-4 text-5xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
+                    <p className="rise-in rise-delay-2 mt-4 text-xl font-medium text-foreground/90">{claim}</p>
+                    <p className="rise-in rise-delay-3 mt-4 max-w-lg leading-relaxed text-muted-foreground">{description}</p>
+                </div>
+                <div className="rise-in rise-delay-2">
                     <div className="overflow-hidden border border-border/70">
                         <img src={image} alt={imageAlt} className="aspect-[3/2] w-full object-cover" />
                     </div>
-                </Reveal>
+                </div>
             </div>
         </section>
     );

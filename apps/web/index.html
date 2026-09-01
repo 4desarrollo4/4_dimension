@@ -19,8 +19,31 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="theme-color" content="#0a0c14" />
 
+		<!--
+			Manrope variable: un solo archivo cubre los pesos 400–800. Antes entraba
+			por @import dentro del CSS, que bloquea el render y encadena dos
+			peticiones. Ver docs/06-backlog.md → P2-01.
+		-->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap"
+		/>
+
+		<!--
+			Sin JavaScript, las secciones que entran al hacer scroll se quedarían en
+			opacity: 0. El HTML ya viene prerenderizado, así que aquí solo hay que
+			revelarlo.
+		-->
+		<noscript>
+			<style>
+				[data-reveal] {
+					opacity: 1 !important;
+					transform: none !important;
+				}
+			</style>
+		</noscript>
 	</head>
 	<body>
 		<div id="root"></div>

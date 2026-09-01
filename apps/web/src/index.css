@@ -1,15 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+  La fuente ya NO se carga con @import: bloqueaba el render. Ahora entra por
+  <link rel="preconnect"> + <link> en index.html, con la variable de Manrope
+  (un solo archivo para los pesos 400–800). Ver docs/06-backlog.md → P2-01.
+*/
 body {
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   overflow-x: clip;
   background-color: hsl(223 30% 4.5%);
   color: hsl(220 16% 96%);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /*
@@ -82,11 +86,99 @@ body {
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* El navbar es fijo: sin esto, un ancla deja el título debajo de la cabecera. */
+  [id] {
+    scroll-margin-top: 6.5rem;
+  }
+
   ::selection {
     background: hsl(224 100% 62% / 0.35);
     color: hsl(220 16% 96%);
   }
+
+  /*
+    Foco visible en todo el sitio. Solo con :focus-visible, así que aparece al
+    navegar con teclado y no al hacer clic con el ratón.
+  */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Los campos ya marcan el foco con el borde; el doble anillo sobra. */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline-offset: 0;
+  }
+
+  /* Titulares: evita que la última línea quede con una sola palabra. */
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
 }
+
+/* ---- enlace "saltar al contenido" ---- */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--primary-foreground));
+  background-color: hsl(var(--primary));
+  transform: translateY(-200%);
+  transition: transform 0.2s ease-out;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ---- entrada del hero, sin JavaScript ----
+   El CSS bloquea el render, así que esto se ve desde el primer pintado. Antes
+   el hero entraba con framer-motion, es decir: pantalla en negro hasta que
+   cargaban 411 KB de JS. Ver docs/06-backlog.md → P2-03. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise-in {
+  animation: rise-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Solo desplaza: el elemento es visible desde el primer fotograma, así que no
+   retrasa el LCP. Es lo que usa el H1 del hero. */
+@keyframes rise-solid {
+  from { transform: translateY(10px); }
+  to { transform: none; }
+}
+.rise-solid {
+  animation: rise-solid 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rise-delay-1 { animation-delay: 0.06s; }
+.rise-delay-2 { animation-delay: 0.12s; }
+.rise-delay-3 { animation-delay: 0.18s; }
+.rise-delay-4 { animation-delay: 0.24s; }
 
 /* ---- 4D tesseract (hero) ---- */
 .cube-scene {
@@ -115,6 +207,10 @@ body {
 .marquee-track {
   animation: marquee 36s linear infinite;
 }
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
 @keyframes marquee {
   to { transform: translateX(-50%); }
 }
@@ -125,10 +221,43 @@ body {
   color: transparent;
 }
 
+/* ---- subrayado del enlace activo del navbar ---- */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.4rem;
+  height: 1px;
+  background-color: hsl(var(--primary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .cube-spin-a,
   .cube-spin-b,
-  .marquee-track {
+  .marquee-track,
+  .rise-in,
+  .rise-solid {
     animation: none;
+  }
+  .rise-in {
+    opacity: 1;
+    transform: none;
+  }
+  .nav-link::after {
+    transition: none;
   }
 }

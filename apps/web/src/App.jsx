@@ -14,6 +14,9 @@ import ContactoPage from './pages/ContactoPage';
 function AnimatedRoutes() {
     const location = useLocation();
     return (
+        // Quién se salta la primera animación es PageTransition, no esto:
+        // `initial={false}` aquí lo heredarían también los Reveal y se perderían
+        // las entradas al hacer scroll.
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<HomePage />} />
@@ -34,9 +37,14 @@ function App() {
     return (
         <>
             <ScrollToTop />
+            <a href="#contenido" className="skip-link">
+                Saltar al contenido
+            </a>
             <div className="min-h-screen bg-background text-foreground">
                 <Navbar />
-                <AnimatedRoutes />
+                <main id="contenido">
+                    <AnimatedRoutes />
+                </main>
                 <Footer />
             </div>
         </>

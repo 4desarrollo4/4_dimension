@@ -109,13 +109,14 @@ propietario.
 | Arquitectura de información | 8/10 |
 | SEO y compartibilidad | **8/10** *(era 2/10)* — falta `og-image.jpg` y JSON-LD |
 | Alineación con "informar, no vender" | **9/10** *(era 3/10)* |
-| Accesibilidad | 6/10 — el contraste cumple AA; falta semántica y foco |
+| Accesibilidad | **9/10** *(era 6/10)* — landmark, skip link, foco visible, menú móvil accesible |
 
 **Hecho el 2026-09-01:** Git inicializado · build arreglado (dos bugs de
 Windows) · `index.html` completo · prerender de las 6 rutas con OG, Twitter Card
 y canonical · `sitemap.xml` + `robots.txt` · `react-helmet-async` · reescritura
 editorial completa (9 CTA comerciales → 0) · consentimiento en el formulario ·
-correo y teléfono clicables.
+correo y teléfono clicables · pulido de frontend: el sitio ya se ve sin esperar
+al JavaScript, accesibilidad de teclado y motion afinado.
 
 **Por dónde seguir:** [`docs/06-backlog.md`](docs/06-backlog.md) → **P0-06**,
 confirmar que el hosting resuelve `/nosotros` con `nosotros/index.html`. Es lo
@@ -140,6 +141,9 @@ del correo comercial y alimenta los `canonical`, el `sitemap.xml` y el
   Ver [ADR-009](docs/07-decisiones.md).
 - Al cambiar un título o una descripción, cámbialo en `<Helmet>` **y** en
   `<Seo>`: están duplicados a propósito.
+- **Nada de `Reveal` en la primera pantalla.** El sitio se prerenderiza y un
+  `Reveal` se sirve con `opacity: 0`. El hero entra con CSS (`.rise-in` /
+  `.rise-solid`). Ver [`docs/04-diseno.md`](docs/04-diseno.md).
 
 ---
 
