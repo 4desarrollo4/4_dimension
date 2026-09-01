@@ -6,10 +6,10 @@ import { Menu, X } from 'lucide-react';
 export const LOGO_URL = 'https://horizons-cdn.hostinger.com/50b7554a-aba0-4db0-bd2a-1f8c207f1ca5/4d86c6546c2d16b19fbf2212f5a51658.png';
 
 const links = [
+    { to: '/#proyectos', label: 'Proyectos' },
     { to: '/calzado', label: 'Calzado' },
     { to: '/ropa', label: 'Ropa' },
     { to: '/dotaciones', label: 'Dotaciones' },
-    { to: '/#proyectos', label: 'Proyectos' },
     { to: '/nosotros', label: 'Nosotros' },
 ];
 

@@ -2,8 +2,15 @@
 
 **Última actualización:** 2026-09-01
 
-> El diseño visual es lo más sólido del sitio. **No lo rediseñes.** Este
-> documento existe para que cualquier cambio nuevo se vea como el resto.
+> **Qué está cerrado y qué no.**
+>
+> - **Cerrado:** paleta, tipografía, tokens y voz visual. No los cambies sin un
+>   ADR nuevo.
+> - **Rehecho el 2026-09-01:** la **composición** — ritmo de secciones, jerarquía
+>   y tratamiento de imagen. Lo pidió el propietario porque el sitio, aun siendo
+>   correcto, se sentía plano y repetitivo. Ver [ADR-010](07-decisiones.md).
+>
+> Este documento existe para que cualquier cosa nueva se vea como el resto.
 
 ---
 
@@ -64,10 +71,53 @@ que bloquea el render y encadena dos peticiones.
 
 ---
 
+## Composición ✅ *(rehecha el 2026-09-01)*
+
+El problema anterior: las 9 secciones de la home eran idénticas — `border-t` +
+`py-28` + eyebrow + H2 —, todo en el mismo plano y sin ninguna jerarquía. Nada
+rompía el patrón en 7.600 px de scroll.
+
+### Reglas de ritmo
+
+1. **Alterna el fondo.** `bg-background` → `bg-card/30` → `bg-background`. Dos
+   secciones seguidas nunca comparten fondo.
+2. **No todas las secciones son iguales de altas.** La banda de cifras es corta
+   y contundente; las líneas de negocio son largas; la de diferenciación es casi
+   solo un titular.
+3. **Un resplandor por cada dos o tres secciones**, nunca seguidos.
+4. **Cada sección tiene un protagonista**: un número enorme, una marca de agua,
+   una imagen o un titular. Si no lo tiene, es relleno.
+
+### Piezas reutilizables
+
+Todas viven en [`index.css`](../apps/web/src/index.css).
+
+| Clase | Qué hace |
+|---|---|
+| `.media` | Envuelve una imagen: degradado hacia el fondo para que se apoye en la página, tinte azul al pasar el cursor y zoom suave. Necesita `.group` en un ancestro para el hover |
+| `.glow` + `.glow-tr` / `.glow-bl` / `.glow-c` | Resplandor radial de marca anclado a una esquina o al centro. Da profundidad sin usar sombras |
+| `.watermark` | Numeral o palabra gigante en contorno al 9 % — el "01", "02", "03" y el "4D" |
+| `.stat-number` | Interlineado y tracking de las cifras grandes, con `tabular-nums` |
+| `.sweep` | Botón secundario: la superficie se barre de lado a lado en vez de cambiar de color |
+| `.read-progress` | Barra de progreso de lectura, fija arriba |
+| `.text-outline` | Contorno de 1px, ya existía. Para numeración decorativa |
+
+### Jerarquía de las cifras
+
+`+120K`, `12.000` y `98%` son el dato más creíble del sitio. Antes vivían en tres
+cajitas a `text-4xl` dentro de otra sección. Ahora **abren la página** en su
+propia banda, a `text-6xl / 7xl / 8xl`, justo después del hero.
+
+⚠️ Sobre los fondos alternos, medido el 2026-09-01: texto principal **17.4:1**,
+secundario **6.8:1**, azul primario **4.53:1**. El azul pasa AA, pero **con poco
+margen**: si aclaras un fondo, vuelve a medirlo.
+
+---
+
 ## Layout
 
 - Contenedor: `mx-auto max-w-6xl px-6`
-- Sección: `py-20 md:py-28`, separada con `border-t border-border/60`
+- Sección: `py-24 md:py-32`, alternando fondo y separada con `border-t border-border/60`
 - Rejillas de tarjetas: `grid gap-px border border-border/60 bg-border/60` con
   hijos `bg-background` — así el borde interno lo dibuja el gap. Reutiliza este
   patrón en vez de inventar otro.

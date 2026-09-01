@@ -34,6 +34,93 @@
 
 ---
 
+## 2026-09-01 · Rediseño de composición
+
+**Por qué**
+
+Tras la sesión de pulido, el propietario dijo: *"no cambiaste nada de la parte
+visual, todo sigue igual"*. **Tenía razón.** Lo hecho hasta ahí —render sin
+esperar al JavaScript, accesibilidad, tiempos de motion— era ingeniería
+invisible. Lo visible se limitaba a textos y a quitar botones.
+
+Me había atenido a la regla de `04-diseno.md`: *"No lo rediseñes."* Esa regla la
+escribió una sesión anterior; la decisión del propietario manda sobre ella. Se
+preguntó explícitamente el alcance y eligió **rediseño de composición** — más
+que pulir, menos que cambiar el lenguaje visual.
+
+**El diagnóstico**
+
+- Las 9 secciones de la home eran idénticas: `border-t` + `py-28` + eyebrow + H2.
+  Nada rompía el patrón en 7.600 px de scroll.
+- Todo en el mismo plano: sin sombras (decisión de marca) y un solo degradado en
+  todo el sitio. Las imágenes eran rectángulos con borde de 1px: parecían
+  pegadas.
+- **Las cifras estaban desaprovechadas.** `+120K`, `12.000` y `98%` son el dato
+  más creíble del sitio y vivían en tres cajitas a `text-4xl`.
+- Tarjetas de proyecto planas y rejilla 2×2 previsible.
+
+**Qué se hizo**
+
+| Antes | Ahora |
+|---|---|
+| Cifras en 3 cajitas a `text-4xl`, dentro de otra sección | **Banda propia justo tras el hero**, a `text-6xl/7xl/8xl` |
+| 9 secciones con el mismo fondo y el mismo alto | Fondos alternos, alturas distintas y un protagonista por sección |
+| Índice de línea como etiqueta pequeña | **Marca de agua de 192 px** tras el título |
+| Imagen con borde de 1px | `.media`: degradado hacia el fondo, tinte azul al pasar el cursor y zoom |
+| Rejilla de proyectos 2×2 | **Asimétrica**: el primer caso ocupa el doble y va apaisado |
+| Sin profundidad | Resplandores radiales de marca anclados por sección |
+| Numeración de metodología a `text-sm` | Numerales en contorno a `text-5xl/6xl` |
+| — | Barra de progreso de lectura y botón secundario con barrido |
+
+**Petición explícita del propietario:** en el navbar, **"Proyectos" va primero**.
+Hecho.
+
+**Piezas nuevas y reutilizables**
+
+`.media`, `.glow` (+ `-tr` / `-bl` / `-c`), `.watermark`, `.stat-number`,
+`.sweep` y `.read-progress`, todas en `index.css` y documentadas en
+[`04-diseno.md`](04-diseno.md). Toda sección nueva debe usarlas en vez de
+inventar su propio tratamiento.
+
+**Verificado**
+
+| Comprobación | Resultado |
+|---|---|
+| Contraste texto principal sobre fondos alternos | **17.4:1** ✅ |
+| Contraste texto secundario | **6.8:1** ✅ |
+| Contraste azul primario | **4.53:1** ✅ AA, con poco margen |
+| Desborde horizontal a 375 px | ninguno |
+| Errores de consola | ninguno |
+| `opacity: 0` fuera de los `data-reveal` | ninguno — el prerender sigue visible |
+| Orden del navbar | Proyectos · Calzado · Ropa · Dotaciones · Nosotros · Contacto |
+
+**Estado del backlog**
+
+Sin cambios: esto no era una tarea del backlog, sino una petición directa.
+
+**Decisiones tomadas**
+
+- **ADR-010** — Se rehace la composición, no el lenguaje visual. Incluye la
+  tabla de qué se conserva y qué se rehace, y deja constancia de que la regla
+  *"no lo rediseñes"* de `04-diseno.md` queda anulada por decisión del
+  propietario.
+
+**Dónde quedó / qué sigue**
+
+**No cambió ni un dato ni una palabra de contenido.** Siguen intactas las reglas
+del ADR-001 (informar, no vender), ADR-002 (fuente de verdad) y ADR-009 (dos
+enlaces de contacto por página).
+
+Sigue pendiente **P0-06** (hosting) y el material del propietario.
+
+⚠️ **Nota de verificación:** el panel de previsualización no consiguió
+renderizar capturas de las secciones bajo el pliegue —agotaba el tiempo de
+espera—, así que la composición se verificó por DOM: posiciones, tamaños,
+clases y contraste medidos en vivo. Conviene que el propietario le eche un ojo
+en un navegador real.
+
+---
+
 ## 2026-09-01 · Pulido de frontend y motion
 
 **Qué se hizo**

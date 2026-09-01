@@ -257,3 +257,46 @@ elemento del cuerpo enlaza al formulario.**
 ```bash
 grep -o 'href="/contacto"' dist/apps/web/nosotros/index.html | wc -l
 ```
+
+---
+
+## ADR-010 · Se rehace la composición, no el lenguaje visual
+
+**Fecha:** 2026-09-01 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** [`04-diseno.md`](04-diseno.md) decía *"El diseño visual es lo más
+sólido del sitio. No lo rediseñes."* Bajo esa regla, la sesión de pulido tocó
+solo rendimiento, accesibilidad y tiempos: mejoras reales, pero **invisibles**.
+El propietario lo señaló — *"no cambiaste nada de la parte visual"* — y tenía
+razón.
+
+Al revisarlo, el problema no era la paleta ni la tipografía, que están bien. Era
+la **composición**: nueve secciones con la misma estructura, todo en el mismo
+plano, imágenes sin tratamiento y las cifras más creíbles del sitio escondidas
+en tres cajitas pequeñas.
+
+**Decisión.** Se rehace la **composición**; se conserva el **lenguaje visual**.
+
+| Se conserva | Se rehace |
+|---|---|
+| Paleta y tokens | Ritmo y jerarquía de secciones |
+| Manrope y sus pesos | Escala de las cifras y los numerales |
+| Solo modo oscuro (ADR-003) | Tratamiento de imagen |
+| Bordes de 1px, sin sombras | Profundidad mediante resplandores |
+| Radio de 0.25rem | Rejilla de proyectos, ahora asimétrica |
+
+**Consecuencias.**
+
+- La regla de cabecera de `04-diseno.md` cambia: lo cerrado es el lenguaje
+  visual, no la composición.
+- Aparecen piezas reutilizables — `.media`, `.glow`, `.watermark`,
+  `.stat-number`, `.sweep` — que **toda sección nueva debe usar** en vez de
+  inventar su propio tratamiento.
+- El contraste sobre los fondos alternos queda medido y documentado. El azul
+  primario pasa AA con poco margen: cualquier fondo más claro obliga a
+  remedirlo.
+- **No cambió ni un dato ni una palabra del contenido.** Las reglas del ADR-001,
+  ADR-002 y ADR-009 siguen intactas.
+
+**Petición explícita del propietario:** en el navbar, **"Proyectos" va primero**,
+antes de Calzado, Ropa y Dotaciones.
