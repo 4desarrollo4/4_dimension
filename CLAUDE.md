@@ -55,19 +55,29 @@ Están registrados en [`docs/02-empresa.md`](docs/02-empresa.md), que es la
 ## Comandos
 
 ```bash
-npm run dev
+npm run dev --prefix apps/web
 ```
-Levanta web (`:3000`) y PocketBase (`:8090`) en paralelo.
+Levanta el frontend en `:3000`.
+*(`npm run dev` a secas también arranca PocketBase, pero su binario es un
+ejecutable de Linux y no corre en Windows.)*
 
 ```bash
-npx vite build --outDir ../../dist/apps/web
+npm run build --prefix apps/web
 ```
-Compilar producción. Ejecutar **desde `apps/web/`**.
+Build de producción **con prerender**. Encadena cuatro pasos:
+`generate-llms.js → build:client → build:ssr → prerender.js`, y deja en
+`dist/apps/web` un `index.html` por ruta, más `sitemap.xml` y `robots.txt`.
 
-> ⚠️ **`npm run build` está roto en Windows.** El script encadena
-> `node tools/generate-llms.js || true && vite build`, y como `true` no existe
-> en `cmd.exe`, la cadena muere y **vite nunca corre** — saliendo con código 0.
-> Ver `docs/06-backlog.md` → P0-01.
+```bash
+npm run start --prefix apps/web
+```
+Sirve el build en `:3000` (el mismo puerto que `dev`, así que no los levantes a la vez).
+
+> ⚠️ `npm run start` usa `vite preview`, que **reescribe todas las rutas al
+> `index.html` raíz**. Por eso `/nosotros` devuelve el home y solo `/nosotros/`
+> devuelve la página correcta. Es un artefacto de la herramienta, no del build —
+> pero es lo que pasaría en producción con un hosting mal configurado.
+> Ver `docs/06-backlog.md` → **P0-06**.
 
 ---
 
@@ -89,24 +99,34 @@ Compilar producción. Ejecutar **desde `apps/web/`**.
 
 ## Estado actual (2026-09-01)
 
-El sitio **funciona y se ve bien**, pero todavía **no cumple su objetivo**:
-está escrito como una landing de ventas y es prácticamente invisible para
-buscadores y para los previsualizadores de WhatsApp y LinkedIn.
+El **bloque de visibilidad ya está hecho**: el sitio se puede compartir e
+indexar. Lo que falta ahora es sobre todo **contenido**, no infraestructura.
 
 | Dimensión | Nota |
 |---|---|
 | Diseño visual | 8.5/10 — lo más sólido. **No lo rediseñes** |
 | Arquitectura de información | 8/10 |
+| SEO y compartibilidad | **8/10** *(era 2/10)* — falta `og-image.jpg` y JSON-LD |
 | Accesibilidad | 6/10 — el contraste cumple AA; falta semántica y foco |
-| Alineación con "informar, no vender" | **3/10** |
-| SEO y compartibilidad | **2/10** |
+| Alineación con "informar, no vender" | **3/10** ← *el pendiente grande* |
 
-**Por dónde seguir:** [`docs/06-backlog.md`](docs/06-backlog.md) → **P0-00**
-(inicializar Git), y después el bloque de visibilidad P0-01 → P0-03 → P0-02 →
-P0-04.
+**Hecho el 2026-09-01:** Git inicializado · build arreglado (dos bugs de
+Windows) · `index.html` completo · prerender de las 6 rutas con OG, Twitter Card
+y canonical · `sitemap.xml` + `robots.txt` · migración a `react-helmet-async`.
 
-⚠️ **El directorio no es un repositorio Git.** No hay historial ni forma de
-revertir. Ten cuidado con lo que sobrescribes hasta que P0-00 esté hecho.
+**Por dónde seguir:** [`docs/06-backlog.md`](docs/06-backlog.md) → **P0-06**
+(confirmar cómo sirve las rutas el hosting — si reescribe todo a `/index.html`,
+el prerender no sirve de nada), **P0-05** (aviso de privacidad, riesgo legal
+abierto) y luego **P1-01**, la reescritura editorial.
+
+⚠️ **El dominio de `apps/web/src/lib/site.js` está sin confirmar.** Está inferido
+del correo comercial y alimenta los `canonical`, el `sitemap.xml` y el
+`robots.txt`. Confírmalo antes de publicar.
+
+⚠️ **Reglas nuevas desde el prerender:** una ruta nueva se registra en `App.jsx`
+**y** en `src/lib/site.js`; y ningún componente puede tocar `window`, `document`
+o `localStorage` fuera de un efecto — ese código ahora también corre en Node.
+Ver [ADR-008](docs/07-decisiones.md).
 
 ---
 

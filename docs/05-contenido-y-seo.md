@@ -66,68 +66,77 @@ Hoy vende en 2ª persona. Debe describir en 1ª:
 
 # Parte 2 · SEO
 
-## Estado actual: 3/10 — es el punto más débil del sitio
+## Estado actual: 8/10 — era 3/10 el 2026-09-01
 
-Para un sitio cuyo objetivo es *"que nos conozcan"*, esto es lo que más
-importa arreglar.
+El bloque de visibilidad (**P0-02**, **P0-03**, **P0-04**) se resolvió el
+2026-09-01. Lo que queda son dos cosas que dependen del propietario y una
+verificación de hosting.
 
 | Elemento | Estado |
 |---|---|
-| `<title>` en `index.html` | ❌ **vacío** |
-| `<meta name="generator">` | ❌ dice "Hostinger AI Builder" |
-| Favicon | ❌ roto (apunta a `/vite.svg`, que no existe) |
-| Meta description | ⚠️ solo vía JS (react-helmet) |
-| `og:image` | ❌ **ninguna página la define** |
-| `og:title` / `og:description` | ❌ `Seo.jsx` existe pero no se usa en ningún lado |
-| `canonical` | ❌ ausente |
-| JSON-LD `Organization` | ❌ ausente |
-| `robots.txt` | ❌ no existe (devuelve el HTML del SPA) |
-| `sitemap.xml` | ❌ no existe |
-| SSR / prerender | ❌ SPA puro |
-| `lang="es"` | ✅ correcto |
+| `<title>` en `index.html` | ✅ completo |
+| `<meta name="description">` en `index.html` | ✅ completo |
+| `<meta name="generator">` de Hostinger | ✅ eliminado |
+| Favicon | 🟡 SVG **provisional** — falta el logo oficial |
+| Meta description por ruta | ✅ en el HTML servido, sin JavaScript |
+| `og:title` / `og:description` | ✅ 9 etiquetas `og:*` por ruta |
+| `og:image` | ⛔ **falta el archivo** — se declara pero no existe |
+| Twitter Card | ✅ 4 etiquetas por ruta |
+| `canonical` | ✅ correcto y único por ruta |
+| `robots.txt` | ✅ generado en el build |
+| `sitemap.xml` | ✅ generado en el build, 6 rutas |
+| `llms.txt` | ✅ generado (nunca había corrido en Windows) |
+| Prerender de las 6 rutas | ✅ |
+| JSON-LD `Organization` | ⛔ pendiente — **P1-06** |
+| `lang="es"` | ✅ |
 | Jerarquía de encabezados | ✅ un H1 por página, H2/H3 coherentes |
 | `alt` en imágenes | ✅ descriptivos, en español |
 
+### Lo que sigue faltando
+
+1. **`og-image.jpg` (1200×630).** Al compartir un enlace ya salen título y
+   descripción, pero **no sale imagen**. Es lo que más se nota en WhatsApp y
+   LinkedIn. Necesita el logo oficial. → **P0-02**
+2. **JSON-LD `Organization`.** Es lo que alimenta el panel de conocimiento de
+   Google. Necesita NIT, dirección y redes. → **P1-06**
+3. **Confirmar la configuración de rutas del hosting.** Si el servidor reescribe
+   todo a `/index.html`, todo lo anterior se pierde. → **P0-06**
+
 ---
 
-## Por qué el prerender es prioridad P0
+## Cómo se generan hoy los meta tags
 
-Los rastreadores de **WhatsApp, LinkedIn, Facebook, X y Slack no ejecutan
-JavaScript**. Como todo el contenido y los meta tags se inyectan en el cliente,
-esas plataformas ven el `index.html` crudo con el `<title>` vacío.
+Cada página declara **dos** bloques, y los dos importan:
 
-**Consecuencia:** compartir cualquier enlace del sitio muestra una URL pelada,
-sin título, sin descripción y sin imagen. Para una web de reconocimiento de
-marca cuyo canal principal será WhatsApp y LinkedIn, eso anula el objetivo.
+```jsx
+<Helmet>
+    <title>…</title>
+    <meta name="description" content="…" />
+</Helmet>
+<Seo title="…" description="…" />
+```
 
-**Solución mínima:** prerenderizar las 6 rutas en tiempo de build
-(`vite-plugin-ssg`, `react-snap` o similar). No requiere migrar de framework.
+| Bloque | Para qué sirve |
+|---|---|
+| `<Helmet>` | `<title>` y `description`. **Literales obligatorios**: `tools/generate-llms.js` los lee del código fuente y no admite variables |
+| `<Seo>` | Open Graph, Twitter Card y `canonical`. Toma el dominio de `src/lib/site.js` |
+
+⚠️ Si cambias un título, **cámbialo en los dos**. Están duplicados a propósito:
+es el precio de que `llms.txt` se pueda generar leyendo el código.
+
+📁 [`apps/web/src/components/Seo.jsx`](../apps/web/src/components/Seo.jsx) ·
+[`apps/web/src/lib/site.js`](../apps/web/src/lib/site.js)
 
 ---
 
 ## Meta tags por ruta
 
-Cada página debe declarar `<title>` y `<meta name="description">` **literales**
-dentro de su `<Helmet>` — el script `tools/generate-llms.js` los lee del código
-fuente, así que no pueden ser variables.
-
 | Ruta | Estado |
 |---|---|
-| `/` | ✅ title + description |
-| `/calzado` `/ropa` `/dotaciones` | ✅ title + description |
-| `/nosotros` | ✅ title + description |
-| `/contacto` | ⚠️ description con lenguaje de venta ("Cotiza") |
-
-**Todas** deben además usar `<Seo>` para OG, Twitter Card y canonical.
-
----
-
-## JSON-LD pendiente
-
-Añadir `Organization` en el home con los datos de [`02-empresa.md`](02-empresa.md):
-razón social, logo, dirección, teléfono, correo, área de servicio y `sameAs`
-con las redes sociales. Es lo que alimenta el panel de conocimiento de Google
-— literalmente, lo que hace que "te conozcan".
+| `/` | ✅ title + description + OG |
+| `/calzado` `/ropa` `/dotaciones` | ✅ title + description + OG |
+| `/nosotros` | ✅ title + description + OG |
+| `/contacto` | ⚠️ title y description con lenguaje de venta ("Hablemos", "Cotiza") → **P1-01** |
 
 ---
 

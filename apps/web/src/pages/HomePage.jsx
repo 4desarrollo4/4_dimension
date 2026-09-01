@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import { motion, useScroll } from 'framer-motion';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import Reveal from '../components/Reveal';
@@ -69,6 +70,10 @@ export default function HomePage() {
                     content="Comercializadora internacional de diseño y desarrollo de producto. Convertimos ideas en productos ganadores: calzado, ropa y dotaciones corporativas e industriales."
                 />
             </Helmet>
+            <Seo
+                title="4D Cuarta Dimensión — Diseño y desarrollo de producto: calzado, ropa y dotaciones"
+                description="Comercializadora internacional de diseño y desarrollo de producto. Convertimos ideas en productos ganadores: calzado, ropa y dotaciones corporativas e industriales."
+            />
 
             {/* HERO */}
             <section className="relative flex min-h-[100dvh] items-center overflow-hidden">

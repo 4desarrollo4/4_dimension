@@ -1,5 +1,6 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import PageTransition from '../components/PageTransition';
 import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineCTA } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
@@ -30,6 +31,10 @@ export default function RopaPage() {
                     content="Diseño y desarrollo de indumentaria: colecciones, patronaje, textiles, personalización y producción a escala con comercialización internacional."
                 />
             </Helmet>
+            <Seo
+                title="Ropa — Diseño y desarrollo de indumentaria | 4D Cuarta Dimensión"
+                description="Diseño y desarrollo de indumentaria: colecciones, patronaje, textiles, personalización y producción a escala con comercialización internacional."
+            />
             <LineHero
                 index="02"
                 title="Ropa"

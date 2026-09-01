@@ -34,6 +34,106 @@
 
 ---
 
+## 2026-09-01 · Bloque P0: Git, build y visibilidad
+
+**Qué se hizo**
+
+Se ejecutó el bloque P0 del backlog. **Cinco tareas cerradas, una parcial, una
+nueva descubierta.**
+
+| Tarea | Resultado |
+|---|---|
+| **P0-00** Git | ✅ Repositorio inicializado, 189 archivos, `.gitignore` + `.gitattributes` |
+| **P0-01** Build roto | ✅ Arreglado — eran **dos** bugs, no uno |
+| **P0-02** `public/` | 🟡 favicon provisional, `robots.txt` y `sitemap.xml` generados; falta `og-image.jpg` |
+| **P0-03** `index.html` | ✅ title, description, favicon, theme-color, preconnect |
+| **P0-04** Prerender | ✅ Las 6 rutas, verificado en el navegador |
+| **P1-04** `react-helmet-async` | ✅ Requisito de P0-04 |
+| **P0-06** Hosting | 🆕 **Tarea nueva** — ver abajo |
+
+**El segundo bug del build, que nadie había visto**
+
+`npm run build` no compilaba por el `|| true` que `cmd.exe` no entiende. Eso ya
+estaba documentado. Al arreglarlo apareció el otro: `tools/generate-llms.js`
+comparaba la URL de su propio módulo contra una ruta construida a mano desde
+`process.argv[1]`. En Windows **nunca coinciden**, así que `main()` no se
+ejecutaba nunca. Consecuencia: **`llms.txt` no se había generado jamás en esta
+máquina**. Ahora sí.
+
+**El prerender (P0-04)**
+
+Implementado con un script propio en vez de una dependencia — ver
+[ADR-008](07-decisiones.md). Obligó a mover el `<Router>` fuera de `App.jsx`,
+separar `main.jsx` de `entry-server.jsx`, hacer `Seo.jsx` compatible con Node y
+centralizar dominio y rutas en `src/lib/site.js`.
+
+Medido sobre el build servido, antes y después:
+
+| Comprobación | Antes | Ahora |
+|---|---|---|
+| `og:*` por ruta | 0 | **9** |
+| `twitter:*` por ruta | 0 | **4** |
+| `canonical` | ausente | uno por ruta, correcto |
+| `<title>` en el HTML servido | vacío | el de cada página |
+| `<h1>` visible sin JavaScript | no | **sí** |
+| `robots.txt` / `sitemap.xml` | devolvían HTML del SPA | archivos reales |
+| Errores de hidratación | — | **ninguno** |
+
+**P0-06: la tarea nueva, y por qué importa**
+
+Al verificar el build apareció que `/nosotros` devolvía el HTML del **home**,
+mientras que `/nosotros/` devolvía el correcto. La causa es que `vite preview`
+reescribe todas las rutas a `/index.html`, como un SPA.
+
+Es un artefacto de la herramienta de previsualización — los archivos
+prerenderizados son correctos —, **pero es exactamente lo que pasaría en
+producción si el hosting está configurado igual**: WhatsApp mostraría el título
+del home en todos los enlaces y Google indexaría 6 URLs idénticas. Todo el
+trabajo de P0-04 se perdería en silencio.
+
+Quedó como **P0-06**, con la regla de nginx correcta y cómo comprobarlo en
+producción. También se documentó en la nueva sección *Despliegue* de
+[`03-arquitectura.md`](03-arquitectura.md).
+
+**Corrección a la sesión anterior**
+
+**P1-02** (`ScrollToTop` rompe los enlaces con ancla) estaba mal diagnosticado.
+El código **sí** contempla el hash. Al probarlo el scroll no ocurrió, pero la
+causa es que en ese navegador `scrollIntoView({ behavior: 'smooth' })` no hace
+nada, mientras que `'instant'` sí. Es una limitación del entorno de prueba, no
+del sitio. La tarea pasó a ⚠️ *sin confirmar*, pendiente de probarla en un
+navegador real.
+
+Del mismo modo, los errores de hidratación de React que aparecieron en consola
+no eran del sitio: venían de cargar `/nosotros` con el HTML del home servido por
+el fallback de `vite preview`. En una carga limpia la hidratación no da un solo
+error.
+
+**Estado del backlog**
+
+P0: 4 ✅, 1 🟡, 2 pendientes. P1: 1 ✅, 1 ⚠️, 4 pendientes. P2: 10 pendientes
+(uno nuevo, **P2-11**, sobre los scripts de Horizons inyectados en producción).
+
+**Decisiones tomadas**
+
+- **ADR-004** pasa de 💡 *Propuesta* a ✅ *Aceptada e implementada*.
+- **ADR-008** nuevo: cómo se implementó el prerender y qué reglas impone al
+  código de aquí en adelante.
+
+**Dónde quedó / qué sigue**
+
+El sitio ya es visible y compartible. **No cambió ni una palabra del contenido**:
+todo el trabajo fue de infraestructura.
+
+Siguiente: **P0-06** (confirmar el hosting) y **P0-05** (aviso de privacidad).
+Después, **P1-01**, la reescritura editorial, que es lo que falta para que el
+sitio deje de sonar a landing de ventas.
+
+⛔ Sigue bloqueado por datos del propietario: logo en vectorial, dominio
+definitivo, NIT y dirección.
+
+---
+
 ## 2026-09-01 · Auditoría completa y cierre del sistema de documentación
 
 **Qué se hizo**

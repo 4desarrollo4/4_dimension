@@ -1,5 +1,6 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import Reveal from '../components/Reveal';
@@ -23,6 +24,10 @@ export default function NosotrosPage() {
                     content="Conoce 4D Cuarta Dimensión ES S.A.S.: comercializadora internacional de diseño y desarrollo de producto en calzado, ropa y dotaciones."
                 />
             </Helmet>
+            <Seo
+                title="Nosotros — 4D Cuarta Dimensión ES S.A.S."
+                description="Conoce 4D Cuarta Dimensión ES S.A.S.: comercializadora internacional de diseño y desarrollo de producto en calzado, ropa y dotaciones."
+            />
 
             <section className="mx-auto max-w-6xl px-6 pb-16 pt-32 md:pt-40">
                 <Reveal>

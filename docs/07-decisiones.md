@@ -93,7 +93,7 @@ valores y no hay conmutador.
 
 ## ADR-004 · Prerender en tiempo de build, en vez de migrar de framework
 
-**Fecha:** 2026-09-01 · **Estado:** 💡 Propuesta — pendiente de aprobación
+**Fecha:** 2026-09-01 · **Estado:** ✅ Aceptada e implementada el 2026-09-01
 
 **Contexto.** El sitio es un SPA puro. Los rastreadores de WhatsApp, LinkedIn,
 Facebook, X y Slack no ejecutan JavaScript, así que ven el `index.html` crudo con
@@ -102,8 +102,9 @@ anula el objetivo del **ADR-001**.
 
 La solución evidente sería migrar a Next.js o Astro con SSR.
 
-**Decisión propuesta.** **No migrar.** Prerenderizar las 6 rutas en tiempo de
-build con `vite-plugin-ssg`, `react-snap` o equivalente.
+**Decisión.** **No migrar.** Prerenderizar las 6 rutas en tiempo de build.
+(Se evaluaron `vite-react-ssg` y `react-snap`; se acabó usando un script propio
+— ver [ADR-008](#adr-008--cómo-se-implementó-el-prerender).)
 
 **Razones.**
 - Son 6 rutas estáticas sin contenido dinámico: SSR es desproporcionado.
@@ -117,7 +118,8 @@ build con `vite-plugin-ssg`, `react-snap` o equivalente.
 - Si algún día el sitio necesita contenido dinámico real (blog, catálogo), este
   ADR se revisa.
 
-📌 Implementación en **[P0-04](06-backlog.md)**.
+📌 Implementada en **[P0-04](06-backlog.md)**. El detalle técnico y las reglas
+que impone están en el **[ADR-008](#adr-008--cómo-se-implementó-el-prerender)**.
 
 ---
 
@@ -179,3 +181,44 @@ entrada y se carga automáticamente en cada sesión.
 - La documentación es parte del entregable, no un extra.
 
 📖 Protocolo completo en [`README.md`](README.md).
+
+---
+
+## ADR-008 · Cómo se implementó el prerender
+
+**Fecha:** 2026-09-01 · **Estado:** ✅ Aceptada
+
+**Contexto.** El ADR-004 decidió *qué* (prerender en build, sin migrar de
+framework). Este registra el *cómo*, porque son decisiones que alguien podría
+deshacer sin querer y romper el SEO en silencio.
+
+**Decisiones.**
+
+1. **Script propio, no un plugin.** `tools/prerender.js` son ~130 líneas que
+   usan `renderToString` y `StaticRouter`. Se prefirió a `vite-react-ssg` o
+   `react-snap`: sin dependencia nueva que mantener, sin Puppeteer, y el
+   mecanismo queda legible para quien lo herede.
+2. **El `<Router>` sale de `App.jsx`.** Lo pone cada entrada: `BrowserRouter` en
+   `main.jsx`, `StaticRouter` en `entry-server.jsx`. Sin esto no hay forma de
+   renderizar una ruta concreta en Node.
+3. **Hidratar si hay HTML, montar si no.** `main.jsx` mira si `#root` tiene
+   contenido. En producción hidrata el HTML prerenderizado; en desarrollo, donde
+   Vite sirve un `#root` vacío, monta de cero. Un `hydrateRoot` incondicional
+   llenaría la consola de desarrollo de errores falsos.
+4. **`src/lib/site.js` es la única fuente del dominio y de las rutas.** De ahí
+   salen los `canonical`, el `sitemap.xml` y el `robots.txt`. Un dominio escrito
+   dos veces se desincroniza; uno solo, no.
+5. **Se conserva la duplicación `<Helmet>` + `<Seo>`.** Es fea a propósito:
+   `tools/generate-llms.js` extrae `<title>` y `description` leyendo el código
+   fuente con expresiones regulares, así que tienen que ser literales. El
+   `<Seo>` aporta lo demás.
+
+**Consecuencias.**
+
+- Una ruta nueva se registra en **dos** sitios: `App.jsx` y `src/lib/site.js`.
+- Ningún componente puede tocar `window`, `document` o `localStorage` fuera de
+  un efecto: ese código ahora también corre en Node.
+- El despliegue deja de ser indiferente: el hosting **debe** resolver
+  `/nosotros` con `nosotros/index.html`. Ver **P0-06** y la sección de
+  despliegue de [`03-arquitectura.md`](03-arquitectura.md).
+- `react-helmet` quedó obsoleto en favor de `react-helmet-async` (**P1-04**).

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import { CheckCircle2, Loader2, Mail, MapPin, Phone, Globe } from 'lucide-react';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
@@ -53,6 +54,10 @@ export default function ContactoPage() {
                     content="Hablemos sobre el reto que quieres convertir en una oportunidad. Cotiza tu proyecto de calzado, ropa o dotaciones con 4D Cuarta Dimensión."
                 />
             </Helmet>
+            <Seo
+                title="Contacto — Hablemos de tu proyecto | 4D Cuarta Dimensión"
+                description="Hablemos sobre el reto que quieres convertir en una oportunidad. Cotiza tu proyecto de calzado, ropa o dotaciones con 4D Cuarta Dimensión."
+            />
 
             <section className="mx-auto max-w-6xl px-6 pb-20 pt-32 md:pt-40">
                 <Reveal>

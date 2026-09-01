@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes, BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
@@ -27,16 +27,19 @@ function AnimatedRoutes() {
     );
 }
 
+// El Router NO vive aquí: lo pone cada entrada. `main.jsx` usa BrowserRouter y
+// `entry-server.jsx` usa StaticRouter, que es lo que permite prerenderizar las
+// 6 rutas en el build (docs/06-backlog.md → P0-04).
 function App() {
     return (
-        <Router>
+        <>
             <ScrollToTop />
             <div className="min-h-screen bg-background text-foreground">
                 <Navbar />
                 <AnimatedRoutes />
                 <Footer />
             </div>
-        </Router>
+        </>
     );
 }
 

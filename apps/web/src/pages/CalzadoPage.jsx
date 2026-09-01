@@ -1,5 +1,6 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import PageTransition from '../components/PageTransition';
 import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineCTA } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
@@ -30,6 +31,10 @@ export default function CalzadoPage() {
                     content="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
                 />
             </Helmet>
+            <Seo
+                title="Calzado — Diseño y desarrollo de producto | 4D Cuarta Dimensión"
+                description="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
+            />
             <LineHero
                 index="01"
                 title="Calzado"

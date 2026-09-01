@@ -1,5 +1,6 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import PageTransition from '../components/PageTransition';
 import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineCTA } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
@@ -32,6 +33,10 @@ export default function DotacionesPage() {
                     content="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
                 />
             </Helmet>
+            <Seo
+                title="Dotaciones — Uniformes corporativos e industriales | 4D Cuarta Dimensión"
+                description="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
+            />
             <LineHero
                 index="03"
                 title="Dotaciones"
