@@ -1,0 +1,29 @@
+# Dependencias
+node_modules/
+
+# Build
+dist/
+*.local
+
+# PocketBase — datos y binario
+apps/pocketbase/pb_data/
+apps/pocketbase/pocketbase
+apps/pocketbase/pocketbase.exe
+
+# Registro automático del editor visual de Horizons
+vault/temp/SESSION_JOURNAL.md
+
+# Entorno
+.env
+.env.*
+!.env.example
+
+# Editores y SO
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

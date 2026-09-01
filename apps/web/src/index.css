@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Manrope", sans-serif;
+  overflow-x: clip;
+  background-color: hsl(223 30% 4.5%);
+  color: hsl(220 16% 96%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+  ---break---
+*/
+
+@layer base {
+  :root {
+    --background: 223 30% 4.5%;
+    --foreground: 220 16% 96%;
+    --card: 222 18% 11%;
+    --card-foreground: 220 16% 96%;
+    --popover: 222 20% 8%;
+    --popover-foreground: 220 16% 96%;
+    --primary: 224 100% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 18% 13%;
+    --secondary-foreground: 220 16% 96%;
+    --muted: 222 14% 14%;
+    --muted-foreground: 220 10% 62%;
+    --accent: 224 100% 62%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 14% 15%;
+    --input: 222 14% 20%;
+    --ring: 224 100% 62%;
+    --radius: 0.25rem;
+    --sidebar-background: 222 18% 9%;
+    --sidebar-foreground: 220 16% 96%;
+    --sidebar-primary: 224 100% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 18% 13%;
+    --sidebar-accent-foreground: 220 16% 96%;
+    --sidebar-border: 222 14% 15%;
+    --sidebar-ring: 224 100% 62%;
+  }
+  .dark {
+    --background: 223 30% 4.5%;
+    --foreground: 220 16% 96%;
+    --card: 222 18% 11%;
+    --card-foreground: 220 16% 96%;
+    --popover: 222 20% 8%;
+    --popover-foreground: 220 16% 96%;
+    --primary: 224 100% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 18% 13%;
+    --secondary-foreground: 220 16% 96%;
+    --muted: 222 14% 14%;
+    --muted-foreground: 220 10% 62%;
+    --accent: 224 100% 62%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 14% 15%;
+    --input: 222 14% 20%;
+    --ring: 224 100% 62%;
+    --sidebar-background: 222 18% 9%;
+    --sidebar-foreground: 220 16% 96%;
+    --sidebar-primary: 224 100% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 18% 13%;
+    --sidebar-accent-foreground: 220 16% 96%;
+    --sidebar-border: 222 14% 15%;
+    --sidebar-ring: 224 100% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  ::selection {
+    background: hsl(224 100% 62% / 0.35);
+    color: hsl(220 16% 96%);
+  }
+}
+
+/* ---- 4D tesseract (hero) ---- */
+.cube-scene {
+  perspective: 1400px;
+}
+.cube {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.cube-spin-a {
+  animation: cube-spin-a 42s linear infinite;
+}
+.cube-spin-b {
+  animation: cube-spin-b 28s linear infinite;
+}
+@keyframes cube-spin-a {
+  from { transform: rotateX(-18deg) rotateY(0deg); }
+  to { transform: rotateX(-18deg) rotateY(360deg); }
+}
+@keyframes cube-spin-b {
+  from { transform: rotateX(22deg) rotateY(0deg); }
+  to { transform: rotateX(22deg) rotateY(-360deg); }
+}
+
+/* ---- marquee ---- */
+.marquee-track {
+  animation: marquee 36s linear infinite;
+}
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+/* ---- outlined display text ---- */
+.text-outline {
+  -webkit-text-stroke: 1px hsl(220 16% 96% / 0.28);
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube-spin-a,
+  .cube-spin-b,
+  .marquee-track {
+    animation: none;
+  }
+}

@@ -1,0 +1,78 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { LOGO_URL } from './Navbar';
+
+const columns = [
+    {
+        title: 'Empresa',
+        items: [
+            { label: 'Nosotros', to: '/nosotros' },
+            { label: 'Metodología', to: '/#metodologia' },
+            { label: 'Proyectos', to: '/#proyectos' },
+            { label: 'Contacto', to: '/contacto' },
+        ],
+    },
+    {
+        title: 'Líneas de producto',
+        items: [
+            { label: 'Calzado', to: '/calzado' },
+            { label: 'Ropa', to: '/ropa' },
+            { label: 'Dotaciones', to: '/dotaciones' },
+        ],
+    },
+    {
+        title: 'Proyectos',
+        items: [
+            { label: 'Runner X-40', to: '/#proyectos' },
+            { label: 'Colección Origin', to: '/#proyectos' },
+            { label: 'Programa Atlas', to: '/#proyectos' },
+            { label: 'Línea Executive', to: '/#proyectos' },
+        ],
+    },
+    {
+        title: 'Contacto',
+        items: [
+            { label: 'comercial@cuartadimension.co', to: '/contacto' },
+            { label: '+57 (601) 743 4400', to: '/contacto' },
+            { label: 'Bogotá D.C., Colombia', to: '/contacto' },
+        ],
+    },
+];
+
+export default function Footer() {
+    return (
+        <footer className="border-t border-border/70 bg-background">
+            <div className="mx-auto max-w-6xl px-6 py-16">
+                <div className="grid gap-12 md:grid-cols-[1.2fr_repeat(4,1fr)]">
+                    <div>
+                        <Link to="/" className="flex items-center gap-3">
+                            <img src={LOGO_URL} alt="Logo 4D Cuarta Dimensión" className="h-10 w-10 rounded-full" />
+                            <span className="text-sm font-bold uppercase tracking-[0.18em]">4D Cuarta Dimensión</span>
+                        </Link>
+                        <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted-foreground">
+                            Transformamos la visión en una cuarta dimensión. Diseño, desarrollo y comercialización internacional de producto.
+                        </p>
+                    </div>
+                    {columns.map((col) => (
+                        <div key={col.title}>
+                            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{col.title}</h3>
+                            <ul className="mt-4 space-y-2.5">
+                                {col.items.map((item) => (
+                                    <li key={item.label}>
+                                        <Link to={item.to} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
+                                            {item.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-14 flex flex-col gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                    <p>© 2026 4D Cuarta Dimensión ES S.A.S. Todos los derechos reservados.</p>
+                    <p>Latinoamérica · Norteamérica · Europa</p>
+                </div>
+            </div>
+        </footer>
+    );
+}

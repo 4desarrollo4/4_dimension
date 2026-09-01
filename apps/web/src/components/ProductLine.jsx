@@ -1,0 +1,131 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import Reveal from './Reveal';
+import ProjectCard from './ProjectCard';
+
+export function LineHero({ index, title, claim, description, image, imageAlt }) {
+    return (
+        <section className="relative overflow-hidden pt-32 md:pt-40">
+            <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 md:pb-24 lg:grid-cols-2">
+                <Reveal>
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Dimensión {index}</p>
+                    <h1 className="mt-4 text-5xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
+                    <p className="mt-4 text-xl font-medium text-foreground/90">{claim}</p>
+                    <p className="mt-4 max-w-lg leading-relaxed text-muted-foreground">{description}</p>
+                    <Link
+                        to="/contacto"
+                        className="group mt-8 inline-flex items-center gap-2 bg-primary px-6 py-3.5 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
+                    >
+                        Solicitar cotización
+                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    </Link>
+                </Reveal>
+                <Reveal delay={0.15}>
+                    <div className="overflow-hidden border border-border/70">
+                        <img src={image} alt={imageAlt} className="aspect-[3/2] w-full object-cover" />
+                    </div>
+                </Reveal>
+            </div>
+        </section>
+    );
+}
+
+export function CapabilityList({ title = 'Capacidades', capabilities }) {
+    return (
+        <section className="border-t border-border/60">
+            <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+                <Reveal>
+                    <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
+                </Reveal>
+                <div className="mt-10">
+                    {capabilities.map((c, i) => (
+                        <Reveal key={c.title} delay={i * 0.05}>
+                            <div className="grid gap-2 border-t border-border/60 py-6 sm:grid-cols-[3rem_1fr_2fr] sm:items-baseline sm:gap-6">
+                                <span className="text-sm font-semibold text-primary">{String(i + 1).padStart(2, '0')}</span>
+                                <h3 className="text-lg font-bold tracking-tight">{c.title}</h3>
+                                <p className="text-sm leading-relaxed text-muted-foreground">{c.description}</p>
+                            </div>
+                        </Reveal>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+export function FeatureGrid({ title, items, columns = 'sm:grid-cols-2 lg:grid-cols-4' }) {
+    return (
+        <section className="border-t border-border/60 bg-card/40">
+            <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+                <Reveal>
+                    <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
+                </Reveal>
+                <div className={`mt-10 grid gap-px border border-border/60 bg-border/60 ${columns}`}>
+                    {items.map((item) => (
+                        <div key={item.title} className="bg-background p-6">
+                            <h3 className="text-base font-bold tracking-tight">{item.title}</h3>
+                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+export function DetailSplit({ title, text, image, imageAlt, reverse = false }) {
+    return (
+        <section className="border-t border-border/60">
+            <div className={`mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 md:py-24 lg:grid-cols-2`}>
+                <Reveal className={reverse ? 'lg:order-2' : ''}>
+                    <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
+                    <p className="mt-5 max-w-lg leading-relaxed text-muted-foreground">{text}</p>
+                </Reveal>
+                <Reveal delay={0.12} className={reverse ? 'lg:order-1' : ''}>
+                    <div className="overflow-hidden border border-border/70">
+                        <img src={image} alt={imageAlt} loading="lazy" className="aspect-[3/2] w-full object-cover" />
+                    </div>
+                </Reveal>
+            </div>
+        </section>
+    );
+}
+
+export function CasesSection({ cases }) {
+    return (
+        <section className="border-t border-border/60 bg-card/40">
+            <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+                <Reveal>
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Casos de éxito</p>
+                    <h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Resultados que hablan por sí solos</h2>
+                </Reveal>
+                <div className="mt-10 grid gap-6 md:grid-cols-2">
+                    {cases.map((p, i) => (
+                        <ProjectCard key={p.id} project={p} delay={i * 0.08} />
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+export function LineCTA({ title = '¿Tienes un proyecto en mente?', text }) {
+    return (
+        <section className="border-t border-border/60">
+            <div className="mx-auto max-w-6xl px-6 py-20 text-center md:py-28">
+                <Reveal>
+                    <h2 className="mx-auto max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl">{title}</h2>
+                    <p className="mx-auto mt-5 max-w-xl leading-relaxed text-muted-foreground">{text}</p>
+                    <Link
+                        to="/contacto"
+                        className="group mt-9 inline-flex items-center gap-2 bg-primary px-8 py-4 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
+                    >
+                        Iniciar conversación
+                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                    </Link>
+                </Reveal>
+            </div>
+        </section>
+    );
+}
