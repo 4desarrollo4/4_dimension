@@ -25,6 +25,20 @@
         "4173"
       ],
       "port": 4173
+    },
+    {
+      "name": "web-dev-3100",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "apps/web",
+        "--",
+        "--port",
+        "3100"
+      ],
+      "port": 3100
     }
   ]
 }
