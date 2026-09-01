@@ -34,6 +34,94 @@
 
 ---
 
+## 2026-09-01 · P1-01: el sitio deja de vender
+
+**Qué se hizo**
+
+La reescritura editorial completa (**P1-01**), el consentimiento del formulario
+(**P0-05**, parcial) y los datos de contacto clicables (**P1-03**).
+
+**De 9 llamados comerciales a 0**
+
+| Dónde | Antes | Ahora |
+|---|---|---|
+| Navbar | "Hablemos ↗" | "Contacto" |
+| Home, H1 | "Convertimos ideas en productos ganadores" | "Diseñamos y desarrollamos producto: calzado, ropa y dotaciones" |
+| Home, hero | "Hablemos de un proyecto" | "Qué hacemos" → ancla a las líneas |
+| Home, cierre | "¿Cuál será tu próxima dimensión?" + botón | "Dónde operamos" — bloque informativo con los datos de contacto |
+| Líneas ×3 | "Solicitar cotización" + "Iniciar conversación" | `LineClosing`: sitúa la línea y enlaza a las otras dos |
+| Nosotros | "Trabajemos juntos" | eliminado |
+| Contacto | "Hablemos sobre el reto que quieres…" | "Dónde y cómo encontrarnos" |
+
+**El hallazgo de la sesión: cuatro CTA escondidos**
+
+Al contar los enlaces sobre el HTML del build apareció que **cada
+`ProjectCard` enlazaba a `/contacto`**. Los cuatro proyectos del portafolio no
+eran casos de éxito: eran botones de contacto disfrazados, y solo en la home
+sumaban cuatro llamados que ninguna auditoría de texto habría detectado, porque
+el problema no estaba en lo que decían sino en **a dónde llevaban**.
+
+Ahora cada tarjeta lleva a su línea de negocio. De ahí salió el **ADR-009**, que
+fija la regla estructural: dos enlaces a `/contacto` por página, navbar y
+footer, y ninguno más en el cuerpo.
+
+**Verificado sobre el HTML del build**
+
+| Comprobación | Antes | Ahora |
+|---|---|---|
+| Enlaces a `/contacto` en la home | 6 | **2** |
+| "Hablemos" / "Cotiza" / "cotización" | presentes | **0** |
+| "Trabajemos" / "Iniciar conversación" / "Solicitar" | presentes | **0** |
+| Tarjetas de proyecto que apuntan al formulario | 4 | **0** |
+| `mailto:` y `tel:` reales | 0 | en home, contacto y footer |
+
+**Voz**
+
+De 2ª persona vendiendo a 1ª persona describiendo, en la metodología, la
+sección de diferenciación, las capacidades de Ropa y Dotaciones, los compromisos
+de Nosotros y la capacidad internacional.
+
+**P0-05 · Consentimiento (parcial)**
+
+Casilla no premarcada y obligatoria, texto de finalidad nombrando al responsable
+y aviso de derechos con mención de la Ley 1581 de 2012. Probado: con todos los
+campos válidos pero sin marcar la casilla, el envío se bloquea.
+
+Falta la página `/politica-de-datos` (necesita NIT y dirección) y guardar la
+marca de tiempo del consentimiento, que requiere una migración de PocketBase
+**que no se puede probar en Windows** — no se escribió a ciegas.
+
+**Desviación deliberada**
+
+`05-contenido-y-seo.md` pedía dejar el formulario en "nombre, correo, mensaje y
+ya". Se conservaron *Empresa* (opcional) y *Línea de interés*: son útiles para
+clasificar la solicitud y no empujan a nada. Lo que se corrigió fue el tono de
+las etiquetas. Queda anotado por si el propietario prefiere el formulario
+mínimo.
+
+**Estado del backlog**
+
+P0: 4 ✅, 2 🟡, 1 ⬜. P1: 3 ✅, 1 ⚠️, 2 ⬜. P2: 11 ⬜.
+
+**Decisiones tomadas**
+
+- **ADR-009** — Dos enlaces de contacto por página, y ninguno más. Incluye el
+  comando para comprobarlo sobre el build.
+
+**Dónde quedó / qué sigue**
+
+**No se tocó ni un dato factual.** Cifras, proyectos, clientes y datos de
+contacto siguen siendo exactamente los de `02-empresa.md`.
+
+Lo único de P0 que no depende del propietario es **P0-06**: confirmar que el
+hosting resuelve `/nosotros` con `nosotros/index.html`.
+
+⛔ Todo lo demás espera material: **logo en vectorial** (favicon y
+`og-image.jpg`), **dominio definitivo**, **NIT y dirección** (política de datos
+y JSON-LD).
+
+---
+
 ## 2026-09-01 · Bloque P0: Git, build y visibilidad
 
 **Qué se hizo**

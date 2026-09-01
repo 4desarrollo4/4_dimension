@@ -13,13 +13,6 @@ export function LineHero({ index, title, claim, description, image, imageAlt }) 
                     <h1 className="mt-4 text-5xl font-extrabold tracking-tight sm:text-6xl">{title}</h1>
                     <p className="mt-4 text-xl font-medium text-foreground/90">{claim}</p>
                     <p className="mt-4 max-w-lg leading-relaxed text-muted-foreground">{description}</p>
-                    <Link
-                        to="/contacto"
-                        className="group mt-8 inline-flex items-center gap-2 bg-primary px-6 py-3.5 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
-                    >
-                        Solicitar cotización
-                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                    </Link>
                 </Reveal>
                 <Reveal delay={0.15}>
                     <div className="overflow-hidden border border-border/70">
@@ -110,21 +103,37 @@ export function CasesSection({ cases }) {
     );
 }
 
-export function LineCTA({ title = '¿Tienes un proyecto en mente?', text }) {
+// Cierre de página de línea. Informa y navega — no vende. Sustituyó al antiguo
+// LineCTA, que cerraba cada línea con un "Iniciar conversación" (ADR-001).
+export function LineClosing({ title, text, others = [] }) {
     return (
         <section className="border-t border-border/60">
-            <div className="mx-auto max-w-6xl px-6 py-20 text-center md:py-28">
+            <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
                 <Reveal>
-                    <h2 className="mx-auto max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl">{title}</h2>
-                    <p className="mx-auto mt-5 max-w-xl leading-relaxed text-muted-foreground">{text}</p>
-                    <Link
-                        to="/contacto"
-                        className="group mt-9 inline-flex items-center gap-2 bg-primary px-8 py-4 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
-                    >
-                        Iniciar conversación
-                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                    </Link>
+                    <h2 className="max-w-2xl text-3xl font-extrabold tracking-tight sm:text-4xl">{title}</h2>
+                    <p className="mt-5 max-w-2xl leading-relaxed text-muted-foreground">{text}</p>
                 </Reveal>
+                {others.length > 0 && (
+                    <Reveal delay={0.1}>
+                        <div className="mt-12 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-2">
+                            {others.map((o) => (
+                                <Link
+                                    key={o.to}
+                                    to={o.to}
+                                    className="group bg-background p-8 transition-colors duration-300 hover:bg-card/60"
+                                >
+                                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                        Dimensión {o.index}
+                                    </span>
+                                    <span className="mt-3 flex items-center gap-2 text-2xl font-extrabold tracking-tight transition-colors duration-300 group-hover:text-primary">
+                                        {o.label}
+                                        <ArrowRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-1" />
+                                    </span>
+                                </Link>
+                            ))}
+                        </div>
+                    </Reveal>
+                )}
             </div>
         </section>
     );

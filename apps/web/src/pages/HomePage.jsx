@@ -49,7 +49,7 @@ const values = [
 ];
 
 const steps = [
-    { title: 'Descubrimos', text: 'Entendemos tu mercado, tu cliente y el reto que quieres convertir en oportunidad.' },
+    { title: 'Descubrimos', text: 'Partimos del mercado y del usuario final para definir qué producto tiene sentido desarrollar.' },
     { title: 'Diseñamos', text: 'Concepto, renders, materiales y fichas técnicas con dirección de producto clara.' },
     { title: 'Desarrollamos', text: 'Prototipos, muestras, producción y control de calidad con aliados certificados.' },
     { title: 'Evolucionamos', text: 'Medimos resultados y mejoramos cada colección, línea o programa de dotación.' },
@@ -67,12 +67,12 @@ export default function HomePage() {
                 <title>4D Cuarta Dimensión — Diseño y desarrollo de producto: calzado, ropa y dotaciones</title>
                 <meta
                     name="description"
-                    content="Comercializadora internacional de diseño y desarrollo de producto. Convertimos ideas en productos ganadores: calzado, ropa y dotaciones corporativas e industriales."
+                    content="4D Cuarta Dimensión ES S.A.S. es una comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
                 />
             </Helmet>
             <Seo
                 title="4D Cuarta Dimensión — Diseño y desarrollo de producto: calzado, ropa y dotaciones"
-                description="Comercializadora internacional de diseño y desarrollo de producto. Convertimos ideas en productos ganadores: calzado, ropa y dotaciones corporativas e industriales."
+                description="4D Cuarta Dimensión ES S.A.S. es una comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
             />
 
             {/* HERO */}
@@ -90,13 +90,13 @@ export default function HomePage() {
                         </Reveal>
                         <Reveal delay={0.1}>
                             <h1 className="mt-6 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
-                                Convertimos ideas en{' '}
-                                <span className="text-primary">productos ganadores</span>.
+                                Diseñamos y desarrollamos{' '}
+                                <span className="text-primary">producto</span>: calzado, ropa y dotaciones.
                             </h1>
                         </Reveal>
                         <Reveal delay={0.2}>
                             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                                Comercializadora internacional de diseño y desarrollo de producto. Calzado, ropa y dotaciones con visión estratégica, tecnología y una perspectiva diferente.
+                                Somos una comercializadora internacional colombiana. No comercializamos catálogos: desarrollamos producto a medida, con dirección de diseño propia y producción verificable.
                             </p>
                         </Reveal>
                         <Reveal delay={0.3}>
@@ -107,13 +107,13 @@ export default function HomePage() {
                                 >
                                     Conocer 4D
                                 </Link>
-                                <Link
-                                    to="/contacto"
+                                <a
+                                    href="#lineas"
                                     className="group inline-flex items-center gap-2 bg-primary px-6 py-3.5 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
                                 >
-                                    Hablemos de un proyecto
-                                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                </Link>
+                                    Qué hacemos
+                                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+                                </a>
                             </div>
                         </Reveal>
                     </div>
@@ -158,7 +158,7 @@ export default function HomePage() {
             </section>
 
             {/* LÍNEAS DE NEGOCIO */}
-            <section className="border-t border-border/60">
+            <section id="lineas" className="border-t border-border/60">
                 <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Nuestras líneas de negocio</p>
@@ -203,7 +203,7 @@ export default function HomePage() {
             <section className="border-t border-border/60 bg-card/40">
                 <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
                     <Reveal>
-                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Propuesta de valor</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Cómo trabajamos</p>
                     </Reveal>
                     <div className="mt-8">
                         {values.map((v, i) => (
@@ -299,26 +299,47 @@ export default function HomePage() {
                     </Reveal>
                     <Reveal delay={0.15}>
                         <p className="mt-8 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                            Cada proyecto empieza desde cero: tu mercado, tu cliente, tu oportunidad. Diseñamos producto con identidad propia, no variantes de un catálogo. Esa es la diferencia entre vender un producto más y lanzar uno que el mercado recuerda.
+                            Cada proyecto empieza desde cero: el mercado, el usuario final y la oportunidad concreta. Diseñamos producto con identidad propia, no variantes de un catálogo.
                         </p>
                     </Reveal>
                 </div>
             </section>
 
-            {/* CTA FINAL */}
+            {/* CIERRE INFORMATIVO */}
             <section className="border-t border-border/60 bg-card/40">
-                <div className="mx-auto max-w-6xl px-6 py-24 text-center md:py-32">
+                <div className="mx-auto max-w-6xl px-6 py-20 md:py-28">
                     <Reveal>
-                        <h2 className="mx-auto max-w-3xl text-4xl font-extrabold tracking-tight sm:text-6xl">
-                            ¿Cuál será tu próxima <span className="text-primary">dimensión</span>?
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Dónde operamos</p>
+                        <h2 className="mt-4 max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl">
+                            Colombia, con operación internacional.
                         </h2>
-                        <Link
-                            to="/contacto"
-                            className="group mt-10 inline-flex items-center gap-2 bg-primary px-8 py-4 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
-                        >
-                            Iniciar conversación
-                            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                        </Link>
+                        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+                            Nuestra oficina principal está en Bogotá D.C. Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa, con una red de aliados de manufactura en Colombia, Asia y Europa.
+                        </p>
+                    </Reveal>
+                    <Reveal delay={0.1}>
+                        <dl className="mt-12 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
+                            <div className="bg-background p-8">
+                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Correo</dt>
+                                <dd className="mt-3">
+                                    <a href="mailto:comercial@cuartadimension.co" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
+                                        comercial@cuartadimension.co
+                                    </a>
+                                </dd>
+                            </div>
+                            <div className="bg-background p-8">
+                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Teléfono</dt>
+                                <dd className="mt-3">
+                                    <a href="tel:+576017434400" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
+                                        +57 (601) 743 4400
+                                    </a>
+                                </dd>
+                            </div>
+                            <div className="bg-background p-8">
+                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Oficina</dt>
+                                <dd className="mt-3 text-sm text-foreground">Bogotá D.C., Colombia</dd>
+                            </div>
+                        </dl>
                     </Reveal>
                 </div>
             </section>

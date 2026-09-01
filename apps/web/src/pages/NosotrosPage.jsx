@@ -1,15 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
 import { IMAGES } from '../data/projects';
 
 const commitments = [
     { title: 'Calidad verificable', text: 'Procesos alineados con estándares internacionales de calidad, con inspección en línea y verificación pre-embarque en cada proyecto.' },
-    { title: 'Cumplimiento', text: 'Especificaciones documentadas y trazabilidad por lote. Lo que apruebas en la muestra es lo que recibes en producción.' },
+    { title: 'Cumplimiento', text: 'Especificaciones documentadas y trazabilidad por lote. Lo aprobado en la muestra es lo que sale de producción.' },
     { title: 'Transparencia comercial', text: 'Costos, tiempos y condiciones claros desde la primera conversación. Sin letra pequeña.' },
     { title: 'Relaciones de largo plazo', text: 'Nuestros clientes repiten porque cada entrega abre la puerta a la siguiente dimensión del proyecto.' },
 ];
@@ -68,7 +66,7 @@ export default function NosotrosPage() {
                     <Reveal>
                         <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Capacidad internacional</h2>
                         <p className="mt-5 max-w-2xl leading-relaxed text-muted-foreground">
-                            Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa. Consolidamos producción, documentación y logística para que tu producto cruce fronteras sin fricción.
+                            Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa. Consolidamos producción, documentación y logística para que el producto cruce fronteras sin fricción.
                         </p>
                     </Reveal>
                     <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
@@ -104,15 +102,6 @@ export default function NosotrosPage() {
                             </Reveal>
                         ))}
                     </div>
-                    <Reveal delay={0.1}>
-                        <Link
-                            to="/contacto"
-                            className="group mt-12 inline-flex items-center gap-2 bg-primary px-8 py-4 text-sm font-semibold tracking-wide text-primary-foreground transition-all duration-200 hover:bg-primary/90 active:scale-[0.98]"
-                        >
-                            Trabajemos juntos
-                            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                        </Link>
-                    </Reveal>
                 </div>
             </section>
         </PageTransition>

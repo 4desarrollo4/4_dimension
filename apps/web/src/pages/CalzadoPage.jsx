@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
 import PageTransition from '../components/PageTransition';
-import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineCTA } from '../components/ProductLine';
+import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineClosing } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
 
 const capabilities = [
@@ -53,9 +53,13 @@ export default function CalzadoPage() {
                 reverse
             />
             <CasesSection cases={projects.filter((p) => p.lineId === 'calzado')} />
-            <LineCTA
-                title="¿Listo para desarrollar tu próximo calzado?"
-                text="Cuéntanos qué quieres lanzar y te devolvemos una ruta clara: concepto, tiempos, costos y plan de producción."
+            <LineClosing
+                title="Calzado es la línea 01 de 4D."
+                text="Comparte con las otras dos líneas la misma metodología —descubrimiento, diseño, desarrollo y evolución— y la misma red de aliados de manufactura en Colombia, Asia y Europa."
+                others={[
+                    { index: '02', label: 'Ropa', to: '/ropa' },
+                    { index: '03', label: 'Dotaciones', to: '/dotaciones' },
+                ]}
             />
         </PageTransition>
     );

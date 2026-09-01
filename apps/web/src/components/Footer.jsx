@@ -32,9 +32,9 @@ const columns = [
     {
         title: 'Contacto',
         items: [
-            { label: 'comercial@cuartadimension.co', to: '/contacto' },
-            { label: '+57 (601) 743 4400', to: '/contacto' },
-            { label: 'Bogotá D.C., Colombia', to: '/contacto' },
+            { label: 'comercial@cuartadimension.co', href: 'mailto:comercial@cuartadimension.co' },
+            { label: '+57 (601) 743 4400', href: 'tel:+576017434400' },
+            { label: 'Bogotá D.C., Colombia' },
         ],
     },
 ];
@@ -50,7 +50,7 @@ export default function Footer() {
                             <span className="text-sm font-bold uppercase tracking-[0.18em]">4D Cuarta Dimensión</span>
                         </Link>
                         <p className="mt-5 max-w-xs text-sm leading-relaxed text-muted-foreground">
-                            Transformamos la visión en una cuarta dimensión. Diseño, desarrollo y comercialización internacional de producto.
+                            Comercializadora internacional de diseño y desarrollo de producto: calzado, ropa y dotaciones.
                         </p>
                     </div>
                     {columns.map((col) => (
@@ -59,9 +59,17 @@ export default function Footer() {
                             <ul className="mt-4 space-y-2.5">
                                 {col.items.map((item) => (
                                     <li key={item.label}>
-                                        <Link to={item.to} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
-                                            {item.label}
-                                        </Link>
+                                        {item.to ? (
+                                            <Link to={item.to} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
+                                                {item.label}
+                                            </Link>
+                                        ) : item.href ? (
+                                            <a href={item.href} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
+                                                {item.label}
+                                            </a>
+                                        ) : (
+                                            <span className="text-sm text-foreground/80">{item.label}</span>
+                                        )}
                                     </li>
                                 ))}
                             </ul>

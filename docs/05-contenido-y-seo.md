@@ -32,7 +32,16 @@ entiendan?"***
 **Máximo 2 llamados a la acción en toda la home.** Uno en la barra de
 navegación (`Contacto`) y opcionalmente uno al cerrar la página.
 
-### Reemplazos acordados
+> ✅ **Cumplido desde el 2026-09-01** (**P1-01**). Cada página del sitio tiene
+> exactamente **dos** enlaces a `/contacto` — navbar y footer — y ambos se
+> llaman "Contacto". No queda ni un CTA comercial en el cuerpo.
+>
+> ⚠️ Ojo con los CTA disfrazados: las tarjetas de proyecto enlazaban a
+> `/contacto`, lo que sumaba cuatro llamados encubiertos solo en la home. Ahora
+> llevan a su línea de negocio. Si añades un bloque nuevo, pregúntate a dónde
+> lleva, no solo qué dice.
+
+### Reemplazos acordados ✅ *(aplicados el 2026-09-01)*
 
 | Texto actual | Reemplazo |
 |---|---|
@@ -136,7 +145,7 @@ es el precio de que `llms.txt` se pueda generar leyendo el código.
 | `/` | ✅ title + description + OG |
 | `/calzado` `/ropa` `/dotaciones` | ✅ title + description + OG |
 | `/nosotros` | ✅ title + description + OG |
-| `/contacto` | ⚠️ title y description con lenguaje de venta ("Hablemos", "Cotiza") → **P1-01** |
+| `/contacto` | ✅ title + description + OG, ya sin lenguaje de venta |
 
 ---
 

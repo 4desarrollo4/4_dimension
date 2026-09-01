@@ -99,34 +99,47 @@ Sirve el build en `:3000` (el mismo puerto que `dev`, así que no los levantes a
 
 ## Estado actual (2026-09-01)
 
-El **bloque de visibilidad ya está hecho**: el sitio se puede compartir e
-indexar. Lo que falta ahora es sobre todo **contenido**, no infraestructura.
+El sitio **ya cumple su objetivo**: informa, se puede compartir y se puede
+indexar. Lo que queda depende sobre todo de material que debe aportar el
+propietario.
 
 | Dimensión | Nota |
 |---|---|
 | Diseño visual | 8.5/10 — lo más sólido. **No lo rediseñes** |
 | Arquitectura de información | 8/10 |
 | SEO y compartibilidad | **8/10** *(era 2/10)* — falta `og-image.jpg` y JSON-LD |
+| Alineación con "informar, no vender" | **9/10** *(era 3/10)* |
 | Accesibilidad | 6/10 — el contraste cumple AA; falta semántica y foco |
-| Alineación con "informar, no vender" | **3/10** ← *el pendiente grande* |
 
 **Hecho el 2026-09-01:** Git inicializado · build arreglado (dos bugs de
 Windows) · `index.html` completo · prerender de las 6 rutas con OG, Twitter Card
-y canonical · `sitemap.xml` + `robots.txt` · migración a `react-helmet-async`.
+y canonical · `sitemap.xml` + `robots.txt` · `react-helmet-async` · reescritura
+editorial completa (9 CTA comerciales → 0) · consentimiento en el formulario ·
+correo y teléfono clicables.
 
-**Por dónde seguir:** [`docs/06-backlog.md`](docs/06-backlog.md) → **P0-06**
-(confirmar cómo sirve las rutas el hosting — si reescribe todo a `/index.html`,
-el prerender no sirve de nada), **P0-05** (aviso de privacidad, riesgo legal
-abierto) y luego **P1-01**, la reescritura editorial.
+**Por dónde seguir:** [`docs/06-backlog.md`](docs/06-backlog.md) → **P0-06**,
+confirmar que el hosting resuelve `/nosotros` con `nosotros/index.html`. Es lo
+único de P0 que no está bloqueado, y de ello depende que el prerender sirva de
+algo.
+
+⛔ **Esperando material del propietario:** logo en vectorial (favicon y
+`og-image.jpg`), dominio definitivo, NIT y dirección física (política de datos y
+JSON-LD).
 
 ⚠️ **El dominio de `apps/web/src/lib/site.js` está sin confirmar.** Está inferido
 del correo comercial y alimenta los `canonical`, el `sitemap.xml` y el
 `robots.txt`. Confírmalo antes de publicar.
 
-⚠️ **Reglas nuevas desde el prerender:** una ruta nueva se registra en `App.jsx`
-**y** en `src/lib/site.js`; y ningún componente puede tocar `window`, `document`
-o `localStorage` fuera de un efecto — ese código ahora también corre en Node.
-Ver [ADR-008](docs/07-decisiones.md).
+### Reglas que impone lo ya construido
+
+- Una ruta nueva se registra en `App.jsx` **y** en `src/lib/site.js`.
+- Ningún componente toca `window`, `document` o `localStorage` fuera de un
+  efecto: ese código también corre en Node. Ver [ADR-008](docs/07-decisiones.md).
+- **Dos enlaces a `/contacto` por página**, navbar y footer, y ninguno más en el
+  cuerpo. Antes de añadir un enlace, pregúntate a dónde lleva, no qué dice.
+  Ver [ADR-009](docs/07-decisiones.md).
+- Al cambiar un título o una descripción, cámbialo en `<Helmet>` **y** en
+  `<Seo>`: están duplicados a propósito.
 
 ---
 

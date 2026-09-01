@@ -33,13 +33,16 @@
 
 | Prioridad | ✅ | 🟡 ⚠️ | ⬜ ⛔ | Total |
 |---|---|---|---|---|
-| **P0** | 4 | 1 | 2 | 7 |
-| **P1** | 1 | 1 | 4 | 6 |
-| **P2** | 0 | 0 | 10 | 10 |
+| **P0** | 4 | 2 | 1 | 7 |
+| **P1** | 3 | 1 | 2 | 6 |
+| **P2** | 0 | 0 | 11 | 11 |
 
-**Siguiente tarea recomendada:** **P0-06** (confirmar cómo sirve las rutas el
-hosting) y **P0-05** (aviso de privacidad). Después, **P1-01**, la reescritura
-editorial.
+**Siguiente tarea recomendada:** **P0-06** — confirmar cómo sirve las rutas el
+hosting. Es lo único de P0 que no depende de datos del propietario, y de ello
+depende que el prerender sirva de algo.
+
+Casi todo lo demás está ⛔ **esperando material del propietario**: logo en
+vectorial, dominio definitivo, NIT y dirección física.
 
 ---
 
@@ -169,27 +172,29 @@ fuente, así que no pueden ser variables.
 
 ---
 
-### P0-05 · Aviso de privacidad y consentimiento en el formulario — `M` — ⬜
+### P0-05 · Aviso de privacidad y consentimiento en el formulario — `M` — 🟡 *(parcial, 2026-09-01)*
 
-[`ContactoPage.jsx`](../apps/web/src/pages/ContactoPage.jsx) recoge nombre,
-empresa, correo y mensaje, y los guarda en PocketBase **sin aviso de privacidad
-ni autorización expresa**. Incumple la **Ley 1581 de 2012** (habeas data) y el
-**Decreto 1074 de 2015**.
+**Hecho:** el formulario ya no recoge datos sin autorización.
 
-Mínimo exigible:
+- Casilla de autorización **no premarcada** y **obligatoria**: sin marcarla, el
+  envío se bloquea con un mensaje de error. Verificado el 2026-09-01.
+- Texto de finalidad junto al formulario, nombrando al responsable
+  (4D Cuarta Dimensión ES S.A.S.) y la única finalidad del tratamiento.
+- Aviso de los derechos del titular (consultar, actualizar, eliminar) con el
+  correo de contacto, y mención expresa de la **Ley 1581 de 2012**.
 
-- Casilla de autorización **no premarcada**, obligatoria para enviar
-- Texto corto de finalidad del tratamiento junto al formulario
-- Página `/politica-de-datos` con la política completa, enlazada desde el footer
-- Guardar en `contact_requests` la marca de tiempo del consentimiento
+**Falta:**
 
-⛔ La política necesita datos que aún no tenemos: NIT, dirección física y
-responsable del tratamiento.
-
-📌 Si se añade la ruta `/politica-de-datos`, hay que registrarla también en
-[`src/lib/site.js`](../apps/web/src/lib/site.js) para que entre en el prerender
-y en el sitemap.
-
+1. ⛔ **Página `/politica-de-datos`** con la política completa. Necesita NIT,
+   dirección física y responsable del tratamiento — ver
+   [`02-empresa.md`](02-empresa.md). Al crearla, registrarla también en
+   [`src/lib/site.js`](../apps/web/src/lib/site.js) y enlazarla desde el footer.
+2. ⬜ **Guardar la marca de tiempo del consentimiento** en `contact_requests`.
+   Requiere una migración de PocketBase que **no se puede probar en Windows**
+   (el binario es un ejecutable de Linux), así que no se escribió a ciegas.
+3. ⚠️ **Revisión legal.** El texto actual recoge los elementos que exige la ley,
+   pero no lo redactó un abogado. Conviene que alguien lo valide antes de
+   publicar.
 ---
 
 ### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ⬜
@@ -236,45 +241,51 @@ sirve de aviso de lo que pasaría en producción con esa configuración.
 
 ---
 
-### P1-01 · Reescritura editorial: informar en vez de vender — `L` — ⬜
+### P1-01 · Reescritura editorial: informar en vez de vender — `L` — ✅ *(2026-09-01)*
 
-El sitio está escrito como una landing de captación. Conteo verificado el
-2026-09-01: **9 llamados comerciales en el cuerpo**, más el botón "Hablemos ↗"
-del navbar presente en las 6 páginas. La regla del proyecto es **máximo 2 en
-toda la home**.
+El sitio dejó de estar escrito como una landing de captación.
 
-| Dónde | Texto actual | Reemplazo acordado |
+**Llamados a la acción.** De **9 CTA comerciales** en el cuerpo a **0**. Cada
+página conserva exactamente **dos** enlaces a `/contacto`, ambos etiquetados
+"Contacto": uno en el navbar y otro en el footer.
+
+| Dónde | Antes | Ahora |
 |---|---|---|
-| [`Navbar.jsx:66`](../apps/web/src/components/Navbar.jsx:66) | "Hablemos ↗" | "Contacto" |
-| [`HomePage.jsx`](../apps/web/src/pages/HomePage.jsx) | H1 "Convertimos ideas en productos ganadores" | Titular de identidad |
-| [`HomePage.jsx`](../apps/web/src/pages/HomePage.jsx) | "Hablemos de un proyecto" | "Qué hacemos" — ancla a las líneas |
-| [`HomePage.jsx`](../apps/web/src/pages/HomePage.jsx) | "¿Cuál será tu próxima dimensión?" → "Iniciar conversación" | Cierre informativo, sin CTA |
-| [`HomePage.jsx`](../apps/web/src/pages/HomePage.jsx) | Eyebrow "PROPUESTA DE VALOR" | "CÓMO TRABAJAMOS" |
-| [`ProductLine.jsx`](../apps/web/src/components/ProductLine.jsx) | **"Solicitar cotización"** (×3 páginas) | Eliminar |
-| [`ProductLine.jsx`](../apps/web/src/components/ProductLine.jsx) | `LineCTA` "Iniciar conversación" (×3) | Eliminar la sección, o dejarla informativa |
-| [`NosotrosPage.jsx`](../apps/web/src/pages/NosotrosPage.jsx) | "Trabajemos juntos" | "Conócenos", o eliminar |
-| [`ContactoPage.jsx`](../apps/web/src/pages/ContactoPage.jsx) | Meta "Hablemos de tu proyecto… Cotiza" | "Datos de contacto de 4D Cuarta Dimensión" |
-| [`ContactoPage.jsx`](../apps/web/src/pages/ContactoPage.jsx) | Campo "Tu proyecto \*" | "Mensaje" |
+| Navbar | "Hablemos ↗" | "Contacto" |
+| Home, H1 | "Convertimos ideas en productos ganadores" | "Diseñamos y desarrollamos producto: calzado, ropa y dotaciones" |
+| Home, hero | "Hablemos de un proyecto" | "Qué hacemos" → ancla a las líneas |
+| Home, eyebrow | "PROPUESTA DE VALOR" | "CÓMO TRABAJAMOS" |
+| Home, cierre | "¿Cuál será tu próxima dimensión?" + "Iniciar conversación" | "Dónde operamos" — bloque informativo con correo, teléfono y oficina |
+| Líneas, hero | "Solicitar cotización" (×3) | eliminado |
+| Líneas, cierre | `LineCTA` "Iniciar conversación" (×3) | `LineClosing` — sitúa la línea y enlaza a las otras dos |
+| Nosotros | "Trabajemos juntos" | eliminado |
+| Contacto, H1 | "Hablemos sobre el reto que quieres convertir…" | "Dónde y cómo encontrarnos" |
+| Contacto, campo | "Tu proyecto \*" | "Mensaje \*" |
 
-**El fondo no son los botones, es la persona gramatical.** Hay que pasar de 2ª
-persona vendiendo a 1ª persona describiendo:
+**Un embudo escondido que no estaba en la auditoría.** Cada `ProjectCard` del
+portafolio enlazaba a `/contacto`: cuatro CTA disfrazados de casos de éxito solo
+en la home. Ahora cada tarjeta lleva a **su línea de negocio**, que es
+información sobre lo que hace la empresa.
+
+**Voz.** Se pasó de 2ª persona vendiendo a 1ª persona describiendo en la
+metodología, la sección de diferenciación, las capacidades de Dotaciones y Ropa,
+los compromisos de Nosotros y la capacidad internacional. Ejemplo:
 
 - ❌ "Entendemos **tu** mercado, **tu** cliente y el reto que **quieres** convertir en oportunidad."
 - ✅ "Partimos del mercado y del usuario final para definir qué producto tiene sentido desarrollar."
 
-Otros focos de 2ª persona: la sección de diferenciación del home,
-[`DotacionesPage.jsx`](../apps/web/src/pages/DotacionesPage.jsx) ("tu sector",
-"tus auditorías") y [`RopaPage.jsx`](../apps/web/src/pages/RopaPage.jsx).
+**Verificado sobre el HTML del build:** 0 apariciones de "Hablemos", "Cotiza",
+"cotización", "Trabajemos", "Iniciar conversación" y "Solicitar".
 
-📖 Reglas completas en [`05-contenido-y-seo.md`](05-contenido-y-seo.md).
+⚠️ **No se tocó ni un dato factual.** Cifras, proyectos, clientes y datos de
+contacto son exactamente los mismos de [`02-empresa.md`](02-empresa.md).
 
-⚠️ **No cambia ni un dato factual.** Cifras, proyectos, nombres y datos de
-contacto se quedan exactamente como están.
-
-📌 Al tocar un `<title>` o una `description`, recuerda que ese texto viaja ahora
-a tres sitios: el `<Helmet>`, el `<Seo>` de la misma página y el `llms.txt`
-generado. Cambia los dos primeros a la vez.
-
+📌 **Desviación deliberada de lo acordado en `05-contenido-y-seo.md`:** ese
+documento pedía dejar el formulario en "nombre, correo, mensaje y ya". Se
+conservaron los campos *Empresa* (opcional) y *Línea de interés* porque son
+útiles para clasificar la solicitud y no empujan a nada. Lo que se corrigió fue
+el tono de las etiquetas. Si el propietario prefiere el formulario mínimo, es un
+cambio de cinco minutos.
 ---
 
 ### P1-02 · `ScrollToTop` y los enlaces con ancla — `S` — ⚠️ *(sin confirmar)*
@@ -294,18 +305,14 @@ cerrar como ❌ descartada; si no, reabrir con el diagnóstico real.
 
 ---
 
-### P1-03 · Correo y teléfono no son clicables — `S` — ⬜
+### P1-03 · Correo y teléfono no son clicables — `S` — ✅ *(2026-09-01)*
 
-Para un sitio informativo, contactar es la única acción que importa, y hoy está
-rota en móvil:
-
-- [`ContactoPage.jsx`](../apps/web/src/pages/ContactoPage.jsx) muestra correo y
-  teléfono como **texto plano**
-- [`Footer.jsx`](../apps/web/src/components/Footer.jsx) es peor: el correo, el
-  teléfono y la ciudad son **enlaces internos a `/contacto`**
-
-Deben ser `mailto:comercial@cuartadimension.co` y `tel:+576017434400`.
-
+- [`ContactoPage.jsx`](../apps/web/src/pages/ContactoPage.jsx): el correo y el
+  teléfono del panel lateral son ahora `mailto:` y `tel:`.
+- [`Footer.jsx`](../apps/web/src/components/Footer.jsx): dejaron de ser enlaces
+  internos a `/contacto`. El correo y el teléfono son enlaces reales; la ciudad
+  es texto, porque no es un enlace a ninguna parte.
+- El nuevo cierre de la home repite los tres datos, también enlazados.
 ---
 
 ### P1-04 · Migrar `react-helmet` → `react-helmet-async` — `S` — ✅ *(2026-09-01)*
@@ -508,7 +515,10 @@ listados en [`02-empresa.md`](02-empresa.md):
 1. ~~**P0-00** — Git primero.~~ ✅
 2. ~~**P0-01** — Sin un build que funcione no se puede desplegar nada.~~ ✅
 3. ~~**P0-03 → P0-02 → P0-04** — El bloque de visibilidad.~~ ✅ / 🟡
-4. **P0-06** — Confirmar el hosting. Sin esto, P0-04 puede no servir de nada.
-5. **P0-05** — El riesgo legal sigue abierto mientras el formulario esté publicado.
-6. **P1-01** — La reescritura editorial. No toca ni un dato factual.
-7. El resto de P1, y luego P2 según haya tiempo.
+4. ~~**P1-01** — Reescritura editorial.~~ ✅
+5. ~~**P0-05** — Consentimiento en el formulario.~~ 🟡 *(falta la página de política)*
+6. **P0-06** — Confirmar el hosting. Sin esto, P0-04 puede no servir de nada.
+7. Cuando llegue el material del propietario: cerrar **P0-02** (logo y
+   `og-image`), **P0-05** (página de política) y **P1-06** (JSON-LD).
+8. Luego P2: empezar por **P2-04** (accesibilidad) y **P2-07** (bug de la barra
+   de progreso), que son de minutos.

@@ -222,3 +222,38 @@ deshacer sin querer y romper el SEO en silencio.
   `/nosotros` con `nosotros/index.html`. Ver **P0-06** y la sección de
   despliegue de [`03-arquitectura.md`](03-arquitectura.md).
 - `react-helmet` quedó obsoleto en favor de `react-helmet-async` (**P1-04**).
+
+---
+
+## ADR-009 · Dos enlaces de contacto por página, y ninguno más
+
+**Fecha:** 2026-09-01 · **Estado:** ✅ Aceptada
+
+**Contexto.** El **ADR-001** fijó que el sitio informa y no vende, pero era una
+regla de redacción. Al aplicarla (**P1-01**) hizo falta una regla estructural,
+porque los llamados a la acción se reproducían solos: había nueve en el cuerpo
+del sitio, y cuatro más escondidos en las tarjetas de proyecto, que enlazaban al
+formulario de contacto.
+
+**Decisión.** Cada página tiene **exactamente dos enlaces a `/contacto`**: uno en
+el navbar y uno en el footer, ambos etiquetados "Contacto". **Ningún otro
+elemento del cuerpo enlaza al formulario.**
+
+**Consecuencias.**
+
+- Un bloque de cierre informa o navega hacia otra parte del sitio; no invita a
+  contactar. Por eso `LineCTA` se convirtió en `LineClosing` y el cierre de la
+  home pasó a ser el bloque "Dónde operamos".
+- **Las tarjetas de proyecto enlazan a su línea de negocio**, no al formulario.
+  Un caso de éxito es información, no un anzuelo.
+- Los datos de contacto pueden aparecer las veces que hagan falta como
+  **información** — correo, teléfono y ciudad, enlazados con `mailto:` y `tel:`.
+  Eso no es un CTA: es un dato.
+- Antes de añadir un enlace nuevo, la pregunta no es qué dice sino **a dónde
+  lleva**.
+
+**Cómo comprobarlo.** Sobre el build, cada ruta debe dar exactamente 2:
+
+```bash
+grep -o 'href="/contacto"' dist/apps/web/nosotros/index.html | wc -l
+```

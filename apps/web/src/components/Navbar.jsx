@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 export const LOGO_URL = 'https://horizons-cdn.hostinger.com/50b7554a-aba0-4db0-bd2a-1f8c207f1ca5/4d86c6546c2d16b19fbf2212f5a51658.png';
 
@@ -61,10 +61,9 @@ export default function Navbar() {
                         )}
                         <Link
                             to="/contacto"
-                            className="group inline-flex items-center gap-1.5 border border-foreground/25 px-4 py-2 text-sm font-semibold tracking-wide transition-all duration-200 hover:border-primary hover:bg-primary hover:text-primary-foreground active:scale-[0.98]"
+                            className="inline-flex items-center border border-foreground/25 px-4 py-2 text-sm font-semibold tracking-wide transition-all duration-200 hover:border-primary hover:bg-primary hover:text-primary-foreground active:scale-[0.98]"
                         >
-                            Hablemos
-                            <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            Contacto
                         </Link>
                     </nav>
 

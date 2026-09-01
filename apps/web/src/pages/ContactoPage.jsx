@@ -6,7 +6,7 @@ import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
 import pocketbaseClient from '@/lib/pocketbaseClient';
 
-const initialForm = { name: '', company: '', email: '', line: 'calzado', message: '' };
+const initialForm = { name: '', company: '', email: '', line: 'calzado', message: '', consent: false };
 
 const inputClass =
     'w-full border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors duration-200 focus:border-primary';
@@ -17,12 +17,14 @@ export default function ContactoPage() {
     const [status, setStatus] = useState('idle');
 
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+    const setChecked = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }));
 
     const validate = () => {
         const next = {};
-        if (form.name.trim().length < 2) next.name = 'Cuéntanos tu nombre.';
+        if (form.name.trim().length < 2) next.name = 'Escribe tu nombre.';
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'Ingresa un correo válido.';
-        if (form.message.trim().length < 10) next.message = 'Cuéntanos un poco más sobre tu proyecto (mínimo 10 caracteres).';
+        if (form.message.trim().length < 10) next.message = 'El mensaje debe tener al menos 10 caracteres.';
+        if (!form.consent) next.consent = 'Necesitamos tu autorización para tratar estos datos.';
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -48,22 +50,22 @@ export default function ContactoPage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>Contacto — Hablemos de tu proyecto | 4D Cuarta Dimensión</title>
+                <title>Contacto — 4D Cuarta Dimensión ES S.A.S.</title>
                 <meta
                     name="description"
-                    content="Hablemos sobre el reto que quieres convertir en una oportunidad. Cotiza tu proyecto de calzado, ropa o dotaciones con 4D Cuarta Dimensión."
+                    content="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo comercial, teléfono y oficina principal en Bogotá D.C., Colombia."
                 />
             </Helmet>
             <Seo
-                title="Contacto — Hablemos de tu proyecto | 4D Cuarta Dimensión"
-                description="Hablemos sobre el reto que quieres convertir en una oportunidad. Cotiza tu proyecto de calzado, ropa o dotaciones con 4D Cuarta Dimensión."
+                title="Contacto — 4D Cuarta Dimensión ES S.A.S."
+                description="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo comercial, teléfono y oficina principal en Bogotá D.C., Colombia."
             />
 
             <section className="mx-auto max-w-6xl px-6 pb-20 pt-32 md:pt-40">
                 <Reveal>
                     <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Contacto</p>
                     <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-                        Hablemos sobre el reto que quieres convertir en una <span className="text-primary">oportunidad</span>.
+                        Dónde y cómo <span className="text-primary">encontrarnos</span>.
                     </h1>
                 </Reveal>
 
@@ -74,7 +76,7 @@ export default function ContactoPage() {
                                 <CheckCircle2 className="h-12 w-12 text-primary" />
                                 <h2 className="mt-6 text-2xl font-extrabold tracking-tight">Mensaje recibido.</h2>
                                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                                    Nuestro equipo comercial te contactará en las próximas 24 a 48 horas hábiles para hablar de tu proyecto.
+                                    Respondemos en 24 a 48 horas hábiles.
                                 </p>
                                 <button
                                     type="button"
@@ -92,12 +94,12 @@ export default function ContactoPage() {
                                 <div className="grid gap-6 sm:grid-cols-2">
                                     <div className="space-y-2">
                                         <label htmlFor="name" className="text-sm font-semibold">Nombre *</label>
-                                        <input id="name" type="text" value={form.name} onChange={set('name')} placeholder="Tu nombre" className={inputClass} autoComplete="name" />
+                                        <input id="name" type="text" value={form.name} onChange={set('name')} placeholder="Nombre y apellido" className={inputClass} autoComplete="name" />
                                         {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <label htmlFor="company" className="text-sm font-semibold">Empresa</label>
-                                        <input id="company" type="text" value={form.company} onChange={set('company')} placeholder="Nombre de tu empresa" className={inputClass} autoComplete="organization" />
+                                        <input id="company" type="text" value={form.company} onChange={set('company')} placeholder="Nombre de la empresa" className={inputClass} autoComplete="organization" />
                                     </div>
                                 </div>
                                 <div className="grid gap-6 sm:grid-cols-2">
@@ -117,16 +119,38 @@ export default function ContactoPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="message" className="text-sm font-semibold">Tu proyecto *</label>
+                                    <label htmlFor="message" className="text-sm font-semibold">Mensaje *</label>
                                     <textarea
                                         id="message"
                                         rows={6}
                                         value={form.message}
                                         onChange={set('message')}
-                                        placeholder="Qué quieres desarrollar, volúmenes estimados, países de destino, tiempos…"
+                                        placeholder="Escribe tu mensaje."
                                         className={`${inputClass} resize-y`}
                                     />
                                     {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
+                                </div>
+                                <div className="space-y-3 border-t border-border/60 pt-6">
+                                    <label htmlFor="consent" className="flex cursor-pointer items-start gap-3">
+                                        <input
+                                            id="consent"
+                                            type="checkbox"
+                                            checked={form.consent}
+                                            onChange={setChecked('consent')}
+                                            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                                        />
+                                        <span className="text-sm leading-relaxed text-muted-foreground">
+                                            Autorizo a <strong className="font-semibold text-foreground">4D Cuarta Dimensión ES S.A.S.</strong> a tratar los datos personales de este formulario con la única finalidad de responder a mi solicitud. *
+                                        </span>
+                                    </label>
+                                    {errors.consent && <p className="text-xs text-destructive">{errors.consent}</p>}
+                                    <p className="text-xs leading-relaxed text-muted-foreground/80">
+                                        Los datos no se comparten con terceros ni se usan con fines publicitarios. Puedes consultarlos, actualizarlos o solicitar su eliminación en cualquier momento escribiendo a{' '}
+                                        <a href="mailto:comercial@cuartadimension.co" className="underline transition-colors duration-200 hover:text-primary">
+                                            comercial@cuartadimension.co
+                                        </a>
+                                        . Ley 1581 de 2012.
+                                    </p>
                                 </div>
                                 {status === 'error' && (
                                     <p className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -153,14 +177,18 @@ export default function ContactoPage() {
                                     <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Comercial</p>
-                                        <p className="text-muted-foreground">comercial@cuartadimension.co</p>
+                                        <a href="mailto:comercial@cuartadimension.co" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
+                                            comercial@cuartadimension.co
+                                        </a>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Teléfono</p>
-                                        <p className="text-muted-foreground">+57 (601) 743 4400</p>
+                                        <a href="tel:+576017434400" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
+                                            +57 (601) 743 4400
+                                        </a>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
@@ -179,7 +207,7 @@ export default function ContactoPage() {
                                 </li>
                             </ul>
                             <p className="border-t border-border/60 pt-6 text-xs leading-relaxed text-muted-foreground">
-                                Respondemos en 24 a 48 horas hábiles. Si tu proyecto tiene una fecha límite, cuéntanosla en el mensaje.
+                                Respondemos en 24 a 48 horas hábiles.
                             </p>
                         </aside>
                     </Reveal>

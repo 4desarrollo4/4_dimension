@@ -6,7 +6,9 @@ import Reveal from './Reveal';
 export default function ProjectCard({ project, delay = 0 }) {
     return (
         <Reveal delay={delay}>
-            <Link to="/contacto" className="group block">
+            {/* La tarjeta lleva a su línea de negocio, no al formulario: es
+                información sobre lo que hacemos, no un CTA (ADR-001). */}
+            <Link to={`/${project.lineId}`} className="group block">
                 <div className="overflow-hidden border border-border/70 bg-card">
                     <div className="aspect-[4/3] overflow-hidden">
                         <img
