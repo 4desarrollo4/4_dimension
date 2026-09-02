@@ -57,7 +57,7 @@ onRecordAfterCreateSuccess((e) => {
 		// variable de entorno CONTACT_NOTIFY_TO.
 		// OJO: no es el correo público del sitio (comercial@cuartadimension.co).
 		// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
-		const destino = $os.getenv('CONTACT_NOTIFY_TO') || 'rodriguezsilvamilton5@gmail.com';
+		const destino = $os.getenv('CONTACT_NOTIFY_TO') || 'info@4dimensionsas.com';
 
 		// Etiquetas legibles: en la base, `line` se guarda como identificador.
 		const LINEAS = {
