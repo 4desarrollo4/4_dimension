@@ -207,15 +207,15 @@ export default function ContactoPage() {
                                     {errors.consent && <p className="text-xs text-destructive">{errors.consent}</p>}
                                     <p className="text-xs leading-relaxed text-muted-foreground/80">
                                         Los datos no se comparten con terceros ni se usan con fines publicitarios. Puedes consultarlos, actualizarlos o solicitar su eliminación en cualquier momento escribiendo a{' '}
-                                        <a href="mailto:comercial@cuartadimension.co" className="underline transition-colors duration-200 hover:text-primary">
-                                            comercial@cuartadimension.co
+                                        <a href="mailto:comercial@4dimensionsas.com" className="underline transition-colors duration-200 hover:text-primary">
+                                            comercial@4dimensionsas.com
                                         </a>
                                         . Ley 1581 de 2012.
                                     </p>
                                 </div>
                                 {status === 'error' && (
                                     <p className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                                        No pudimos enviar tu mensaje. Inténtalo de nuevo o escríbenos directamente a comercial@cuartadimension.co.
+                                        No pudimos enviar tu mensaje. Inténtalo de nuevo o escríbenos directamente a comercial@4dimensionsas.com.
                                     </p>
                                 )}
                                 <button
@@ -238,8 +238,8 @@ export default function ContactoPage() {
                                     <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Comercial</p>
-                                        <a href="mailto:comercial@cuartadimension.co" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
-                                            comercial@cuartadimension.co
+                                        <a href="mailto:comercial@4dimensionsas.com" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
+                                            comercial@4dimensionsas.com
                                         </a>
                                     </div>
                                 </li>

@@ -55,7 +55,7 @@ onRecordAfterCreateSuccess((e) => {
 
 		// A dónde llegan los avisos. Se puede cambiar sin tocar código con la
 		// variable de entorno CONTACT_NOTIFY_TO.
-		// OJO: no es el correo público del sitio (comercial@cuartadimension.co).
+		// OJO: no es el correo público del sitio (comercial@4dimensionsas.com).
 		// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
 		const destino = $os.getenv('CONTACT_NOTIFY_TO') || 'info@4dimensionsas.com';
 

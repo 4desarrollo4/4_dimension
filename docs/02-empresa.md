@@ -145,7 +145,7 @@ Red de aliados de manufactura en **Colombia, Asia y Europa**.
 
 | Canal | Valor |
 |---|---|
-| **Correo comercial** | `comercial@cuartadimension.co` |
+| **Correo comercial** | `comercial@4dimensionsas.com` *(actualizado el 2026-09-02 al confirmarse el dominio; antes `@cuartadimension.co`)* |
 | **Teléfono** | `+57 (601) 743 4400` |
 | **Oficina** | Bogotá D.C., Colombia |
 | **Tiempo de respuesta declarado** | 24 a 48 horas hábiles |
