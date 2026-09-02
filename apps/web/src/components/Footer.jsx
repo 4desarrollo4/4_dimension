@@ -43,7 +43,7 @@ export default function Footer() {
     return (
         <footer className="border-t border-border/70 bg-background">
             <div className="mx-auto max-w-6xl px-6 py-16">
-                <div className="grid gap-12 md:grid-cols-[1.2fr_repeat(4,1fr)]">
+                <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_repeat(4,1fr)] lg:gap-12">
                     <div>
                         <Link to="/" className="flex items-center gap-3">
                             <img src={LOGO_URL} alt="Logo 4D Cuarta Dimensión" className="h-10 w-10 rounded-full" />
@@ -56,19 +56,19 @@ export default function Footer() {
                     {columns.map((col) => (
                         <div key={col.title}>
                             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{col.title}</h3>
-                            <ul className="mt-4 space-y-2.5">
+                            <ul className="mt-4 space-y-1">
                                 {col.items.map((item) => (
                                     <li key={item.label}>
                                         {item.to ? (
-                                            <Link to={item.to} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
+                                            <Link to={item.to} className="inline-block py-1 text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
                                                 {item.label}
                                             </Link>
                                         ) : item.href ? (
-                                            <a href={item.href} className="text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
+                                            <a href={item.href} className="inline-block break-words py-1 text-sm text-foreground/80 transition-colors duration-200 hover:text-primary">
                                                 {item.label}
                                             </a>
                                         ) : (
-                                            <span className="text-sm text-foreground/80">{item.label}</span>
+                                            <span className="inline-block py-1 text-sm text-foreground/80">{item.label}</span>
                                         )}
                                     </li>
                                 ))}

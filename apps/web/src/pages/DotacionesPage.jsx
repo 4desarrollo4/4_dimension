@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import JsonLd from '../components/JsonLd';
 import PageTransition from '../components/PageTransition';
 import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineClosing } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
@@ -27,16 +28,17 @@ export default function DotacionesPage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>Dotaciones — Uniformes corporativos e industriales | 4D Cuarta Dimensión</title>
+                <title>Dotaciones — Uniformes y EPP | 4D Cuarta Dimensión</title>
                 <meta
                     name="description"
                     content="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
                 />
             </Helmet>
             <Seo
-                title="Dotaciones — Uniformes corporativos e industriales | 4D Cuarta Dimensión"
+                title="Dotaciones — Uniformes y EPP | 4D Cuarta Dimensión"
                 description="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
             />
+            <JsonLd migas={[{ nombre: 'Dotaciones', ruta: '/dotaciones' }]} />
             <LineHero
                 index="03"
                 title="Dotaciones"

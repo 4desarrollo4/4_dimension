@@ -69,10 +69,14 @@ function buildDocument({ html, helmet }) {
 	out = out.replace(/<title>[\s\S]*?<\/title>/i, '');
 	out = out.replace(/<meta\s+name="description"[^>]*>/i, '');
 
+	// No olvides ninguna categoría: el JSON-LD viaja en `script`, y sin esa
+	// línea los datos estructurados no llegan nunca al HTML servido — que es
+	// justo lo único que lee Google cuando no ejecuta JavaScript.
 	const head = [
 		helmet?.title?.toString(),
 		helmet?.meta?.toString(),
 		helmet?.link?.toString(),
+		helmet?.script?.toString(),
 	].filter(Boolean).join('\n\t\t');
 
 	out = out.replace('</head>', `\t${head}\n\t</head>`);

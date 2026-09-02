@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import JsonLd from '../components/JsonLd';
 import { motion, useReducedMotion, useScroll } from 'framer-motion';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import Reveal from '../components/Reveal';
@@ -74,16 +75,17 @@ export default function HomePage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>4D Cuarta Dimensión — Diseño y desarrollo de producto: calzado, ropa y dotaciones</title>
+                <title>4D Cuarta Dimensión | Diseño y desarrollo de producto</title>
                 <meta
                     name="description"
-                    content="4D Cuarta Dimensión ES S.A.S. es una comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
+                    content="Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
                 />
             </Helmet>
             <Seo
-                title="4D Cuarta Dimensión — Diseño y desarrollo de producto: calzado, ropa y dotaciones"
-                description="4D Cuarta Dimensión ES S.A.S. es una comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
+                title="4D Cuarta Dimensión | Diseño y desarrollo de producto"
+                description="Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
             />
+            <JsonLd />
 
             {!reduceMotion && <motion.div className="read-progress" style={{ scaleX: pageProgress }} aria-hidden="true" />}
 

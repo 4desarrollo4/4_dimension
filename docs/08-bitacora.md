@@ -34,6 +34,87 @@
 
 ---
 
+## 2026-09-02 · Responsive en todas las dimensiones y SEO técnico
+
+**Qué se hizo**
+
+Auditoría de comportamiento responsive en cuatro anchos y cierre del SEO
+técnico que quedaba pendiente.
+
+**Responsive: un fallo real, en el punto exacto**
+
+Se auditó `/`, `/contacto`, `/calzado` y `/nosotros` a **360, 768, 1024 y
+1440 px**, buscando desborde horizontal, texto por debajo de 12 px y áreas de
+toque pequeñas. Un solo fallo, pero real:
+
+A **768 px exactos** la página desbordaba — `scrollWidth` 790 sobre 768. La
+rejilla del footer usaba `md:grid-cols-[1.2fr_repeat(4,1fr)]` y `md` en Tailwind
+arranca justo en 768: cinco columnas en 768 px dejan ~120 px por columna, y
+`comercial@cuartadimension.co` no cabe en 120 px.
+
+Resuelto llevando las cinco columnas a `lg`, con dos columnas intermedias en
+`sm`. De paso, los enlaces del footer medían **19 px** de alto, por debajo del
+mínimo de 24 px de la WCAG 2.5.8.
+
+**Verificado tras el arreglo:** sin desborde en ninguna combinación de página y
+ancho, ningún texto bajo 12 px y ningún enlace del footer bajo 24 px.
+
+*(Nota: el marquee aparece como "desbordado" en cualquier auditoría automática.
+Es un ticker dentro de `overflow-hidden`: desborda a propósito. Se excluyó del
+análisis para no perseguir un falso positivo.)*
+
+**SEO: cuatro problemas medidos y corregidos**
+
+| Problema | Antes | Ahora |
+|---|---|---|
+| Títulos demasiado largos | 4 de 6 pasaban de 60 caracteres (el peor, 81) | los 6 entre 40 y 53 |
+| Descripción del home | 170 caracteres, Google la cortaba | 133 |
+| Datos estructurados | ninguno | `Organization` + `WebSite` en las 6 rutas, más `BreadcrumbList` en las 5 internas |
+| `meta robots` | ausente | `index, follow, max-image-preview:large, max-snippet:-1` |
+
+`max-image-preview:large` es lo que permite que Google muestre la imagen grande
+en resultados y en Discover; sin esa directiva se queda en miniatura.
+
+**🐞 El bug que casi deja el JSON-LD en nada**
+
+Tras añadir los datos estructurados, el HTML del build seguía sin ellos.
+`tools/prerender.js` inyectaba `helmet.title`, `helmet.meta` y `helmet.link`…
+pero **no `helmet.script`**. El JSON-LD se generaba correctamente en React y
+**nunca llegaba al HTML servido**, que es exactamente lo único que lee Google
+cuando no ejecuta JavaScript. Habría pasado por bueno sin comprobarlo sobre el
+build.
+
+Corregido, y con un comentario en el sitio para que no vuelva a pasar al añadir
+otra categoría de etiqueta.
+
+**Dónde vive el JSON-LD y por qué**
+
+En su propio componente, [`JsonLd.jsx`](../apps/web/src/components/JsonLd.jsx),
+no dentro del `<Helmet>` de cada página: `tools/generate-llms.js` lee el primer
+`<Helmet>` del archivo con expresiones regulares, y un bloque JSON ahí dentro
+podría romper la generación de `llms.txt`.
+
+Solo lleva datos verificados de `02-empresa.md`. Faltan NIT, dirección exacta,
+año de fundación y redes: los huecos están marcados en el componente. **Un dato
+inventado en JSON-LD no es un adorno: es una afirmación que Google publica como
+oficial.**
+
+**Estado del backlog**
+
+P0: 4 ✅, 3 🟡⚠️, 1 ⬜. P1: 3 ✅, 1 🟡, 1 ⚠️, 1 ⬜. P2: 8 ✅, 5 ⬜.
+
+**Decisiones tomadas**
+
+Ninguna nueva.
+
+**Dónde quedó / qué sigue**
+
+Sin cambios de contenido factual. Sigue pendiente **P0-06** (hosting),
+**P0-07** (verificar el backend del formulario al desplegar) y el material del
+propietario: logo vectorial, dominio, NIT y dirección.
+
+---
+
 ## 2026-09-01 · Rediseño de composición
 
 **Por qué**

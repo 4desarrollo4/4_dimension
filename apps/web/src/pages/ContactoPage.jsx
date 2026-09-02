@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import JsonLd from '../components/JsonLd';
 import { CheckCircle2, Loader2, Mail, MapPin, Phone, Globe } from 'lucide-react';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
@@ -89,6 +90,7 @@ export default function ContactoPage() {
                 title="Contacto — 4D Cuarta Dimensión ES S.A.S."
                 description="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo comercial, teléfono y oficina principal en Bogotá D.C., Colombia."
             />
+            <JsonLd migas={[{ nombre: 'Contacto', ruta: '/contacto' }]} />
 
             <section className="mx-auto max-w-6xl px-6 pb-20 pt-32 md:pt-40">
                 <Reveal>

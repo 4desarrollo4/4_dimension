@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import JsonLd from '../components/JsonLd';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
 import { IMAGES } from '../data/projects';
@@ -26,6 +27,7 @@ export default function NosotrosPage() {
                 title="Nosotros — 4D Cuarta Dimensión ES S.A.S."
                 description="Conoce 4D Cuarta Dimensión ES S.A.S.: comercializadora internacional de diseño y desarrollo de producto en calzado, ropa y dotaciones."
             />
+            <JsonLd migas={[{ nombre: 'Nosotros', ruta: '/nosotros' }]} />
 
             <section className="mx-auto max-w-6xl px-6 pb-16 pt-32 md:pt-40">
                 <Reveal>

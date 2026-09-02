@@ -1,6 +1,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import JsonLd from '../components/JsonLd';
 import PageTransition from '../components/PageTransition';
 import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineClosing } from '../components/ProductLine';
 import { IMAGES, projects } from '../data/projects';
@@ -25,16 +26,17 @@ export default function CalzadoPage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>Calzado — Diseño y desarrollo de producto | 4D Cuarta Dimensión</title>
+                <title>Calzado — Diseño y desarrollo | 4D Cuarta Dimensión</title>
                 <meta
                     name="description"
                     content="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
                 />
             </Helmet>
             <Seo
-                title="Calzado — Diseño y desarrollo de producto | 4D Cuarta Dimensión"
+                title="Calzado — Diseño y desarrollo | 4D Cuarta Dimensión"
                 description="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
             />
+            <JsonLd migas={[{ nombre: 'Calzado', ruta: '/calzado' }]} />
             <LineHero
                 index="01"
                 title="Calzado"

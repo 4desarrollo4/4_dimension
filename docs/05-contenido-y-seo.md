@@ -75,7 +75,7 @@ Hoy vende en 2ª persona. Debe describir en 1ª:
 
 # Parte 2 · SEO
 
-## Estado actual: 8/10 — era 3/10 el 2026-09-01
+## Estado actual: 9/10 — era 3/10 el 2026-09-01
 
 El bloque de visibilidad (**P0-02**, **P0-03**, **P0-04**) se resolvió el
 2026-09-01. Lo que queda son dos cosas que dependen del propietario y una
@@ -96,7 +96,10 @@ verificación de hosting.
 | `sitemap.xml` | ✅ generado en el build, 6 rutas |
 | `llms.txt` | ✅ generado (nunca había corrido en Windows) |
 | Prerender de las 6 rutas | ✅ |
-| JSON-LD `Organization` | ⛔ pendiente — **P1-06** |
+| JSON-LD | ✅ `Organization` + `WebSite` + `BreadcrumbList` en las 6 rutas |
+| `meta robots` | ✅ `max-image-preview:large`, para que Google muestre imagen grande |
+| Longitud de títulos | ✅ los 6 por debajo de 60 caracteres |
+| Longitud de descripciones | ✅ las 6 entre 120 y 160 caracteres |
 | `lang="es"` | ✅ |
 | Jerarquía de encabezados | ✅ un H1 por página, H2/H3 coherentes |
 | `alt` en imágenes | ✅ descriptivos, en español |
@@ -106,8 +109,8 @@ verificación de hosting.
 1. **`og-image.jpg` (1200×630).** Al compartir un enlace ya salen título y
    descripción, pero **no sale imagen**. Es lo que más se nota en WhatsApp y
    LinkedIn. Necesita el logo oficial. → **P0-02**
-2. **JSON-LD `Organization`.** Es lo que alimenta el panel de conocimiento de
-   Google. Necesita NIT, dirección y redes. → **P1-06**
+2. **Completar el JSON-LD.** Ya se emite con lo verificado; faltan NIT,
+   dirección exacta, año de fundación y redes sociales. → **P1-06**
 3. **Confirmar la configuración de rutas del hosting.** Si el servidor reescribe
    todo a `/index.html`, todo lo anterior se pierde. → **P0-06**
 

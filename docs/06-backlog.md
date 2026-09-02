@@ -379,20 +379,33 @@ PocketBase para Windows.
 
 ---
 
-### P1-06 · JSON-LD `Organization` en la home — `M` — ⛔
+### P1-06 · JSON-LD `Organization` en la home — `M` — 🟡 *(parcial, 2026-09-02)*
 
-Es lo que alimenta el panel de conocimiento de Google — literalmente, lo que hace
-que "te conozcan" cuando buscan la empresa por su nombre.
+**Hecho.** Las 6 rutas emiten un grafo JSON-LD válido, verificado sobre el HTML
+del build:
 
-Datos a incluir, todos desde [`02-empresa.md`](02-empresa.md): razón social,
-logo, dirección, teléfono, correo, área de servicio y `sameAs` con las redes.
+| Ruta | Contenido |
+|---|---|
+| `/` | `Organization` + `WebSite` |
+| Las otras 5 | `Organization` + `WebSite` + `BreadcrumbList` |
 
-Ahora es fácil: el prerender ya inyecta lo que declare `<Helmet>`, así que basta
-con añadir el `<script type="application/ld+json">` en la home.
+📁 [`src/components/JsonLd.jsx`](../apps/web/src/components/JsonLd.jsx)
 
-⛔ Bloqueado en parte: faltan NIT, dirección exacta, año de fundación y perfiles
-de redes sociales.
+Vive en su propio componente, no dentro del `<Helmet>` de cada página, porque
+`tools/generate-llms.js` lee el **primer** `<Helmet>` del archivo con
+expresiones regulares y un bloque JSON ahí dentro podría romperlo.
 
+🐞 **Bug encontrado al hacerlo:** `tools/prerender.js` inyectaba `title`, `meta`
+y `link` de Helmet, pero **no `script`**. El JSON-LD se generaba y no llegaba
+nunca al HTML servido — es decir, Google no lo habría visto jamás. Corregido.
+
+**Falta** (⛔ depende del propietario): `taxID` (NIT), `foundingDate`,
+`streetAddress` y `sameAs` con las redes sociales. Los huecos están marcados en
+el propio componente.
+
+⚠️ **Regla:** en JSON-LD solo entran datos verificados de
+[`02-empresa.md`](02-empresa.md). Un dato inventado aquí no es un adorno: es
+una afirmación que Google publica como oficial.
 ---
 
 # P2 · Solidez, rendimiento y pulido
@@ -533,6 +546,26 @@ un `index.html` cacheado, puede acabar apuntando a un bundle que ya no existe.
 
 Resuelto con `--emptyOutDir` en `build:client`. Verificado: tras un build
 limpio quedan exactamente **dos** archivos en `assets/`.
+
+---
+
+### P2-13 · Desborde horizontal a 768 px — `S` — ✅ *(2026-09-02)*
+
+Auditado el sitio a 360, 768, 1024 y 1440 px en las cuatro páginas. Un solo
+fallo real: a **768 px exactos** la página desbordaba (`scrollWidth` 790).
+
+Causa: la rejilla del footer era `md:grid-cols-[1.2fr_repeat(4,1fr)]`, y `md`
+en Tailwind empieza justo en 768. Con cinco columnas en 768 px, la columna de
+contacto recibía ~120 px y `comercial@cuartadimension.co` no cabe.
+
+Resuelto pasando las cinco columnas a `lg` (1024 px), con dos columnas
+intermedias en `sm`, y permitiendo que el correo se parta.
+
+De paso: los enlaces del footer medían **19 px** de alto, por debajo del mínimo
+de 24 px que pide la WCAG 2.5.8. Ahora pasan.
+
+**Verificado:** sin desborde en 360/768/1024/1440 en `/`, `/contacto`,
+`/calzado` y `/nosotros`.
 
 ---
 

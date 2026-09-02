@@ -97,7 +97,7 @@ Sirve el build en `:3000` (el mismo puerto que `dev`, así que no los levantes a
 
 ---
 
-## Estado actual (2026-09-01)
+## Estado actual (2026-09-02)
 
 El sitio **ya cumple su objetivo**: informa, se puede compartir y se puede
 indexar. Lo que queda depende sobre todo de material que debe aportar el
@@ -107,7 +107,7 @@ propietario.
 |---|---|
 | Diseño visual | 8.5/10 — lo más sólido. **No lo rediseñes** |
 | Arquitectura de información | 8/10 |
-| SEO y compartibilidad | **8/10** *(era 2/10)* — falta `og-image.jpg` y JSON-LD |
+| SEO y compartibilidad | **9/10** *(era 2/10)* — JSON-LD y meta listos; falta `og-image.jpg` |
 | Alineación con "informar, no vender" | **9/10** *(era 3/10)* |
 | Accesibilidad | **9/10** *(era 6/10)* — landmark, skip link, foco visible, menú móvil accesible |
 
