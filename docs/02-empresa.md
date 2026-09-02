@@ -149,7 +149,8 @@ Red de aliados de manufactura en **Colombia, Asia y Europa**.
 | **Teléfono** | `+57 (601) 743 4400` |
 | **Oficina** | Bogotá D.C., Colombia |
 | **Tiempo de respuesta declarado** | 24 a 48 horas hábiles |
-| **Dominio** | `cuartadimension.co` *(inferido del correo — confirmar dominio web definitivo)* |
+| **Buzón de avisos del formulario** | `info@4dimensionsas.com` *(confirmado 2026-09-02)* — no se publica en el sitio |
+| **Dominio** | `4dimensionsas.com` ✅ *(confirmado por el propietario el 2026-09-02)* |
 | **Dirección exacta** | ⬜ *pendiente — solicitar al propietario* |
 | **LinkedIn** | ⬜ *pendiente* |
 | **Instagram** | ⬜ *pendiente* |

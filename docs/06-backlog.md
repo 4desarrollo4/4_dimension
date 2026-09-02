@@ -93,7 +93,7 @@ Además, quedarse sin páginas con `<Helmet>` ya no tumba el build: avisa y sigu
 | `robots.txt` | ✅ lo genera `tools/prerender.js` en `dist/` |
 | `sitemap.xml` | ✅ lo genera `tools/prerender.js` en `dist/` |
 | `favicon.ico` + `apple-touch-icon.png` | ⛔ necesitan el logo oficial |
-| `og-image.jpg` (1200×630) | ⛔ necesita el logo oficial y el dominio confirmado |
+| `og-image.jpg` (1200×630) | ⛔ solo falta el **logo oficial**; el dominio ya está confirmado |
 
 `robots.txt` y `sitemap.xml` **no se escriben a mano**: salen de la lista de
 rutas y del dominio de [`src/lib/site.js`](../apps/web/src/lib/site.js), para que
@@ -604,7 +604,7 @@ listados en [`02-empresa.md`](02-empresa.md):
 | Dato que falta | Bloquea |
 |---|---|
 | Logo en vectorial (SVG) | P0-02 |
-| Dominio definitivo confirmado | P0-02, P0-06 |
+| ~~Dominio definitivo~~ ✅ `4dimensionsas.com`, confirmado el 2026-09-02 | — |
 | NIT, dirección exacta, responsable de datos | P0-05, P1-06 |
 | Año de fundación | P1-06 |
 | Perfiles de redes sociales | P1-06 |
