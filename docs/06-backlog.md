@@ -213,7 +213,12 @@ solo se comprobó la sintaxis.
    npm run migrations:up --prefix apps/pocketbase
    ```
 2. **Mandar un mensaje de prueba** desde `/contacto` y comprobar que llega el
-   aviso a `comercial@cuartadimension.co`.
+   aviso a **`rodriguezsilvamilton5@gmail.com`** (destino de los avisos, fijado
+   por el propietario el 2026-09-02). Se puede cambiar sin tocar código con la
+   variable de entorno `CONTACT_NOTIFY_TO`.
+
+   ⚠️ No confundir con `comercial@cuartadimension.co`, que sigue siendo el
+   correo **público** del sitio y sale de [`02-empresa.md`](02-empresa.md).
 3. **Probar el botón de WhatsApp** del correo.
 4. **Comprobar la trampa antibots**: un POST directo a la API con el campo
    `website` relleno debe ser rechazado.

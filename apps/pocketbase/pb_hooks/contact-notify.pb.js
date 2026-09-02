@@ -14,7 +14,12 @@
   Ver docs/06-backlog.md → P0-07.
 */
 
-const DESTINO_AVISOS = 'comercial@cuartadimension.co';
+// A donde llegan los avisos de nuevas solicitudes.
+// Se puede cambiar sin tocar codigo con la variable de entorno
+// CONTACT_NOTIFY_TO; si no esta definida, se usa este valor.
+// OJO: no es el correo publico del sitio (comercial@cuartadimension.co).
+// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
+const DESTINO_AVISOS = $os.getenv('CONTACT_NOTIFY_TO') || 'rodriguezsilvamilton5@gmail.com';
 
 // Etiquetas legibles: en la base, `line` se guarda como identificador.
 const LINEAS = {
