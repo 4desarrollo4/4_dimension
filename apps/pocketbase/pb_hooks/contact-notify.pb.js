@@ -123,7 +123,7 @@ onRecordAfterCreateSuccess((e) => {
 					algo antes, puedes escribirnos a
 					<a href="mailto:info@4dimensionsas.com" style="color:#3d6bff;text-decoration:none;">info@4dimensionsas.com</a>
 					o llamarnos al
-					<a href="tel:+576017434400" style="color:#f2f4f8;text-decoration:none;">+57 (601) 743 4400</a>.
+					<a href="tel:+573165775539" style="color:#f2f4f8;text-decoration:none;">+57 316 577 5539</a>.
 				</p>
 
 				<p style="margin:0 0 4px;font-size:15px;">Gracias por escribirnos.</p>

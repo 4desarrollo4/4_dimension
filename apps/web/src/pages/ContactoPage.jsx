@@ -83,12 +83,12 @@ export default function ContactoPage() {
                 <title>Contacto — 4D Cuarta Dimensión ES S.A.S.</title>
                 <meta
                     name="description"
-                    content="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo comercial, teléfono y oficina principal en Bogotá D.C., Colombia."
+                    content="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo, teléfono y oficina principal en la Cra. 34a #27a-22 sur, Bogotá D.C."
                 />
             </Helmet>
             <Seo
                 title="Contacto — 4D Cuarta Dimensión ES S.A.S."
-                description="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo comercial, teléfono y oficina principal en Bogotá D.C., Colombia."
+                description="Datos de contacto de 4D Cuarta Dimensión ES S.A.S.: correo, teléfono y oficina principal en la Cra. 34a #27a-22 sur, Bogotá D.C."
             />
             <JsonLd migas={[{ nombre: 'Contacto', ruta: '/contacto' }]} />
 
@@ -247,8 +247,8 @@ export default function ContactoPage() {
                                     <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Teléfono</p>
-                                        <a href="tel:+576017434400" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
-                                            +57 (601) 743 4400
+                                        <a href="tel:+573165775539" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
+                                            +57 316 577 5539
                                         </a>
                                     </div>
                                 </li>
@@ -256,7 +256,7 @@ export default function ContactoPage() {
                                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Oficina principal</p>
-                                        <p className="text-muted-foreground">Bogotá D.C., Colombia</p>
+                                        <p className="text-muted-foreground">Cra. 34a #27a-22 sur<br />Bogotá D.C., Colombia</p>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">

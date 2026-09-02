@@ -146,7 +146,7 @@ Red de aliados de manufactura en **Colombia, Asia y Europa**.
 | Canal | Valor |
 |---|---|
 | **Correo institucional** | `info@4dimensionsas.com` ✅ *(confirmado 2026-09-02. Es el único buzón: `comercial@` NO existe en ningún dominio)* |
-| **Teléfono** | `+57 (601) 743 4400` |
+| **Teléfono** | `+57 316 577 5539` ✅ *(corregido el 2026-09-02; el anterior `+57 (601) 743 4400` era erróneo)* |
 | **Oficina** | Bogotá D.C., Colombia |
 | **Tiempo de respuesta declarado** | 24 a 48 horas hábiles |
 | **Buzón de avisos del formulario** | `info@4dimensionsas.com` *(confirmado 2026-09-02)* — no se publica en el sitio |

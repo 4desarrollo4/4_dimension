@@ -373,14 +373,14 @@ export default function HomePage() {
                             <div className="bg-background p-8 transition-colors duration-300 hover:bg-card/60">
                                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Teléfono</dt>
                                 <dd className="mt-3">
-                                    <a href="tel:+576017434400" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
-                                        +57 (601) 743 4400
+                                    <a href="tel:+573165775539" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
+                                        +57 316 577 5539
                                     </a>
                                 </dd>
                             </div>
                             <div className="bg-background p-8">
                                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Oficina</dt>
-                                <dd className="mt-3 text-sm text-foreground">Bogotá D.C., Colombia</dd>
+                                <dd className="mt-3 text-sm text-foreground">Cra. 34a #27a-22 sur<br />Bogotá D.C., Colombia</dd>
                             </div>
                         </dl>
                     </Reveal>

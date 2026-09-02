@@ -34,9 +34,10 @@ const organizacion = {
     description:
         'Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales.',
     email: 'info@4dimensionsas.com',
-    telephone: '+57-601-743-4400',
+    telephone: '+57-316-577-5539',
     address: {
         '@type': 'PostalAddress',
+        streetAddress: 'Cra. 34a #27a-22 sur',
         addressLocality: 'Bogotá D.C.',
         addressCountry: 'CO',
     },
@@ -50,7 +51,7 @@ const organizacion = {
         '@type': 'ContactPoint',
         contactType: 'sales',
         email: 'info@4dimensionsas.com',
-        telephone: '+57-601-743-4400',
+        telephone: '+57-316-577-5539',
         areaServed: ['CO', 'US', 'EU'],
         availableLanguage: ['Spanish'],
     },

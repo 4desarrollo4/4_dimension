@@ -33,7 +33,8 @@ const columns = [
         title: 'Contacto',
         items: [
             { label: 'info@4dimensionsas.com', href: 'mailto:info@4dimensionsas.com' },
-            { label: '+57 (601) 743 4400', href: 'tel:+576017434400' },
+            { label: '+57 316 577 5539', href: 'tel:+573165775539' },
+            { label: 'Cra. 34a #27a-22 sur' },
             { label: 'Bogotá D.C., Colombia' },
         ],
     },
