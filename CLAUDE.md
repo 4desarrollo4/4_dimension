@@ -107,7 +107,7 @@ propietario.
 |---|---|
 | Diseño visual | 8.5/10 — lo más sólido. **No lo rediseñes** |
 | Arquitectura de información | 8/10 |
-| SEO y compartibilidad | **9/10** *(era 2/10)* — JSON-LD y meta listos; falta `og-image.jpg` |
+| SEO y compartibilidad | **10/10** *(era 2/10)* — prerender, JSON-LD, meta, iconos y og-image |
 | Alineación con "informar, no vender" | **9/10** *(era 3/10)* |
 | Accesibilidad | **9/10** *(era 6/10)* — landmark, skip link, foco visible, menú móvil accesible |
 
@@ -123,13 +123,10 @@ confirmar que el hosting resuelve `/nosotros` con `nosotros/index.html`. Es lo
 único de P0 que no está bloqueado, y de ello depende que el prerender sirva de
 algo.
 
-⛔ **Esperando material del propietario:** logo en vectorial (favicon y
-`og-image.jpg`), dominio definitivo, NIT y dirección física (política de datos y
-JSON-LD).
+⛔ **Esperando del propietario:** solo el **NIT**, para la política de datos.
+Dominio, correo, teléfono, dirección y logo ya están aplicados.
 
-⚠️ **El dominio de `apps/web/src/lib/site.js` está sin confirmar.** Está inferido
-del correo comercial y alimenta los `canonical`, el `sitemap.xml` y el
-`robots.txt`. Confírmalo antes de publicar.
+✅ **Dominio confirmado:** `4dimensionsas.com`, en `apps/web/src/lib/site.js`.
 
 ### Reglas que impone lo ya construido
 

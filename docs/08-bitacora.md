@@ -34,6 +34,79 @@
 
 ---
 
+## 2026-09-02 · Datos reales, logo propio y la imagen para compartir
+
+**Qué aportó el propietario**
+
+| Dato | Valor |
+|---|---|
+| Dominio | `4dimensionsas.com` |
+| Buzón institucional | `info@4dimensionsas.com` — `comercial@` **no existe** |
+| Teléfono | `+57 316 577 5539` (el publicado, `+57 (601) 743 4400`, era erróneo) |
+| Dirección | `Cra. 34a #27a-22 sur, Bogotá D.C.` |
+| Logo | el archivo real |
+
+Todo entró primero en [`02-empresa.md`](02-empresa.md) y después al código,
+como manda el [ADR-002](07-decisiones.md).
+
+**El correo, resuelto**
+
+El buzón está en **Hostinger**, no en Google. Ese era el origen del `535`: se
+autenticaba contra `smtp.gmail.com`, un servidor que no conoce esa cuenta. La
+contraseña siempre estuvo bien.
+
+```
+smtp.gmail.com:587  →  smtp.hostinger.com:465 (TLS)
+```
+
+Envío real ejecutado, sin errores. Se envía **un solo correo**: el acuse de
+recibo al cliente. El aviso interno se quitó por decisión del propietario.
+
+📌 Un envío correcto **no deja rastro en el log**: `logs.minLevel` está en 8 y
+solo guarda errores. El silencio es la confirmación.
+
+**Imágenes: P0-02 cerrado**
+
+Se descargó el logo del CDN de Hostinger —con permiso explícito— y se creó
+[`tools/generate-images.js`](../apps/web/tools/generate-images.js), que produce
+los tres iconos y el `og-image.jpg` de 1200×630 a partir de él. Si el logo
+cambia, se vuelve a correr y se regenera todo.
+
+🐞 **El logo es un cuadrado negro opaco, no transparente.** Las esquinas son
+`[0,0,0,255]`. Al componer el og-image, ese cuadrado se recortaba contra el
+degradado del fondo y se veía el borde. Se resolvió con una máscara circular.
+
+**Y de paso, P2-02 a medias**
+
+El logo dejó de venir del CDN de Hostinger: ahora se sirve desde el propio
+dominio. Era un riesgo real — si se desactivaba ese proyecto, el sitio se
+quedaba sin logo. Las 11 imágenes de producto siguen en el CDN.
+
+**Verificado sobre el build**
+
+| Comprobación | Resultado |
+|---|---|
+| `og:image` | `https://4dimensionsas.com/og-image.jpg` ✅ |
+| Iconos (32, 192, apple-touch) | ✅ generados y enlazados |
+| JSON-LD: logo, teléfono, dirección | ✅ los tres reales |
+| Referencias al CDN de Hostinger | **0** ✅ |
+| Teléfono viejo en el sitio | **0** ✅ |
+| Errores de consola | ninguno |
+
+**Estado del backlog**
+
+P0: 6 ✅, 1 ⬜ (**P0-06**, el hosting). P1: 4 ✅, 1 ⚠️, 1 🟡. P2: 8 ✅, 1 🟡, 4 ⬜.
+
+**Dónde quedó / qué sigue**
+
+El sitio está listo para publicar salvo dos cosas:
+
+1. **P0-06** — confirmar que el hosting resuelve `/nosotros` con
+   `nosotros/index.html` y no con el `index.html` de la home.
+2. **NIT** — es lo único que falta para la política de tratamiento de datos.
+
+---
+
 ## 2026-09-02 · El backend corriendo en local, y dos bugs que habrían llegado a producción
 
 **Por qué esta sesión existe**

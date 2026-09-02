@@ -84,28 +84,32 @@ Además, quedarse sin páginas con `<Helmet>` ya no tumba el build: avisa y sigu
 
 ---
 
-### P0-02 · Crear `apps/web/public/` — `M` — 🟡 *(parcial, 2026-09-01)*
+### P0-02 · Crear `apps/web/public/` — `M` — ✅ *(2026-09-02)*
 
 | Archivo | Estado |
 |---|---|
-| `public/favicon.svg` | ✅ **provisional** — marca tipográfica "4D" con los tokens de marca |
-| `public/llms.txt` | ✅ lo genera `tools/generate-llms.js` |
-| `robots.txt` | ✅ lo genera `tools/prerender.js` en `dist/` |
-| `sitemap.xml` | ✅ lo genera `tools/prerender.js` en `dist/` |
-| `favicon.ico` + `apple-touch-icon.png` | ⛔ necesitan el logo oficial |
-| `og-image.jpg` (1200×630) | ⛔ solo falta el **logo oficial**; el dominio ya está confirmado |
+| `logo-4d.png` | ✅ el logo real, servido desde el propio dominio |
+| `favicon-32.png` · `favicon-192.png` | ✅ generados del logo |
+| `apple-touch-icon.png` | ✅ 180×180 |
+| `og-image.jpg` | ✅ **1200×630** — logo recortado en círculo sobre el fondo de marca |
+| `robots.txt` · `sitemap.xml` | ✅ los genera el prerender |
+| `llms.txt` | ✅ lo genera `generate-llms.js` |
 
-`robots.txt` y `sitemap.xml` **no se escriben a mano**: salen de la lista de
-rutas y del dominio de [`src/lib/site.js`](../apps/web/src/lib/site.js), para que
-no puedan desincronizarse.
+Los derivados se producen con
+[`tools/generate-images.js`](../apps/web/tools/generate-images.js). Si cambia
+el logo, se vuelve a correr y se regeneran todos:
 
-⛔ Lo que falta depende del propietario: **logo en vectorial** y **dominio
-definitivo**. El favicon actual es un marcador de posición — hay que
-reemplazarlo antes de publicar.
+```bash
+node tools/generate-images.js
+```
 
-⚠️ **Sin `og-image.jpg`, al compartir un enlace sale el título y la descripción
-pero no la imagen.** Es lo que más se nota en WhatsApp y LinkedIn.
+🐞 **Detalle que había que resolver:** el logo es un cuadrado **negro opaco**
+con el círculo dibujado dentro — las esquinas son `[0,0,0,255]`, no
+transparentes. Sin recortarlo, ese cuadrado se recortaba contra el degradado
+del og-image y se veía el borde. El script le aplica una máscara circular.
 
+⬜ Queda pendiente el **logo en vectorial**, pero ya no bloquea nada: el PNG de
+1020×1011 basta para todos los tamaños que usa el sitio.
 ---
 
 ### P0-03 · Completar `index.html` — `S` — ✅ *(2026-09-01)*
@@ -441,15 +445,18 @@ El `@import` anterior bloqueaba el render y encadenaba dos peticiones: el
 navegador tenía que descargar el CSS para descubrir que necesitaba la fuente.
 ---
 
-### P2-02 · Logo e imágenes alojadas en CDN externo — `M` — ⬜
+### P2-02 · Logo e imágenes alojadas en CDN externo — `M` — 🟡 *(el logo ya no, 2026-09-02)*
 
 Los 11 assets de [`data/projects.js`](../apps/web/src/data/projects.js) apuntan a
 `images.hostinger.com`; el logo del navbar y del footer, a
 `horizons-cdn.hostinger.com`. Una imagen viene de Unsplash.
 
-**Riesgo:** si se desactiva el proyecto en Hostinger, el sitio se queda **sin una
-sola imagen y sin logo**. Hay que bajarlos al repositorio — o a un CDN propio — y
-servirlos desde el dominio de la empresa.
+✅ **El logo ya está resuelto** (2026-09-02): vive en `public/logo-4d.png` y se
+sirve desde el propio dominio. El navbar, el pie y el JSON-LD lo toman de ahí.
+
+⬜ **Quedan las 11 imágenes de producto**, que siguen en `images.hostinger.com`.
+Si se desactiva ese proyecto, el sitio se queda sin fotos — aunque ya no sin
+logo, que era lo más grave.
 
 ---
 

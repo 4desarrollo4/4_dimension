@@ -163,9 +163,14 @@ Red de aliados de manufactura en **Colombia, Asia y Europa**.
 
 ## Identidad visual
 
-- **Logo:** `https://horizons-cdn.hostinger.com/50b7554a-aba0-4db0-bd2a-1f8c207f1ca5/4d86c6546c2d16b19fbf2212f5a51658.png`
-  ⚠️ alojado en CDN externo de Hostinger — ver backlog P2-02.
-- **Falta:** el archivo fuente del logo (SVG/AI) y un favicon propio.
+- **Logo:** `apps/web/public/logo-4d.png` — 1020×1011 px, PNG.
+  ✅ *(2026-09-02)* Servido desde el propio dominio. Antes venía del CDN de
+  Hostinger, lo que dejaba al sitio sin logo si se desactivaba ese proyecto.
+- **Derivados**, generados con `tools/generate-images.js`: `favicon-32.png`,
+  `favicon-192.png`, `apple-touch-icon.png` y `og-image.jpg` (1200×630).
+- ⬜ **Falta el vectorial (SVG/AI).** El PNG basta para todo lo actual; el
+  vectorial solo haría falta para impresión o para un favicon perfecto a
+  cualquier tamaño.
 
 ---
 

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { absoluteUrl, SITE_NAME, SITE_URL } from '@/lib/site';
-import { LOGO_URL } from './Navbar';
+
+// Google necesita la URL absoluta del logo, no la ruta relativa.
+const LOGO_ABSOLUTO = `${SITE_URL}/logo-4d.png`;
 
 /*
   Datos estructurados (schema.org). Es lo que alimenta el panel de conocimiento
@@ -29,8 +31,8 @@ const organizacion = {
     name: '4D Cuarta Dimensión ES S.A.S.',
     alternateName: SITE_NAME,
     url: SITE_URL,
-    logo: LOGO_URL,
-    image: LOGO_URL,
+    logo: LOGO_ABSOLUTO,
+    image: LOGO_ABSOLUTO,
     description:
         'Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales.',
     email: 'info@4dimensionsas.com',
