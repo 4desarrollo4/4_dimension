@@ -251,22 +251,35 @@ cd apps/pocketbase
 
 Panel: `http://127.0.0.1:8090/_/`
 
-### Correo real desde local
+### Correo — el buzón está en Hostinger, NO en Google ✅ *(2026-09-02)*
 
-`pb_hooks/smtp-desde-entorno.pb.js` configura el SMTP leyendo variables de
-entorno. Con eso, Gmail envía igual desde localhost que desde producción — no
-depende del hosting.
+`info@4dimensionsas.com` se creó en **Hostinger**, y su contraseña de
+aplicación se genera desde el panel de correo de Hostinger.
 
-```bash
-SMTP_USERNAME="tucuenta@gmail.com" SMTP_PASSWORD="las 16 letras" ./pocketbase.exe serve ...
-```
+| Ajuste | Valor |
+|---|---|
+| Host | `smtp.hostinger.com` |
+| Puerto | `465` |
+| TLS | **activado** (implícito, no STARTTLS) |
+| Username | `info@4dimensionsas.com` |
+| Remitente | `info@4dimensionsas.com` |
 
-La contraseña tiene que ser una **contraseña de aplicación** de Google, con la
-verificación en dos pasos activada. La normal la rechaza con
-`535 Username and Password not accepted`.
+⚠️ **No uses `smtp.gmail.com`.** Se intentó y devuelve
+`535 Username and Password not accepted`. El error engaña: parece que la
+contraseña está mal, pero lo que pasa es que se autentica contra un servidor
+que no conoce esa cuenta. Una clave de Hostinger solo sirve contra el SMTP de
+Hostinger.
 
-📌 Al activar el SMTP propio, `builder-mailer.pb.js` se aparta: ese hook solo
-desvía el correo a la API de Hostinger **cuando el SMTP está desactivado**.
+📌 **Los envíos correctos no dejan rastro en el log.** `logs.minLevel` está en 8,
+que guarda solo errores: silencio tras un envío significa que salió bien. Si
+buscas confirmación, mírala en la carpeta *Enviados* del buzón.
+
+### Un solo correo
+
+El formulario envía **únicamente** el acuse de recibo al cliente, desde
+`info@4dimensionsas.com`. No hay aviso interno al equipo: se quitó el
+2026-09-02 por decisión del propietario. Ver
+[`pb_hooks/contact-notify.pb.js`](../apps/pocketbase/pb_hooks/contact-notify.pb.js).
 
 ---
 

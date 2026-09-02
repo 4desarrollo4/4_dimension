@@ -12,25 +12,26 @@
 
   ── Cómo usarlo ────────────────────────────────────────────────────────────
 
-  1. Activa la verificación en dos pasos en la cuenta de Gmail.
-  2. myaccount.google.com → Seguridad → Contraseñas de aplicación.
-     Google genera 16 caracteres.
-  3. Arranca PocketBase con estas variables:
+  El buzón info@4dimensionsas.com está en **Hostinger**, no en Google. La
+  contraseña de aplicación se genera desde el panel de correo de Hostinger.
 
-       SMTP_USERNAME   la cuenta de Gmail que envía
-       SMTP_PASSWORD   la contraseña de aplicación de 16 caracteres
+       SMTP_USERNAME   info@4dimensionsas.com
+       SMTP_PASSWORD   la contraseña de aplicación de Hostinger
        SMTP_SENDER     (opcional) el remitente; por defecto, SMTP_USERNAME
-       SMTP_HOST       (opcional) por defecto smtp.gmail.com
-       SMTP_PORT       (opcional) por defecto 587
+       SMTP_HOST       (opcional) por defecto smtp.hostinger.com
+       SMTP_PORT       (opcional) por defecto 465
 
-  ⚠️ Gmail rechaza la contraseña normal de la cuenta. Tiene que ser una
-     contraseña de aplicación, y con la verificación en dos pasos activada.
+  ⚠️ NO uses smtp.gmail.com. Se intentó y Gmail devuelve
+     "535 Username and Password not accepted". El error engaña: parece que la
+     contraseña está mal, pero lo que pasa es que se está autenticando contra
+     un servidor que no conoce esa cuenta. Una clave de Hostinger solo sirve
+     contra el SMTP de Hostinger.
 
   ── Por qué importa que el SMTP quede activado ─────────────────────────────
 
   `builder-mailer.pb.js` intercepta el envío y lo desvía a la API de correo de
   Hostinger SOLO cuando el SMTP está desactivado. Al activarlo aquí, ese hook
-  se aparta y el correo sale directo por Gmail.
+  se aparta y el correo sale directo por el SMTP configurado.
 */
 
 onBootstrap((e) => {
@@ -50,8 +51,8 @@ onBootstrap((e) => {
 		const settings = $app.settings();
 
 		settings.smtp.enabled = true;
-		settings.smtp.host = $os.getenv('SMTP_HOST') || 'smtp.gmail.com';
-		settings.smtp.port = Number($os.getenv('SMTP_PORT') || 587);
+		settings.smtp.host = $os.getenv('SMTP_HOST') || 'smtp.hostinger.com';
+		settings.smtp.port = Number($os.getenv('SMTP_PORT') || 465);
 		settings.smtp.username = usuario;
 		settings.smtp.password = clave;
 		settings.smtp.authMethod = 'PLAIN';

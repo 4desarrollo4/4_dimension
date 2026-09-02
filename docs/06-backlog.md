@@ -216,40 +216,35 @@ fuente, así que no pueden ser variables.
    publicar.
 ---
 
-### P0-07 · Verificar el backend del formulario — `M` — 🟡 *(casi todo verificado, 2026-09-02)*
+### P0-07 · Verificar el backend del formulario — `M` — ✅ *(2026-09-02)*
 
-Ya no está "sin probar": el backend se levantó en local con el binario de
-Windows y se probó de verdad.
+Verificado de extremo a extremo con el backend corriendo en local.
 
 | Comprobación | Estado |
 |---|---|
-| Las 10 migraciones aplican | ✅ incluidas las 4 nuevas |
+| Las 10 migraciones aplican | ✅ |
 | Esquema con `phone`, `consent`, `consent_at` | ✅ |
 | `consent` obligatorio a nivel de base | ✅ |
-| Formulario → registro guardado | ✅ desde el navegador |
-| Hook de aviso se dispara | ✅ |
-| Plantilla del correo se construye | ✅ |
-| Conexión a `smtp.gmail.com:587` con STARTTLS | ✅ Gmail responde |
-| **Correo entregado** | ⏳ **falta la contraseña de aplicación de Gmail** |
+| Formulario → registro guardado | ✅ |
+| Hook se dispara | ✅ |
+| **Correo entregado** | ✅ **sin errores por smtp.hostinger.com:465** |
 
-**Dos bugs reales encontrados y corregidos:**
+**Tres bugs encontrados y corregidos por el camino:**
 
-1. 🐞 **Contexto aislado.** `ReferenceError: LINEAS is not defined`. Las
-   constantes del nivel superior del archivo no existen dentro del handler.
-   Documentado en [`03-arquitectura.md`](03-arquitectura.md) → trampa 2.
+1. 🐞 **Contexto aislado de los hooks.** `ReferenceError: LINEAS is not defined`.
+   Ver [`03-arquitectura.md`](03-arquitectura.md) → trampa 2.
 2. 🐞 **El mailer de Hostinger se tragaba el envío.**
-   `unsupported protocol scheme ""`, porque `BUILDER_MAILER_API_URL` no está
-   definida. Se resuelve activando el SMTP propio: `builder-mailer.pb.js` solo
-   interviene cuando el SMTP está desactivado.
+   `unsupported protocol scheme ""`. Se resuelve activando el SMTP propio.
+3. 🐞 **Servidor SMTP equivocado.** Estaba apuntando a `smtp.gmail.com` y
+   devolvía `535 Username and Password not accepted`. El buzón está en
+   **Hostinger**: la contraseña era correcta desde el principio, pero se
+   autenticaba contra un servidor que no conoce esa cuenta.
 
-**Lo que falta:** arrancar con `SMTP_USERNAME` y `SMTP_PASSWORD` (contraseña de
-aplicación de Google, con verificación en dos pasos activada) y mandar un
-mensaje de prueba. El último error registrado fue
-`535 Username and Password not accepted`, que es Gmail rechazando la clave
-falsa de prueba: la cadena entera funciona.
+📌 **Se envía un solo correo:** el acuse de recibo al cliente. El aviso interno
+al equipo se quitó el 2026-09-02 por decisión del propietario.
 
-📌 Sigue pendiente comprobar el **límite de 5 envíos por hora** y que las
-**copias automáticas** se generen.
+**Queda por comprobar:** el límite de 5 envíos por hora y que las copias
+automáticas se generen.
 ---
 
 ### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ⬜
