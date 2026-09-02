@@ -1,27 +1,35 @@
 /// <reference path="../pb_data/types.d.ts" />
 
 /*
-  Aviso por correo cuando entra una solicitud de contacto.
+  Acuse de recibo al cliente cuando envía el formulario de contacto.
 
-  Por qué existe: el sitio promete públicamente "Respondemos en 24 a 48 horas
-  hábiles", pero hasta ahora nada avisaba a nadie. Los mensajes se quedaban en
-  la base de datos esperando a que alguien entrara al panel a mirarlos.
+  ── Se envía UN SOLO correo ────────────────────────────────────────────────
 
-  ⚠️⚠️ LEE ESTO ANTES DE TOCAR NADA ⚠️⚠️
+  De `info@4dimensionsas.com` → a quien llenó el formulario. Nada más.
+
+  Hubo antes un segundo correo de aviso interno a info@; el propietario pidió
+  quitarlo el 2026-09-02. No lo vuelvas a añadir sin preguntar.
+
+  📌 Cómo se entera el equipo de que llegó una solicitud, sin aviso interno:
+     - El acuse sale DESDE info@4dimensionsas.com, así que queda copia en la
+       carpeta "Enviados" de esa cuenta, con todos los datos del cliente.
+     - Y la solicitud queda guardada en la colección `contact_requests`.
+
+  ── ⚠️⚠️ LEE ESTO ANTES DE TOCAR NADA ⚠️⚠️ ────────────────────────────────
 
   PocketBase ejecuta cada handler en un **contexto aislado**. Una constante o
   una función declarada en el nivel superior de este archivo NO existe dentro
   del handler: da "ReferenceError: X is not defined" en tiempo de ejecución.
 
-  Por eso todo lo que el handler necesita está declarado DENTRO del handler,
-  aunque se repita entre uno y otro. No lo "limpies" sacándolo fuera.
+  Por eso todo lo que el handler necesita está declarado DENTRO del handler.
+  No lo "limpies" sacándolo fuera.
 
   Se descubrió por las malas: el hook se disparaba, fallaba con
   "LINEAS is not defined", el error quedaba en el log interno que nadie lee y
   el correo no salía nunca. La solicitud sí se guardaba, así que por fuera todo
   parecía correcto.
 
-  Verificado el 2026-09-02 con PocketBase 0.39.8 en Windows y base local.
+  Verificado el 2026-09-02 con PocketBase 0.39.8 en Windows.
 */
 
 // --- Trampa antibots -------------------------------------------------------
@@ -48,18 +56,11 @@ onRecordCreateRequest((e) => {
 	e.next();
 }, 'contact_requests');
 
-// --- Aviso al equipo comercial ---------------------------------------------
+// --- Acuse de recibo al cliente --------------------------------------------
 onRecordAfterCreateSuccess((e) => {
 	try {
 		// ↓↓↓ TODO ESTO VA DENTRO DEL HANDLER A PROPÓSITO. Ver la nota de arriba.
 
-		// A dónde llegan los avisos. Se puede cambiar sin tocar código con la
-		// variable de entorno CONTACT_NOTIFY_TO.
-		// OJO: no es el correo público del sitio (comercial@4dimensionsas.com).
-		// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
-		const destino = $os.getenv('CONTACT_NOTIFY_TO') || 'info@4dimensionsas.com';
-
-		// Etiquetas legibles: en la base, `line` se guarda como identificador.
 		const LINEAS = {
 			calzado: 'Calzado',
 			ropa: 'Ropa',
@@ -75,9 +76,6 @@ onRecordAfterCreateSuccess((e) => {
 			.replace(/"/g, '&quot;')
 			.replace(/'/g, '&#39;');
 
-		// wa.me solo acepta dígitos, sin "+" ni espacios.
-		const soloDigitos = (valor) => String(valor === null || valor === undefined ? '' : valor).replace(/\D/g, '');
-
 		const r = e.record;
 
 		const nombre = r.getString('name');
@@ -87,78 +85,73 @@ onRecordAfterCreateSuccess((e) => {
 		const linea = LINEAS[r.getString('line')] || r.getString('line') || 'sin especificar';
 		const mensaje = r.getString('message');
 
-		// El saludo que pidió el propietario, en primera persona, como si lo
-		// escribiera quien rellena el formulario. La empresa es opcional: si no
-		// la puso, la frase se arma sin ella en lugar de quedar coja.
-		const presentacion = empresa
-			? `Hola, soy <strong>${escapar(nombre)}</strong> de la empresa <strong>${escapar(empresa)}</strong> y mi línea de interés es <strong>${escapar(linea)}</strong>.`
-			: `Hola, soy <strong>${escapar(nombre)}</strong> y mi línea de interés es <strong>${escapar(linea)}</strong>.`;
-
-		const whatsapp = soloDigitos(telefono);
+		const resumen = [
+			['Nombre', nombre],
+			['Empresa', empresa || '—'],
+			['Correo', correo],
+			['Teléfono', telefono],
+			['Línea de interés', linea],
+		].map(function (fila) {
+			return '<tr>'
+				+ '<td style="padding:7px 18px 7px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;vertical-align:top;">' + escapar(fila[0]) + '</td>'
+				+ '<td style="padding:7px 0;color:#f2f4f8;font-size:14px;">' + escapar(fila[1]) + '</td>'
+				+ '</tr>';
+		}).join('');
 
 		const html = `
 			<div style="background:#0a0c14;color:#f2f4f8;font-family:Helvetica,Arial,sans-serif;padding:32px;">
 				<p style="margin:0 0 4px;color:#3d6bff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">
 					4D Cuarta Dimensión
 				</p>
-				<h1 style="margin:0 0 28px;font-size:20px;">Nueva solicitud de contacto</h1>
+				<h1 style="margin:0 0 24px;font-size:20px;">Recibimos tu mensaje</h1>
 
-				<p style="margin:0 0 20px;font-size:16px;line-height:1.6;">${presentacion}</p>
+				<p style="margin:0 0 20px;font-size:16px;line-height:1.6;">
+					Hola <strong>${escapar(nombre)}</strong>, te escribimos de
+					<strong>4D Cuarta Dimensión</strong>. Tu mensaje llegó bien y
+					pronto nos pondremos en contacto contigo.
+				</p>
 
-				<div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 24px;font-size:15px;line-height:1.7;white-space:pre-wrap;">${escapar(mensaje)}</div>
+				<p style="margin:0 0 10px;color:#8a8f9c;font-size:12px;letter-spacing:.1em;text-transform:uppercase;">
+					Esto fue lo que nos enviaste
+				</p>
+				<table style="border-collapse:collapse;margin:0 0 18px;">${resumen}</table>
 
-				<p style="margin:0 0 32px;font-size:16px;">Muchas gracias.</p>
+				<div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 28px;font-size:15px;line-height:1.7;white-space:pre-wrap;">${escapar(mensaje)}</div>
 
-				<table style="border-collapse:collapse;border-top:1px solid #23262d;padding-top:16px;width:100%;">
-					<tr>
-						<td style="padding:14px 16px 6px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;">Correo</td>
-						<td style="padding:14px 0 6px;font-size:14px;">
-							<a href="mailto:${escapar(correo)}" style="color:#3d6bff;text-decoration:none;">${escapar(correo)}</a>
-						</td>
-					</tr>
-					<tr>
-						<td style="padding:6px 16px 6px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;">Teléfono</td>
-						<td style="padding:6px 0;font-size:14px;">
-							<a href="tel:${escapar(telefono)}" style="color:#f2f4f8;text-decoration:none;">${escapar(telefono || '—')}</a>
-						</td>
-					</tr>
-				</table>
+				<p style="margin:0 0 28px;font-size:15px;line-height:1.6;">
+					Respondemos en <strong>24 a 48 horas hábiles</strong>. Si necesitas
+					algo antes, puedes escribirnos a
+					<a href="mailto:info@4dimensionsas.com" style="color:#3d6bff;text-decoration:none;">info@4dimensionsas.com</a>
+					o llamarnos al
+					<a href="tel:+576017434400" style="color:#f2f4f8;text-decoration:none;">+57 (601) 743 4400</a>.
+				</p>
 
-				${whatsapp
-					? `<p style="margin:24px 0 0;">
-							<a href="https://wa.me/${escapar(whatsapp)}"
-								style="display:inline-block;background:#25D366;color:#06180d;text-decoration:none;font-weight:bold;font-size:14px;padding:12px 22px;">
-								Escribir por WhatsApp
-							</a>
-						</p>`
-					: ''}
+				<p style="margin:0 0 4px;font-size:15px;">Gracias por escribirnos.</p>
+				<p style="margin:0;color:#8a8f9c;font-size:13px;">4D Cuarta Dimensión ES S.A.S. · Bogotá D.C., Colombia</p>
 
-				<p style="margin:28px 0 0;color:#8a8f9c;font-size:12px;line-height:1.6;">
-					El compromiso publicado en el sitio es de 24 a 48 horas hábiles.<br>
-					Si el botón de WhatsApp no abre la conversación, es que el número llegó sin indicativo de país.
+				<p style="margin:28px 0 0;padding-top:16px;border-top:1px solid #23262d;color:#8a8f9c;font-size:11px;line-height:1.6;">
+					Recibes este correo porque enviaste el formulario de contacto de
+					4dimensionsas.com y autorizaste el tratamiento de tus datos con la
+					única finalidad de responderte. Si no fuiste tú, ignóralo.
 				</p>
 			</div>
 		`;
 
-		const message = new MailerMessage({
+		$app.newMailClient().send(new MailerMessage({
 			from: {
 				address: $app.settings().meta.senderAddress,
 				name: $app.settings().meta.senderName,
 			},
-			to: [{ address: destino }],
-			// `mailer.Message` no tiene campo replyTo: se pone por cabecera.
-			headers: { 'Reply-To': correo },
-			subject: `Nueva solicitud de contacto — ${nombre}`,
+			to: [{ address: correo }],
+			subject: 'Recibimos tu mensaje — 4D Cuarta Dimensión',
 			html: html,
-		});
+		}));
 
-		$app.newMailClient().send(message);
-
-		$app.logger().info('Aviso de contacto enviado', 'destino', destino, 'de', correo);
+		$app.logger().info('Acuse de recibo enviado al cliente', 'destino', correo);
 	} catch (error) {
 		// Nunca tumbes la petición por un fallo de correo: el mensaje del
 		// visitante ya está guardado y perderlo sería mucho peor que no avisar.
-		$app.logger().error('No se pudo enviar el aviso de contacto', 'error', String(error));
+		$app.logger().error('No se pudo enviar el acuse al cliente', 'error', String(error));
 	}
 
 	e.next();

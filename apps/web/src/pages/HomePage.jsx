@@ -365,8 +365,8 @@ export default function HomePage() {
                             <div className="bg-background p-8 transition-colors duration-300 hover:bg-card/60">
                                 <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Correo</dt>
                                 <dd className="mt-3">
-                                    <a href="mailto:comercial@4dimensionsas.com" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
-                                        comercial@4dimensionsas.com
+                                    <a href="mailto:info@4dimensionsas.com" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
+                                        info@4dimensionsas.com
                                     </a>
                                 </dd>
                             </div>

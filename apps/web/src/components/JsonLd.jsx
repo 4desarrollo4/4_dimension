@@ -33,7 +33,7 @@ const organizacion = {
     image: LOGO_URL,
     description:
         'Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales.',
-    email: 'comercial@4dimensionsas.com',
+    email: 'info@4dimensionsas.com',
     telephone: '+57-601-743-4400',
     address: {
         '@type': 'PostalAddress',
@@ -49,7 +49,7 @@ const organizacion = {
     contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'sales',
-        email: 'comercial@4dimensionsas.com',
+        email: 'info@4dimensionsas.com',
         telephone: '+57-601-743-4400',
         areaServed: ['CO', 'US', 'EU'],
         availableLanguage: ['Spanish'],
