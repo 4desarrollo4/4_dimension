@@ -33,7 +33,7 @@
 
 | Prioridad | ✅ | 🟡 ⚠️ | ⬜ ⛔ | Total |
 |---|---|---|---|---|
-| **P0** | 4 | 2 | 1 | 7 |
+| **P0** | 4 | 3 | 1 | 8 |
 | **P1** | 3 | 1 | 2 | 6 |
 | **P2** | 6 | 0 | 6 | 12 |
 
@@ -195,6 +195,41 @@ fuente, así que no pueden ser variables.
 3. ⚠️ **Revisión legal.** El texto actual recoge los elementos que exige la ley,
    pero no lo redactó un abogado. Conviene que alguien lo valide antes de
    publicar.
+---
+
+### P0-07 · Verificar el backend del formulario en el despliegue — `M` — ⚠️ *(escrito, sin probar)*
+
+**Todo lo de esta tarea está escrito pero NUNCA se ha ejecutado.** El binario
+`apps/pocketbase/pocketbase` es un ejecutable de **Linux** y no arranca en
+Windows, así que se programó contra la API declarada en `pb_data/types.d.ts` y
+solo se comprobó la sintaxis.
+
+**Qué hay que verificar en el primer despliegue, en este orden:**
+
+1. **Correr las migraciones ANTES de publicar el frontend.** El formulario ya
+   envía `phone`, `consent` y `consent_at`; si la colección aún no tiene esos
+   campos, los envíos fallan.
+   ```bash
+   npm run migrations:up --prefix apps/pocketbase
+   ```
+2. **Mandar un mensaje de prueba** desde `/contacto` y comprobar que llega el
+   aviso a `comercial@cuartadimension.co`.
+3. **Probar el botón de WhatsApp** del correo.
+4. **Comprobar la trampa antibots**: un POST directo a la API con el campo
+   `website` relleno debe ser rechazado.
+5. **Comprobar el límite**: seis envíos seguidos desde la misma IP; el sexto
+   debe fallar.
+6. **Comprobar las copias**: al día siguiente debe existir una copia automática.
+
+📁 Archivos implicados:
+[`pb_hooks/contact-notify.pb.js`](../apps/pocketbase/pb_hooks/contact-notify.pb.js) ·
+las cuatro migraciones `1788*` de [`pb_migrations/`](../apps/pocketbase/pb_migrations/)
+
+⚠️ **Riesgo conocido sin resolver:** no pude confirmar si PocketBase ignora los
+campos desconocidos en el cuerpo de la petición o los rechaza. Si los rechaza y
+las migraciones no han corrido, el formulario deja de funcionar. De ahí que el
+orden de despliegue importe.
+
 ---
 
 ### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ⬜

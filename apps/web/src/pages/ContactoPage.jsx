@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
 import { CheckCircle2, Loader2, Mail, MapPin, Phone, Globe } from 'lucide-react';
@@ -6,7 +6,14 @@ import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
 import pocketbaseClient from '@/lib/pocketbaseClient';
 
-const initialForm = { name: '', company: '', email: '', line: 'calzado', message: '', consent: false };
+const initialForm = { name: '', company: '', email: '', phone: '', line: 'calzado', message: '', consent: false, website: '' };
+
+// Un envío legítimo no se completa en menos de esto. Los bots sí.
+const SEGUNDOS_MINIMOS = 3;
+
+// El número se guarda tal como lo escribe la persona, pero para validarlo y
+// para armar el enlace de WhatsApp solo interesan los dígitos.
+const soloDigitos = (valor) => String(valor ?? '').replace(/\D/g, '');
 
 const inputClass =
     'w-full border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors duration-200 focus:border-primary';
@@ -15,6 +22,7 @@ export default function ContactoPage() {
     const [form, setForm] = useState(initialForm);
     const [errors, setErrors] = useState({});
     const [status, setStatus] = useState('idle');
+    const abiertoEn = useRef(Date.now());
 
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
     const setChecked = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.checked }));
@@ -23,6 +31,9 @@ export default function ContactoPage() {
         const next = {};
         if (form.name.trim().length < 2) next.name = 'Escribe tu nombre.';
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = 'Ingresa un correo válido.';
+        // Permisiva a propósito: el sitio recibe contactos internacionales y una
+        // validación estricta rechazaría números perfectamente válidos.
+        if (soloDigitos(form.phone).length < 7) next.phone = 'Ingresa un número de contacto válido, con indicativo.';
         if (form.message.trim().length < 10) next.message = 'El mensaje debe tener al menos 10 caracteres.';
         if (!form.consent) next.consent = 'Necesitamos tu autorización para tratar estos datos.';
         setErrors(next);
@@ -32,14 +43,32 @@ export default function ContactoPage() {
     const onSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
+
+        // Trampa antibots: el campo está oculto y ninguna persona lo rellena.
+        // Y nadie escribe un mensaje de verdad en menos de tres segundos.
+        // No avisamos de que se detectó nada: al bot se le responde "éxito" y
+        // no se envía nada, para que no aprenda a esquivarlo.
+        const esBot = form.website !== '' || (Date.now() - abiertoEn.current) / 1000 < SEGUNDOS_MINIMOS;
+
+        if (esBot) {
+            setStatus('success');
+            return;
+        }
+
         setStatus('sending');
         try {
             await pocketbaseClient.collection('contact_requests').create({
                 name: form.name.trim(),
                 company: form.company.trim(),
                 email: form.email.trim(),
+                phone: form.phone.trim(),
                 line: form.line,
                 message: form.message.trim(),
+                // Prueba del consentimiento, exigida por la Ley 1581 de 2012.
+                // La colección declara `consent` como booleano requerido, así que
+                // el servidor rechaza cualquier registro sin autorización.
+                consent: true,
+                consent_at: new Date().toISOString(),
             });
             setStatus('success');
         } catch {
@@ -109,14 +138,30 @@ export default function ContactoPage() {
                                         {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <label htmlFor="line" className="text-sm font-semibold">Línea de interés</label>
-                                        <select id="line" value={form.line} onChange={set('line')} className={inputClass}>
-                                            <option value="calzado">Calzado</option>
-                                            <option value="ropa">Ropa</option>
-                                            <option value="dotaciones">Dotaciones</option>
-                                            <option value="otro">Otro proyecto</option>
-                                        </select>
+                                        <label htmlFor="phone" className="text-sm font-semibold">Teléfono o WhatsApp *</label>
+                                        <input
+                                            id="phone"
+                                            type="tel"
+                                            value={form.phone}
+                                            onChange={set('phone')}
+                                            placeholder="+57 300 123 4567"
+                                            className={inputClass}
+                                            autoComplete="tel"
+                                            inputMode="tel"
+                                        />
+                                        {errors.phone
+                                            ? <p className="text-xs text-destructive">{errors.phone}</p>
+                                            : <p className="text-xs text-muted-foreground/70">Inclúyelo con indicativo del país para poder escribirte por WhatsApp.</p>}
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="line" className="text-sm font-semibold">Línea de interés</label>
+                                    <select id="line" value={form.line} onChange={set('line')} className={`${inputClass} block sm:max-w-xs`}>
+                                        <option value="calzado">Calzado</option>
+                                        <option value="ropa">Ropa</option>
+                                        <option value="dotaciones">Dotaciones</option>
+                                        <option value="otro">Otro proyecto</option>
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="message" className="text-sm font-semibold">Mensaje *</label>
@@ -130,6 +175,20 @@ export default function ContactoPage() {
                                     />
                                     {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
                                 </div>
+                                {/* Trampa antibots. No es `display:none` a propósito:
+                                    muchos bots ignoran los campos ocultos así. */}
+                                <div className="sr-only" aria-hidden="true">
+                                    <label htmlFor="website">No rellenes este campo</label>
+                                    <input
+                                        id="website"
+                                        type="text"
+                                        tabIndex={-1}
+                                        autoComplete="off"
+                                        value={form.website}
+                                        onChange={set('website')}
+                                    />
+                                </div>
+
                                 <div className="space-y-3 border-t border-border/60 pt-6">
                                     <label htmlFor="consent" className="flex cursor-pointer items-start gap-3">
                                         <input
