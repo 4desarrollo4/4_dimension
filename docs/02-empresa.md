@@ -28,7 +28,7 @@
 | **País de origen** | Colombia |
 | **Oficina principal** | Bogotá D.C., Colombia |
 | **Etapa** | En operación, con clientes activos |
-| **NIT** | ⬜ *pendiente — solicitar al propietario* |
+| **NIT** | ⬜ *pendiente — **no es obligatorio** para la política de datos; solo mejora el JSON-LD* |
 | **Año de fundación** | ⬜ *pendiente — solicitar al propietario* |
 | **Representante legal** | ⬜ *pendiente — solicitar al propietario* |
 
@@ -151,7 +151,7 @@ Red de aliados de manufactura en **Colombia, Asia y Europa**.
 | **Tiempo de respuesta declarado** | 24 a 48 horas hábiles |
 | **Buzón de avisos del formulario** | `info@4dimensionsas.com` *(confirmado 2026-09-02)* — no se publica en el sitio |
 | **Dominio** | `4dimensionsas.com` ✅ *(confirmado por el propietario el 2026-09-02)* |
-| **Dirección exacta** | ⬜ *pendiente — solicitar al propietario* |
+| **Dirección exacta** | ⛔ ***obligatoria*** — *el Decreto 1074 de 2015 la exige en la política de tratamiento* |
 | **LinkedIn** | ⬜ *pendiente* |
 | **Instagram** | ⬜ *pendiente* |
 

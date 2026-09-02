@@ -42,7 +42,7 @@ hosting. Es lo único de P0 que no depende de datos del propietario, y de ello
 depende que el prerender sirva de algo.
 
 Casi todo lo demás está ⛔ **esperando material del propietario**: logo en
-vectorial, dominio definitivo, NIT y dirección física.
+vectorial y dirección física exacta.
 
 ---
 
@@ -185,10 +185,29 @@ fuente, así que no pueden ser variables.
 
 **Falta:**
 
-1. ⛔ **Página `/politica-de-datos`** con la política completa. Necesita NIT,
-   dirección física y responsable del tratamiento — ver
-   [`02-empresa.md`](02-empresa.md). Al crearla, registrarla también en
-   [`src/lib/site.js`](../apps/web/src/lib/site.js) y enlazarla desde el footer.
+1. ⛔ **Página `/politica-de-datos`** con la política completa. Al crearla,
+   registrarla también en [`src/lib/site.js`](../apps/web/src/lib/site.js) y
+   enlazarla desde el footer.
+
+   **Qué exige realmente la ley** *(corregido el 2026-09-02)*. El
+   **Decreto 1074 de 2015** pide, del responsable: razón social, domicilio,
+   dirección, correo electrónico y teléfono.
+
+   | Dato | ¿Obligatorio? | ¿Lo tenemos? |
+   |---|---|---|
+   | Razón social | ✅ | ✅ 4D Cuarta Dimensión ES S.A.S. |
+   | Correo y teléfono | ✅ | ✅ |
+   | Domicilio (ciudad) | ✅ | ✅ Bogotá D.C. |
+   | **Dirección exacta** | ✅ | ⛔ **lo único que bloquea** |
+   | **NIT** | ❌ no lo exige el decreto | ⬜ conveniente para el JSON-LD |
+
+   **Responsable del Tratamiento = la sociedad**, no una persona natural.
+   Aparte hay que designar un *área o persona de atención al titular*: basta
+   con "Área Administrativa — info@4dimensionsas.com". No hace falta el nombre
+   del propietario.
+
+   ⚠️ Es la lectura de lo que enumera el decreto, no un dictamen legal. El
+   texto final debería validarlo un abogado.
 2. ⬜ **Guardar la marca de tiempo del consentimiento** en `contact_requests`.
    Requiere una migración de PocketBase que **no se puede probar en Windows**
    (el binario es un ejecutable de Linux), así que no se escribió a ciegas.
@@ -605,7 +624,8 @@ listados en [`02-empresa.md`](02-empresa.md):
 |---|---|
 | Logo en vectorial (SVG) | P0-02 |
 | ~~Dominio definitivo~~ ✅ `4dimensionsas.com`, confirmado el 2026-09-02 | — |
-| NIT, dirección exacta, responsable de datos | P0-05, P1-06 |
+| **Dirección física exacta** — lo único que bloquea la política | P0-05 |
+| NIT *(no lo exige el decreto; solo mejora el JSON-LD)* | P1-06 |
 | Año de fundación | P1-06 |
 | Perfiles de redes sociales | P1-06 |
 | Fotos reales y equipo | P2-10 |
