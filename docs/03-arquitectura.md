@@ -1,6 +1,6 @@
 # 03 — Arquitectura y entorno
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-09-02
 
 ---
 
@@ -150,6 +150,9 @@ proyecto. Ver [ADR-004](07-decisiones.md).
 | `email` | email | requerido |
 | `line` | select | `calzado` · `ropa` · `dotaciones` · `otro` |
 | `message` | text | requerido, 10–4000 |
+| `phone` | text | **requerido**, 7–40 |
+| `consent` | bool | **requerido** — en PocketBase un booleano requerido debe ser verdadero, así que la base rechaza registros sin autorización |
+| `consent_at` | date | opcional — marca de tiempo del consentimiento |
 | `created` / `updated` | autodate | — |
 
 Reglas de acceso: `createRule: ''` (creación pública), todo lo demás `null`
@@ -157,9 +160,9 @@ Reglas de acceso: `createRule: ''` (creación pública), todo lo demás `null`
 
 📁 [`apps/pocketbase/pb_migrations/1787766900_create_contact_requests.js`](../apps/pocketbase/pb_migrations/1787766900_create_contact_requests.js)
 
-⚠️ **El binario `apps/pocketbase/pocketbase` es un ejecutable ELF de Linux.** En
-Windows no arranca: hace falta WSL o el binario de PocketBase para Windows. Por
-eso `npm run dev` solo levanta la web en esta máquina.
+⚠️ **El binario `apps/pocketbase/pocketbase` es un ejecutable ELF de Linux** y no
+arranca en Windows. Para desarrollar en local se usa `pocketbase.exe`, el
+binario oficial de la misma versión — ver *Desarrollo del backend en local*.
 
 ---
 
@@ -177,27 +180,93 @@ eso `npm run dev` solo levanta la web en esta máquina.
 
 ### Vigentes
 
-**1. El formulario de contacto no funciona en local.**
-`/hcgi/platform` proxea la infraestructura de Horizons, no Vite. En local
-devuelve el `index.html` del SPA (`text/html`, 200), así que PocketBase nunca
-recibe la petición. → **P1-05**
+**1. ~~El formulario de contacto no funciona en local.~~ ✅ Resuelto el 2026-09-02.**
+`vite.config.js` proxea ahora `/hcgi/platform` → `http://127.0.0.1:8090`,
+quitando el prefijo. Y el binario de PocketBase para **Windows** está instalado,
+así que el backend corre en local. Ver *Desarrollo del backend* abajo.
 
-**2. `console.warn` está silenciado globalmente.**
+**2. ⚠️ Los hooks de PocketBase corren en un CONTEXTO AISLADO.**
+
+Una constante o una función declarada en el nivel superior de un archivo de
+`pb_hooks/` **no existe dentro del handler**. Da
+`ReferenceError: X is not defined` en tiempo de ejecución, no al arrancar.
+
+```js
+const LINEAS = { ... };              // ❌ el handler NO lo ve
+
+onRecordAfterCreateSuccess((e) => {
+    const LINEAS = { ... };          // ✅ así sí
+    e.next();
+}, 'contact_requests');
+```
+
+**Por qué duele tanto:** el hook se dispara, falla, el error queda en el log
+interno de PocketBase que nadie mira, y la operación principal sigue como si
+nada. Por fuera todo parece correcto. Nos costó un correo que nunca salía —
+ver [`08-bitacora.md`](08-bitacora.md), 2026-09-02.
+
+Si un handler necesita algo, decláralo **dentro**, aunque se repita entre
+handlers. No lo "limpies" sacándolo fuera.
+
+**3. `console.warn` está silenciado globalmente.**
 [`vite.config.js`](../apps/web/vite.config.js) hace `console.warn = () => {}`.
 Si depuras avisos y no ves nada, es por esto. Ya ocultó un bug real durante
 meses (**P2-07**).
 
-**3. `vite.config.js` inyecta scripts de Horizons también en producción.**
+**4. `vite.config.js` inyecta scripts de Horizons también en producción.**
 El `index.html` del build pesa 8.7 KB en vez de ~1 KB. → **P2-11**
 
-**4. Código muerto del scaffold.**
+**5. Código muerto del scaffold.**
 `AuthContext.jsx`, `ProtectedRoute.jsx`, los ~55 componentes de `ui/` (ninguno
 importado) y la dependencia `react-helmet`. `knip.json` está configurado para
 detectarlo. → **P2-06**
 
-**5. No tocar `apps/web/plugins/`.**
+**6. No tocar `apps/web/plugins/`.**
 Son plugins del editor visual de Horizons. Solo cargan en dev. Modificarlos
 puede romper la integración con el builder. → [ADR-006](07-decisiones.md)
+
+---
+
+## Desarrollo del backend en local ✅ *(2026-09-02)*
+
+El binario `pocketbase` del repositorio es un **ELF de Linux**: no arranca en
+Windows. Se descargó el binario oficial de Windows de la **misma versión
+(0.39.8)** y se dejó como `apps/pocketbase/pocketbase.exe`, ignorado por git.
+
+```bash
+# checksum verificado contra el oficial del repositorio de PocketBase
+# 430f36b50b6c01849a7960e0b296bf7a5aebd3674a969d0d30ccafea789c5b9f
+```
+
+⚠️ **Se usa `pb_data_local/` como base de datos, NO `pb_data/`.** La real la
+creó el binario de Linux y puede tener una clave de cifrado que no tenemos.
+`pb_data_local/` está en `.gitignore`.
+
+### Levantar el backend
+
+```bash
+cd apps/pocketbase
+./pocketbase.exe serve --http=127.0.0.1:8090 --dir=./pb_data_local --migrationsDir=./pb_migrations --hooksDir=./pb_hooks --hooksWatch=false
+```
+
+Panel: `http://127.0.0.1:8090/_/`
+
+### Correo real desde local
+
+`pb_hooks/smtp-desde-entorno.pb.js` configura el SMTP leyendo variables de
+entorno. Con eso, Gmail envía igual desde localhost que desde producción — no
+depende del hosting.
+
+```bash
+SMTP_USERNAME="tucuenta@gmail.com" SMTP_PASSWORD="las 16 letras" ./pocketbase.exe serve ...
+```
+
+La contraseña tiene que ser una **contraseña de aplicación** de Google, con la
+verificación en dos pasos activada. La normal la rechaza con
+`535 Username and Password not accepted`.
+
+📌 Al activar el SMTP propio, `builder-mailer.pb.js` se aparta: ese hook solo
+desvía el correo a la API de Hostinger **cuando el SMTP está desactivado**.
 
 ---
 

@@ -380,6 +380,17 @@ export default defineConfig({
 	],
 	server: {
 		port: 3000,
+		// El frontend llama a /hcgi/platform, que en produccion resuelve la
+		// infraestructura de Horizons. En local no existe: sin este proxy la
+		// peticion cae en el fallback del SPA y el formulario siempre falla.
+		// docs/06-backlog.md -> P1-05.
+		proxy: {
+			'/hcgi/platform': {
+				target: process.env.POCKETBASE_URL || 'http://127.0.0.1:8090',
+				changeOrigin: true,
+				rewrite: (ruta) => ruta.replace(/^\/hcgi\/platform/, ''),
+			},
+		},
 		cors: { origin: AllowedEditorOrigins },
 		headers: {
 			'Cross-Origin-Embedder-Policy': 'credentialless',

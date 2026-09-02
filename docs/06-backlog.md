@@ -34,7 +34,7 @@
 | Prioridad | ✅ | 🟡 ⚠️ | ⬜ ⛔ | Total |
 |---|---|---|---|---|
 | **P0** | 4 | 3 | 1 | 8 |
-| **P1** | 3 | 1 | 2 | 6 |
+| **P1** | 4 | 1 | 1 | 6 |
 | **P2** | 6 | 0 | 6 | 12 |
 
 **Siguiente tarea recomendada:** **P0-06** — confirmar cómo sirve las rutas el
@@ -197,44 +197,40 @@ fuente, así que no pueden ser variables.
    publicar.
 ---
 
-### P0-07 · Verificar el backend del formulario en el despliegue — `M` — ⚠️ *(escrito, sin probar)*
+### P0-07 · Verificar el backend del formulario — `M` — 🟡 *(casi todo verificado, 2026-09-02)*
 
-**Todo lo de esta tarea está escrito pero NUNCA se ha ejecutado.** El binario
-`apps/pocketbase/pocketbase` es un ejecutable de **Linux** y no arranca en
-Windows, así que se programó contra la API declarada en `pb_data/types.d.ts` y
-solo se comprobó la sintaxis.
+Ya no está "sin probar": el backend se levantó en local con el binario de
+Windows y se probó de verdad.
 
-**Qué hay que verificar en el primer despliegue, en este orden:**
+| Comprobación | Estado |
+|---|---|
+| Las 10 migraciones aplican | ✅ incluidas las 4 nuevas |
+| Esquema con `phone`, `consent`, `consent_at` | ✅ |
+| `consent` obligatorio a nivel de base | ✅ |
+| Formulario → registro guardado | ✅ desde el navegador |
+| Hook de aviso se dispara | ✅ |
+| Plantilla del correo se construye | ✅ |
+| Conexión a `smtp.gmail.com:587` con STARTTLS | ✅ Gmail responde |
+| **Correo entregado** | ⏳ **falta la contraseña de aplicación de Gmail** |
 
-1. **Correr las migraciones ANTES de publicar el frontend.** El formulario ya
-   envía `phone`, `consent` y `consent_at`; si la colección aún no tiene esos
-   campos, los envíos fallan.
-   ```bash
-   npm run migrations:up --prefix apps/pocketbase
-   ```
-2. **Mandar un mensaje de prueba** desde `/contacto` y comprobar que llega el
-   aviso a **`rodriguezsilvamilton5@gmail.com`** (destino de los avisos, fijado
-   por el propietario el 2026-09-02). Se puede cambiar sin tocar código con la
-   variable de entorno `CONTACT_NOTIFY_TO`.
+**Dos bugs reales encontrados y corregidos:**
 
-   ⚠️ No confundir con `comercial@cuartadimension.co`, que sigue siendo el
-   correo **público** del sitio y sale de [`02-empresa.md`](02-empresa.md).
-3. **Probar el botón de WhatsApp** del correo.
-4. **Comprobar la trampa antibots**: un POST directo a la API con el campo
-   `website` relleno debe ser rechazado.
-5. **Comprobar el límite**: seis envíos seguidos desde la misma IP; el sexto
-   debe fallar.
-6. **Comprobar las copias**: al día siguiente debe existir una copia automática.
+1. 🐞 **Contexto aislado.** `ReferenceError: LINEAS is not defined`. Las
+   constantes del nivel superior del archivo no existen dentro del handler.
+   Documentado en [`03-arquitectura.md`](03-arquitectura.md) → trampa 2.
+2. 🐞 **El mailer de Hostinger se tragaba el envío.**
+   `unsupported protocol scheme ""`, porque `BUILDER_MAILER_API_URL` no está
+   definida. Se resuelve activando el SMTP propio: `builder-mailer.pb.js` solo
+   interviene cuando el SMTP está desactivado.
 
-📁 Archivos implicados:
-[`pb_hooks/contact-notify.pb.js`](../apps/pocketbase/pb_hooks/contact-notify.pb.js) ·
-las cuatro migraciones `1788*` de [`pb_migrations/`](../apps/pocketbase/pb_migrations/)
+**Lo que falta:** arrancar con `SMTP_USERNAME` y `SMTP_PASSWORD` (contraseña de
+aplicación de Google, con verificación en dos pasos activada) y mandar un
+mensaje de prueba. El último error registrado fue
+`535 Username and Password not accepted`, que es Gmail rechazando la clave
+falsa de prueba: la cadena entera funciona.
 
-⚠️ **Riesgo conocido sin resolver:** no pude confirmar si PocketBase ignora los
-campos desconocidos en el cuerpo de la petición o los rechaza. Si los rechaza y
-las migraciones no han corrido, el formulario deja de funcionar. De ahí que el
-orden de despliegue importe.
-
+📌 Sigue pendiente comprobar el **límite de 5 envíos por hora** y que las
+**copias automáticas** se generen.
 ---
 
 ### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ⬜
@@ -369,19 +365,23 @@ usa: quitarla junto con el resto del código muerto en **P2-06**.
 
 ---
 
-### P1-05 · El formulario de contacto no se puede probar en local — `S` — ⬜
+### P1-05 · El formulario de contacto no se puede probar en local — `S` — ✅ *(2026-09-02)*
 
-`/hcgi/platform` es una ruta que proxea la infraestructura de Horizons, no Vite.
-En local devuelve el `index.html` del SPA (`text/html`, 200), así que PocketBase
-nunca recibe la petición y el formulario **siempre falla**.
+Dos piezas:
 
-**Solución:** `server.proxy` en [`vite.config.js`](../apps/web/vite.config.js)
-apuntando `/hcgi/platform` → `http://localhost:8090`.
+1. **Proxy en Vite.** `/hcgi/platform` → `http://127.0.0.1:8090`, quitando el
+   prefijo. Antes la petición caía en el fallback del SPA y el formulario
+   fallaba siempre.
+2. **Binario de PocketBase para Windows.** Descargado el oficial de la misma
+   versión (0.39.8), checksum verificado contra el del repositorio de
+   PocketBase, dejado como `pocketbase.exe` e ignorado por git.
 
-⚠️ En Windows, además, el binario `apps/pocketbase/pocketbase` es un ejecutable
-**ELF de Linux** y no arranca. Para probarlo hace falta WSL, o el binario de
-PocketBase para Windows.
+⚠️ Se usa `pb_data_local/` como base, **no** `pb_data/`: la real la creó el
+binario de Linux y puede tener una clave de cifrado que no tenemos.
 
+**Verificado el 2026-09-02:** formulario rellenado en el navegador → registro
+guardado con teléfono, consentimiento y marca de tiempo → hook de aviso
+disparado.
 ---
 
 ### P1-06 · JSON-LD `Organization` en la home — `M` — 🟡 *(parcial, 2026-09-02)*

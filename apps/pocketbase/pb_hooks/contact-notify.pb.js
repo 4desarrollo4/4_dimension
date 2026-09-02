@@ -7,42 +7,22 @@
   hábiles", pero hasta ahora nada avisaba a nadie. Los mensajes se quedaban en
   la base de datos esperando a que alguien entrara al panel a mirarlos.
 
-  ⚠️ SIN PROBAR. El binario de PocketBase que trae el repositorio es un
-  ejecutable de Linux y no arranca en Windows, así que este hook se escribió
-  contra la API declarada en pb_data/types.d.ts pero no se ha ejecutado nunca.
-  Verifícalo en el primer despliegue enviando un mensaje de prueba.
-  Ver docs/06-backlog.md → P0-07.
+  ⚠️⚠️ LEE ESTO ANTES DE TOCAR NADA ⚠️⚠️
+
+  PocketBase ejecuta cada handler en un **contexto aislado**. Una constante o
+  una función declarada en el nivel superior de este archivo NO existe dentro
+  del handler: da "ReferenceError: X is not defined" en tiempo de ejecución.
+
+  Por eso todo lo que el handler necesita está declarado DENTRO del handler,
+  aunque se repita entre uno y otro. No lo "limpies" sacándolo fuera.
+
+  Se descubrió por las malas: el hook se disparaba, fallaba con
+  "LINEAS is not defined", el error quedaba en el log interno que nadie lee y
+  el correo no salía nunca. La solicitud sí se guardaba, así que por fuera todo
+  parecía correcto.
+
+  Verificado el 2026-09-02 con PocketBase 0.39.8 en Windows y base local.
 */
-
-// A donde llegan los avisos de nuevas solicitudes.
-// Se puede cambiar sin tocar codigo con la variable de entorno
-// CONTACT_NOTIFY_TO; si no esta definida, se usa este valor.
-// OJO: no es el correo publico del sitio (comercial@cuartadimension.co).
-// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
-const DESTINO_AVISOS = $os.getenv('CONTACT_NOTIFY_TO') || 'rodriguezsilvamilton5@gmail.com';
-
-// Etiquetas legibles: en la base, `line` se guarda como identificador.
-const LINEAS = {
-	calzado: 'Calzado',
-	ropa: 'Ropa',
-	dotaciones: 'Dotaciones',
-	otro: 'Otro proyecto',
-};
-
-// El contenido lo escribe un desconocido: nunca lo metas crudo en el HTML.
-function escaparHtml(valor) {
-	return String(valor ?? '')
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;');
-}
-
-// wa.me solo acepta dígitos, sin "+" ni espacios.
-function soloDigitos(valor) {
-	return String(valor ?? '').replace(/\D/g, '');
-}
 
 // --- Trampa antibots -------------------------------------------------------
 // El formulario incluye un campo oculto que una persona nunca ve ni rellena.
@@ -71,6 +51,33 @@ onRecordCreateRequest((e) => {
 // --- Aviso al equipo comercial ---------------------------------------------
 onRecordAfterCreateSuccess((e) => {
 	try {
+		// ↓↓↓ TODO ESTO VA DENTRO DEL HANDLER A PROPÓSITO. Ver la nota de arriba.
+
+		// A dónde llegan los avisos. Se puede cambiar sin tocar código con la
+		// variable de entorno CONTACT_NOTIFY_TO.
+		// OJO: no es el correo público del sitio (comercial@cuartadimension.co).
+		// Ese sigue siendo el que ven los visitantes y sale de docs/02-empresa.md.
+		const destino = $os.getenv('CONTACT_NOTIFY_TO') || 'rodriguezsilvamilton5@gmail.com';
+
+		// Etiquetas legibles: en la base, `line` se guarda como identificador.
+		const LINEAS = {
+			calzado: 'Calzado',
+			ropa: 'Ropa',
+			dotaciones: 'Dotaciones',
+			otro: 'Otro proyecto',
+		};
+
+		// El contenido lo escribe un desconocido: nunca lo metas crudo en el HTML.
+		const escapar = (valor) => String(valor === null || valor === undefined ? '' : valor)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+
+		// wa.me solo acepta dígitos, sin "+" ni espacios.
+		const soloDigitos = (valor) => String(valor === null || valor === undefined ? '' : valor).replace(/\D/g, '');
+
 		const r = e.record;
 
 		const nombre = r.getString('name');
@@ -84,8 +91,8 @@ onRecordAfterCreateSuccess((e) => {
 		// escribiera quien rellena el formulario. La empresa es opcional: si no
 		// la puso, la frase se arma sin ella en lugar de quedar coja.
 		const presentacion = empresa
-			? `Hola, soy <strong>${escaparHtml(nombre)}</strong> de la empresa <strong>${escaparHtml(empresa)}</strong> y mi línea de interés es <strong>${escaparHtml(linea)}</strong>.`
-			: `Hola, soy <strong>${escaparHtml(nombre)}</strong> y mi línea de interés es <strong>${escaparHtml(linea)}</strong>.`;
+			? `Hola, soy <strong>${escapar(nombre)}</strong> de la empresa <strong>${escapar(empresa)}</strong> y mi línea de interés es <strong>${escapar(linea)}</strong>.`
+			: `Hola, soy <strong>${escapar(nombre)}</strong> y mi línea de interés es <strong>${escapar(linea)}</strong>.`;
 
 		const whatsapp = soloDigitos(telefono);
 
@@ -98,7 +105,7 @@ onRecordAfterCreateSuccess((e) => {
 
 				<p style="margin:0 0 20px;font-size:16px;line-height:1.6;">${presentacion}</p>
 
-				<div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 24px;font-size:15px;line-height:1.7;white-space:pre-wrap;">${escaparHtml(mensaje)}</div>
+				<div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 24px;font-size:15px;line-height:1.7;white-space:pre-wrap;">${escapar(mensaje)}</div>
 
 				<p style="margin:0 0 32px;font-size:16px;">Muchas gracias.</p>
 
@@ -106,20 +113,20 @@ onRecordAfterCreateSuccess((e) => {
 					<tr>
 						<td style="padding:14px 16px 6px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;">Correo</td>
 						<td style="padding:14px 0 6px;font-size:14px;">
-							<a href="mailto:${escaparHtml(correo)}" style="color:#3d6bff;text-decoration:none;">${escaparHtml(correo)}</a>
+							<a href="mailto:${escapar(correo)}" style="color:#3d6bff;text-decoration:none;">${escapar(correo)}</a>
 						</td>
 					</tr>
 					<tr>
 						<td style="padding:6px 16px 6px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;">Teléfono</td>
 						<td style="padding:6px 0;font-size:14px;">
-							<a href="tel:${escaparHtml(telefono)}" style="color:#f2f4f8;text-decoration:none;">${escaparHtml(telefono || '—')}</a>
+							<a href="tel:${escapar(telefono)}" style="color:#f2f4f8;text-decoration:none;">${escapar(telefono || '—')}</a>
 						</td>
 					</tr>
 				</table>
 
 				${whatsapp
 					? `<p style="margin:24px 0 0;">
-							<a href="https://wa.me/${escaparHtml(whatsapp)}"
+							<a href="https://wa.me/${escapar(whatsapp)}"
 								style="display:inline-block;background:#25D366;color:#06180d;text-decoration:none;font-weight:bold;font-size:14px;padding:12px 22px;">
 								Escribir por WhatsApp
 							</a>
@@ -138,16 +145,16 @@ onRecordAfterCreateSuccess((e) => {
 				address: $app.settings().meta.senderAddress,
 				name: $app.settings().meta.senderName,
 			},
-			to: [{ address: DESTINO_AVISOS }],
+			to: [{ address: destino }],
 			// `mailer.Message` no tiene campo replyTo: se pone por cabecera.
-			// Ojo: builder-mailer.pb.js reescribe el Reply-To cuando el SMTP
-			// propio está desactivado, así que esto es "en la medida de lo posible".
 			headers: { 'Reply-To': correo },
 			subject: `Nueva solicitud de contacto — ${nombre}`,
-			html,
+			html: html,
 		});
 
 		$app.newMailClient().send(message);
+
+		$app.logger().info('Aviso de contacto enviado', 'destino', destino, 'de', correo);
 	} catch (error) {
 		// Nunca tumbes la petición por un fallo de correo: el mensaje del
 		// visitante ya está guardado y perderlo sería mucho peor que no avisar.

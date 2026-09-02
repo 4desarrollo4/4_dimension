@@ -34,6 +34,97 @@
 
 ---
 
+## 2026-09-02 · El backend corriendo en local, y dos bugs que habrían llegado a producción
+
+**Por qué esta sesión existe**
+
+El propietario cuestionó mi afirmación de que no se podían enviar correos, y
+puso el ejemplo de otro proyecto suyo que envía por Gmail SMTP con contraseña
+de aplicación desde desarrollo local, antes de desplegar.
+
+**Tenía razón y yo estaba equivocado.** Mi conclusión ("no hay backend, luego no
+hay correo") mezclaba dos cosas distintas: que el binario de Linux no arranca en
+Windows —cierto— y que por tanto el correo fuera imposible —falso—. Gmail SMTP
+funciona desde cualquier sitio con internet.
+
+**Qué se hizo**
+
+Se comprobó primero el terreno en vez de suponerlo: sin WSL, sin Docker, sin
+nodemailer. Pero PocketBase publica binario oficial de Windows.
+
+1. Descargado `pocketbase_0.39.8_windows_amd64`, **checksum verificado** contra
+   el oficial (`430f36b5…`). Instalado como `pocketbase.exe`, ignorado por git.
+2. Base de datos **aparte** (`pb_data_local/`), para no tocar la real: la creó
+   el binario de Linux y puede tener una clave de cifrado que no tenemos.
+3. Las 10 migraciones aplican, **incluidas las 4 que se habían escrito a
+   ciegas**. El esquema quedó con `phone`, `consent` y `consent_at`, y
+   `consent` es obligatorio a nivel de base.
+4. **P1-05 cerrado:** proxy `/hcgi/platform` → `:8090` en `vite.config.js`.
+5. Nuevo `pb_hooks/smtp-desde-entorno.pb.js`: configura el SMTP desde variables
+   de entorno, mismo patrón que el otro proyecto. La contraseña nunca entra al
+   repositorio.
+
+**El formulario funcionó de extremo a extremo por primera vez.** Rellenado en el
+navegador → "Mensaje recibido." → registro en la base con todos los campos.
+
+**🐞 Bug 1 — Los hooks corren en un contexto aislado**
+
+`ReferenceError: LINEAS is not defined`.
+
+PocketBase ejecuta cada handler en su propio contexto: **las constantes del
+nivel superior del archivo no existen dentro de la función**. Todo lo que el
+handler necesita tiene que declararse dentro, aunque se repita.
+
+Lo grave es cómo fallaba: el hook se disparaba, reventaba, el error quedaba en
+el log interno de PocketBase que nadie mira, y la solicitud se guardaba
+igualmente. **Por fuera todo parecía correcto y el correo no salía nunca.**
+Documentado en `03-arquitectura.md` como trampa 2.
+
+**🐞 Bug 2 — El mailer de Hostinger se tragaba el envío**
+
+Arreglado el primero, apareció `Post "/api/v2/email": unsupported protocol
+scheme ""`. Es `builder-mailer.pb.js` desviando el correo a la API de Hostinger
+usando `BUILDER_MAILER_API_URL`, que no está definida.
+
+Ese hook solo interviene **cuando el SMTP propio está desactivado**. Al
+activarlo, se aparta.
+
+**La cadena, verificada hasta Gmail**
+
+Con credenciales deliberadamente falsas, para no usar ninguna real:
+
+```
+535 5.7.8 Username and Password not accepted ... gsmtp
+```
+
+Eso es **el servidor de Gmail respondiendo**: PocketBase conectó a
+`smtp.gmail.com:587`, negoció STARTTLS y Gmail rechazó la clave. Todo funciona
+salvo la credencial real.
+
+**Estado del backlog**
+
+P0: 4 ✅, 3 🟡, 1 ⬜. P1: 4 ✅, 1 ⚠️, 1 ⛔. P2: 8 ✅, 5 ⬜.
+
+**Decisiones tomadas**
+
+Ninguna nueva.
+
+**Dónde quedó / qué sigue**
+
+Arrancar PocketBase con `SMTP_USERNAME` y `SMTP_PASSWORD` reales y mandar un
+mensaje de prueba. Es lo único que separa al formulario de estar terminado.
+
+Falta también comprobar el límite de 5 envíos por hora y las copias automáticas.
+
+**Lección**
+
+Dos veces en esta sesión di por imposible algo que solo era "no está montado".
+La diferencia entre las dos afirmaciones es enorme, y la segunda se comprueba
+en diez minutos. Comprobar el terreno —¿hay WSL? ¿hay Docker? ¿publica binario
+de Windows?— antes de concluir.
+
+---
+
 ## 2026-09-02 · Responsive en todas las dimensiones y SEO técnico
 
 **Qué se hizo**

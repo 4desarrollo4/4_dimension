@@ -27,3 +27,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Base de datos local de pruebas (Windows). No es la real.
+apps/pocketbase/pb_data_local/
