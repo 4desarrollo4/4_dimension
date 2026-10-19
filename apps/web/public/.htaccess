@@ -1,0 +1,96 @@
+# =========================================================================
+#  Configuración del sitio en Apache/LiteSpeed.
+#
+#  ⚠️ Este archivo vive en apps/web/public/, así que el build lo copia a la
+#     raíz del sitio. NO lo confundas con apps/web/public/api/.htaccess, que
+#     hace otra cosa: proteger la configuración del formulario.
+#
+#  Si algo se rompe tras subirlo, BÓRRALO del servidor: el sitio vuelve al
+#  comportamiento anterior al instante.
+# =========================================================================
+
+
+# --- 1 · Rutas sin barra final -------------------------------------------
+#
+# El prerender genera una carpeta por ruta (`nosotros/index.html`). Sin esta
+# regla, Apache responde a `/nosotros` con un 301 hacia `/nosotros/`, y eso
+# choca con el resto del sitio:
+#
+#   · el sitemap entrega  https://4dimensionsas.com/nosotros   (sin barra)
+#   · la etiqueta canonical dice  /nosotros                    (sin barra)
+#   · pero el servidor sirve      /nosotros/                   (con barra)
+#
+# Google entra por el sitemap, lo redirigen, y la página de destino le dice
+# que su versión buena es la que redirige. Lo reportó como **Error de
+# redirección** el 2026-09-07, con 5 de 6 páginas sin indexar. La home era la
+# única sana porque `/` y `` son la misma URL.
+#
+# Con esto, `/nosotros` sirve el archivo directamente: sin redirección, y la
+# URL que Google recibe es la misma que el canonical declara.
+# Ver docs/06-backlog.md → P1-08.
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+
+	# DirectorySlash Off solo si mod_rewrite existe: si no, dejamos que Apache
+	# siga redirigiendo, que es peor pero funciona. Nunca un 404.
+	<IfModule mod_dir.c>
+		DirectorySlash Off
+	</IfModule>
+
+	# No tocar nada que ya sea un archivo real: assets, imágenes,
+	# sitemap.xml, robots.txt y api/contacto.php entran por aquí.
+	RewriteCond %{REQUEST_FILENAME} !-f
+
+	# Actuar solo si esa carpeta tiene su index.html.
+	RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+
+	# Reescritura interna, no redirección: el navegador no ve ningún 301.
+	RewriteRule ^(.+?)/?$ /$1/index.html [L]
+</IfModule>
+
+<IfModule mod_dir.c>
+	DirectoryIndex index.html
+</IfModule>
+
+
+# --- 2 · Cabeceras de seguridad ------------------------------------------
+#
+# Auditoría del 2026-09-03: el hosting no enviaba ninguna. Estas se pueden
+# poner sin riesgo porque no restringen lo que la página carga, solo cómo la
+# trata el navegador.
+#
+# 📌 Falta una Content-Security-Policy, que es la que de verdad frena un XSS.
+#    No va aquí porque hay que calibrarla y probarla: la página usa
+#    fonts.googleapis.com, imágenes de images.hostinger.com y 48 atributos
+#    `style` en línea. Mal ajustada, deja el sitio en blanco.
+
+<IfModule mod_headers.c>
+
+	# Obliga a HTTPS durante un año. El certificado ya está activo y el sitio
+	# solo se sirve por HTTPS, así que no deja a nadie fuera.
+	# Sin `preload` a propósito: eso es irreversible durante meses.
+	Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# El navegador respeta el Content-Type declarado y no lo adivina.
+	Header always set X-Content-Type-Options "nosniff"
+
+	# Nadie puede meter el sitio en un iframe desde otro dominio. Sin esto,
+	# una página ajena puede superponerlo y capturar clics (clickjacking).
+	Header always set X-Frame-Options "SAMEORIGIN"
+
+	# Al salir hacia otro dominio no se filtra la ruta completa que se veía.
+	Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+	# El sitio no usa ninguna de estas capacidades. Negarlas cierra la puerta
+	# por si algún día se cuela un script de terceros.
+	Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+
+</IfModule>
+
+
+# --- 3 · Sin listados de directorio --------------------------------------
+# El hosting ya los tiene desactivados, pero esto lo garantiza aunque cambie
+# la configuración del servidor. Además es lo que hace segura la línea
+# `DirectorySlash Off` de arriba.
+Options -Indexes
