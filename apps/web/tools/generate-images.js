@@ -6,7 +6,13 @@
   Se corre a mano, no en cada build: los resultados se versionan en public/.
   Vuelve a correrlo solo si cambia el logo.
 
+      npm i -D sharp --prefix apps/web    # solo si hace falta regenerar
       node tools/generate-images.js
+
+  ⚠️ `sharp` YA NO es una dependencia del proyecto. Ocupaba 28 MB y este script
+  no forma parte del build: los PNG y el JPG que produce ya están versionados
+  en public/. Instálala con la línea de arriba solo si cambia el logo, y
+  desinstálala después (`npm un -D sharp --prefix apps/web`).
 
   ── Qué produce ────────────────────────────────────────────────────────────
 
