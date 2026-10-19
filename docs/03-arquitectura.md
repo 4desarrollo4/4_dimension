@@ -6,9 +6,15 @@
 
 ## Origen del proyecto
 
-Generado con **Hostinger Horizons** (constructor con IA). Eso explica varias
-cosas del repositorio que no son decisiones de diseño sino residuo del
-scaffold — ver *Trampas conocidas* abajo.
+Generado con **Hostinger Horizons** (constructor con IA), que dejó el sitio a
+medias. Desde entonces se edita en el editor de código, y el **2026-09-02 se
+retiró todo el andamiaje que quedaba** del constructor: 45 dependencias sin
+usar, 61 archivos de código muerto, los 6 plugins de Vite del editor visual y
+los 5 scripts que se inyectaban en el HTML de producción. Ver **ADR-011**.
+
+Ya no queda residuo del scaffold: el proyecto declara **6 dependencias de
+ejecución** —bajaron a 6 al retirar `pocketbase` del frontend, **ADR-012**— y
+`vite.config.js` tiene 40 líneas.
 
 ---
 
@@ -20,12 +26,12 @@ scaffold — ver *Trampas conocidas* abajo.
 | Frontend | React **18.3** + Vite **7.3** (JSX, sin TypeScript) |
 | Enrutado | react-router-dom **7** (SPA con prerender) |
 | Estilos | Tailwind CSS **3.4** + tokens CSS en `src/index.css` |
-| Componentes | shadcn/ui sobre Radix UI (~55 componentes en `src/components/ui/`, **todos sin usar**) |
+| Componentes | Propios. shadcn/ui y Radix se retiraron el 2026-09-02 (ADR-011); `components.json` sigue ahí por si hiciera falta volver |
 | Animación | framer-motion **11** |
 | Iconos | lucide-react |
 | Meta tags | **react-helmet-async** |
 | Prerender | `renderToString` + `StaticRouter`, script propio |
-| Backend | PocketBase **0.39.8** |
+| Backend del formulario | **PHP 8 + MySQL** en el hosting *(desde 2026-09-02, ADR-012)*. PocketBase 0.39.8 se conserva en `apps/pocketbase/` sin usar |
 | Monorepo | npm workspaces (`apps/*`) |
 | Control de versiones | Git *(inicializado el 2026-09-01)* |
 
@@ -42,25 +48,41 @@ C:\4 dimension\
 ├── apps/
 │   ├── web/                  ← frontend
 │   │   ├── index.html        ← plantilla + meta de fallback
-│   │   ├── vite.config.js
-│   │   ├── public/           ← favicon.svg, llms.txt
-│   │   ├── plugins/          ← plugins de Horizons (NO tocar)
+│   │   ├── vite.config.js    ← incluye el proxy a PocketBase
+│   │   ├── public/           ← Vite copia esta carpeta ENTERA al build
+│   │   │   ├── api/              ← backend del formulario
+│   │   │   │   ├── contacto.php      ← guarda en MySQL + manda los 2 correos
+│   │   │   │   ├── smtp.php          ← cliente SMTP sin dependencias
+│   │   │   │   ├── config.example.php ← plantilla; el real NO se versiona
+│   │   │   │   └── .htaccess         ← solo contacto.php es alcanzable
+│   │   │   ├── logo-4d.png       ← el logo real (ya no del CDN)
+│   │   │   ├── og-image.jpg      ← 1200×630, lo que se ve al compartir
+│   │   │   ├── favicon.ico      ← 16/32/48; sin él /favicon.ico daba 404
+│   │   │   ├── favicon-32.png  favicon-192.png  apple-touch-icon.png
+│   │   │   ├── googlec3de623c….html ← verificación de Search Console (P1-07)
+│   │   │   └── llms.txt          ← generado
 │   │   ├── tools/
 │   │   │   ├── generate-llms.js
-│   │   │   └── prerender.js  ← genera las 6 rutas + sitemap + robots
+│   │   │   ├── generate-images.js ← iconos + og-image desde el logo
+│   │   │   └── prerender.js       ← 6 rutas + sitemap + robots
 │   │   └── src/
 │   │       ├── App.jsx           ← rutas (SIN Router)
 │   │       ├── main.jsx          ← entrada de navegador
 │   │       ├── entry-server.jsx  ← entrada de prerender
 │   │       ├── index.css         ← tokens de diseño
-│   │       ├── components/       ← propios
-│   │       ├── components/ui/    ← shadcn (generado, sin usar)
+│   │       ├── components/       ← los 11 propios (JsonLd, Seo, Reveal…)
 │   │       ├── data/projects.js  ← datos de proyectos
 │   │       ├── lib/site.js       ← dominio, rutas y OG
 │   │       └── pages/            ← 6 páginas
-│   └── pocketbase/           ← backend
-│       ├── pb_migrations/  pb_hooks/  pb_data/
-└── vault/temp/SESSION_JOURNAL.md
+├── db/schema.sql             ← tabla contact_requests (FUERA de public/)
+│   └── pocketbase/           ← sin usar desde 2026-09-02; camino de vuelta a VPS
+│       ├── pocketbase.exe    ← el único binario (sin versionar)
+│       ├── pb_data/          ← la real, NO se toca
+│       ├── pb_data_local/    ← la de desarrollo (sin versionar)
+│       ├── pb_migrations/    ← 10 migraciones
+│       └── pb_hooks/
+│           ├── contact-notify.pb.js     ← el correo al cliente
+│           └── smtp-desde-entorno.pb.js ← SMTP por variables de entorno
 ```
 
 ---
@@ -69,8 +91,10 @@ C:\4 dimension\
 
 | Comando | Qué hace |
 |---|---|
-| `npm run dev` | Web `:3000` + PocketBase `:8090` en paralelo |
-| `npm run dev --prefix apps/web` | Solo el frontend |
+| `npm run dev --prefix apps/web -- --port 3100` | Frontend en `:3100` (el puerto que se usa) |
+| `.\pocketbase.exe serve --dir=./pb_data_local …` | Backend en `:8090` — ver *Desarrollo del backend* |
+| `node tools/generate-images.js` | Regenera iconos y `og-image.jpg` desde el logo |
+| `npm run dev` | ⚠️ **No lo uses**: intenta arrancar el binario de Linux |
 | `npm run build --prefix apps/web` | **Build completo con prerender** |
 | `npm run start --prefix apps/web` | Sirve el build ⚠️ ver aviso abajo |
 | `npm run lint --prefix apps/web` | ESLint |
@@ -136,12 +160,24 @@ proyecto. Ver [ADR-004](07-decisiones.md).
 
 ---
 
-## Backend — PocketBase
+## Backend del formulario — PHP + MySQL
 
-- Sirve en `0.0.0.0:8090`.
-- El frontend lo consume vía `/hcgi/platform` ([`src/lib/pocketbaseClient.js`](../apps/web/src/lib/pocketbaseClient.js)).
+Desde el **2026-09-02** (**ADR-012**). El sitio se publica en alojamiento
+compartido, donde PocketBase no puede correr.
 
-### Colección `contact_requests`
+- El frontend hace `POST /api/contacto.php`, una ruta relativa que sirve el
+  mismo hosting. En local la proxea `vite.config.js` a un PHP en `:8099`.
+- La tabla la crea [`db/schema.sql`](../db/schema.sql). Las solicitudes se
+  consultan en **phpMyAdmin**.
+- Para ponerlo en marcha: [`06-backlog.md`](06-backlog.md) → **P0-08**.
+
+## Backend anterior — PocketBase *(sin usar)*
+
+`apps/pocketbase/` se conserva intacto como camino de vuelta si algún día se
+pasa a un VPS, pero **el frontend ya no lo usa**. Servía en `0.0.0.0:8090` y el
+frontend lo consumía vía `/hcgi/platform`.
+
+### Colección `contact_requests` *(el esquema que heredó MySQL)*
 
 | Campo | Tipo | Reglas |
 |---|---|---|
@@ -208,30 +244,30 @@ ver [`08-bitacora.md`](08-bitacora.md), 2026-09-02.
 Si un handler necesita algo, decláralo **dentro**, aunque se repita entre
 handlers. No lo "limpies" sacándolo fuera.
 
-**3. `console.warn` está silenciado globalmente.**
-[`vite.config.js`](../apps/web/vite.config.js) hace `console.warn = () => {}`.
-Si depuras avisos y no ves nada, es por esto. Ya ocultó un bug real durante
-meses (**P2-07**).
+**3. ~~`console.warn` silenciado~~ · ~~scripts de Horizons en producción~~ ·
+~~código muerto~~ · ~~no tocar `plugins/`~~** — ✅ resueltas el 2026-09-02.
 
-**4. `vite.config.js` inyecta scripts de Horizons también en producción.**
-El `index.html` del build pesa 8.7 KB en vez de ~1 KB. → **P2-11**
+Eran las cuatro trampas del andamiaje de Horizons y desaparecieron juntas al
+retirarlo (**ADR-011**, que sustituye al ADR-006). Consecuencia práctica: **el
+build ahora sí muestra los avisos**. El de Rollup sobre `import React from
+'react'` es benigno — lo emite el runtime JSX automático y siempre estuvo ahí,
+oculto tras el `console.warn = () => {}`.
 
-**5. Código muerto del scaffold.**
-`AuthContext.jsx`, `ProtectedRoute.jsx`, los ~55 componentes de `ui/` (ninguno
-importado) y la dependencia `react-helmet`. `knip.json` está configurado para
-detectarlo. → **P2-06**
-
-**6. No tocar `apps/web/plugins/`.**
-Son plugins del editor visual de Horizons. Solo cargan en dev. Modificarlos
-puede romper la integración con el builder. → [ADR-006](07-decisiones.md)
+**4. `sharp` ya no está instalada.**
+[`tools/generate-images.js`](../apps/web/tools/generate-images.js) la necesita,
+pero no forma parte del build y sus resultados están versionados en `public/`.
+Ocupaba 28 MB. El propio script explica cómo reinstalarla si cambia el logo.
 
 ---
 
 ## Desarrollo del backend en local ✅ *(2026-09-02)*
 
-El binario `pocketbase` del repositorio es un **ELF de Linux**: no arranca en
-Windows. Se descargó el binario oficial de Windows de la **misma versión
-(0.39.8)** y se dejó como `apps/pocketbase/pocketbase.exe`, ignorado por git.
+El binario `pocketbase` que traía el repositorio era un **ELF de Linux**: no
+arranca en Windows. Se descargó el binario oficial de Windows de la **misma
+versión (0.39.8)** y se dejó como `apps/pocketbase/pocketbase.exe`, ignorado por
+git. El ELF de Linux **se borró el 2026-09-02** — ocupaba 31 MB sin poder
+usarse. Si algún día hiciera falta para desplegar en Linux, se baja de las
+publicaciones oficiales de PocketBase.
 
 ```bash
 # checksum verificado contra el oficial del repositorio de PocketBase
@@ -250,6 +286,22 @@ cd apps/pocketbase
 ```
 
 Panel: `http://127.0.0.1:8090/_/`
+
+**Superusuario de la base local.** 🔒 **Sus credenciales no se escriben aquí**:
+el repositorio es público y los rastreadores de credenciales indexan cualquier
+contraseña que aparezca en un archivo versionado.
+
+La migración `1764579159_create_superuser.js` lo crea leyendo dos variables de
+entorno, `PB_SUPERUSER_EMAIL` y `PB_SUPERUSER_PASSWORD`. Defínelas antes de
+levantar `pb_data_local` por primera vez:
+
+```bash
+$env:PB_SUPERUSER_EMAIL = "tu-correo@ejemplo.com"
+$env:PB_SUPERUSER_PASSWORD = "la-que-elijas"
+```
+
+Si borras esa carpeta y la vuelves a crear, el superusuario se regenera con
+esas mismas variables. Es la base **local de pruebas**: no contiene nada real.
 
 ### Correo — el buzón está en Hostinger, NO en Google ✅ *(2026-09-02)*
 
@@ -274,12 +326,24 @@ Hostinger.
 que guarda solo errores: silencio tras un envío significa que salió bien. Si
 buscas confirmación, mírala en la carpeta *Enviados* del buzón.
 
-### Un solo correo
+### Dos correos *(desde el 2026-09-02 por la tarde)*
 
-El formulario envía **únicamente** el acuse de recibo al cliente, desde
-`info@4dimensionsas.com`. No hay aviso interno al equipo: se quitó el
-2026-09-02 por decisión del propietario. Ver
-[`pb_hooks/contact-notify.pb.js`](../apps/pocketbase/pb_hooks/contact-notify.pb.js).
+El formulario envía **dos**, ambos desde `info@4dimensionsas.com`:
+
+1. **Aviso interno** a `info@`, con `Reply-To` del cliente — responder desde el
+   buzón le escribe directamente a quien preguntó.
+2. **Acuse de recibo** al cliente, con el mismo texto y diseño que enviaba el
+   hook de PocketBase.
+
+Por la mañana se había dejado un solo correo, porque el equipo se enteraba por
+la colección de PocketBase. Al pasar a alojamiento compartido esa colección
+desaparece del servidor, así que el aviso interno vuelve a ser necesario.
+Ver **ADR-012** y [`api/contacto.php`](../apps/web/public/api/contacto.php).
+
+**El orden importa:** primero se guarda en MySQL, después el aviso, después el
+acuse. Si el correo falla, la solicitud sigue guardada y `mail_status` dice qué
+pasó. Si se topa el límite de envíos por hora, se guarda y se omiten los correos
+— nunca se pierde una solicitud.
 
 ---
 
@@ -318,8 +382,8 @@ interna. → **P0-06**
 ## Git
 
 Repositorio inicializado el **2026-09-01**. `.gitignore` excluye
-`node_modules/`, `dist/`, `apps/pocketbase/pb_data/`, el binario `pocketbase` y
-`vault/temp/SESSION_JOURNAL.md`. `.gitattributes` normaliza los finales de línea
+`node_modules/`, `dist/`, `apps/pocketbase/pb_data/` y los binarios de
+PocketBase. `.gitattributes` normaliza los finales de línea
 a LF (el repositorio se trabaja en Windows).
 
 No hay remoto configurado.

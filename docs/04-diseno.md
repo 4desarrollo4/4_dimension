@@ -1,6 +1,6 @@
 # 04 — Sistema de diseño
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-09-02
 
 > **Qué está cerrado y qué no.**
 >
@@ -141,7 +141,10 @@ margen**: si aclaras un fondo, vuelve a medirlo.
 | `ScrollToTop.jsx` | Scroll al tope al navegar; respeta el hash para las anclas |
 | `Seo.jsx` | OG/Twitter/canonical. Se usa en las 6 páginas; toma el dominio de `lib/site.js` |
 
-`components/ui/` es shadcn generado — no lo edites a mano.
+Estos 11 son **todos** los componentes del sitio. La carpeta `components/ui/`
+de shadcn se borró el 2026-09-02: eran 55 componentes que nadie importaba
+(**ADR-011**). Si algún día hiciera falta uno, el CLI de shadcn lo regenera —
+`components.json` sigue en su sitio.
 
 ---
 

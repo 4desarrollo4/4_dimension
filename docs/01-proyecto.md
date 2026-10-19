@@ -1,6 +1,6 @@
 # 01 — El proyecto
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-09-02
 
 ---
 
@@ -52,8 +52,8 @@ Seis rutas, todas públicas:
 | `/contacto` | `ContactoPage.jsx` | Datos de contacto + formulario |
 
 **No hay** área privada, ni blog, ni catálogo de productos, ni carrito.
-`AuthContext` y `ProtectedRoute` existen en el código pero **no se usan** —
-son residuo del scaffold de Horizons.
+`AuthContext` y `ProtectedRoute` eran residuo del scaffold de Horizons y se
+borraron el 2026-09-02 (**ADR-011**).
 
 ---
 

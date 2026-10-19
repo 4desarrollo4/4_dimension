@@ -1,5 +1,7 @@
 # Documentación del proyecto 4D
 
+**Última actualización:** 2026-09-02
+
 Este directorio es **el estado del proyecto**. El sitio se trabaja en sesiones
 de chat que no recuerdan nada de la anterior, así que lo que no esté escrito
 aquí, se pierde.
@@ -21,6 +23,7 @@ Este archivo explica **cómo mantener** la documentación.
 | 6 | [`03-arquitectura.md`](03-arquitectura.md) | Vas a tocar código, build o backend |
 | 7 | [`04-diseno.md`](04-diseno.md) | Vas a tocar estilos o añadir una sección |
 | 8 | [`07-decisiones.md`](07-decisiones.md) | Algo te parece mal hecho — mira si fue deliberado |
+| 9 | [`09-despliegue.md`](09-despliegue.md) | Vas a publicar el sitio o a tocar el formulario en producción |
 
 **Mínimo antes de editar cualquier cosa:** 1, 2, 3, 4 y 5.
 
@@ -33,6 +36,7 @@ Este archivo explica **cómo mantener** la documentación.
 | Un dato real de la empresa | `02-empresa.md` **primero**, luego el código |
 | Texto visible del sitio | `05-contenido-y-seo.md` si cambia una regla |
 | Stack, comandos o backend | `03-arquitectura.md` |
+| Algo del despliegue o del hosting | `09-despliegue.md` |
 | Tokens, tipografía o un patrón visual | `04-diseno.md` |
 | El estado de una tarea | `06-backlog.md` |
 | Algo estructural y costoso de revertir | `07-decisiones.md` (ADR nuevo) |

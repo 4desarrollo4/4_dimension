@@ -1,6 +1,6 @@
 # 08 — Bitácora de sesiones
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-09-02
 
 ---
 
@@ -31,6 +31,293 @@
 > - **No borres entradas antiguas.** Este archivo es el historial.
 > - Si algo se verificó midiéndolo, escribe el dato. Si es una impresión,
 >   dilo así. La bitácora solo sirve si es fiable.
+
+---
+
+## 2026-09-02 · El formulario deja PocketBase: PHP + MySQL para publicar en Hostinger
+
+**Origen.** Tras la limpieza del andamiaje, el propietario preguntó si podía
+publicar en su plan de Hostinger. Sí — pero al revisarlo apareció un problema
+que no venía de la limpieza: el formulario llamaba a `/hcgi/platform`, una ruta
+que **solo resuelve la infraestructura de Horizons**. En alojamiento compartido
+no existe, y el formulario habría fallado en el primer envío.
+
+**Una corrección importante durante la sesión**
+
+Primero se planteó una salida sin base de datos, solo correos. El propietario
+preguntó si de verdad no hacía falta base de datos. **Tenía razón, y la
+respuesta inicial se quedó corta**: lo que no puede correr en alojamiento
+compartido es PocketBase (binario de Go), no una base de datos. **El plan
+incluye MySQL** — se comprueba en la propia oferta, que ofrece WordPress, y
+WordPress no arranca sin MySQL.
+
+Con MySQL sobre la mesa, la decisión cambió, y por dos razones de peso:
+
+1. La **prueba del consentimiento** (Ley 1581 de 2012 y Decreto 1074 de 2015,
+   que obliga a *conservarla*) es mucho más sólida en una fila fechada que en un
+   correo suelto.
+2. La regla que el propio hook llevaba escrita — *«Nunca tumbes la petición por
+   un fallo de correo»* — solo se sostiene si hay dónde guardar.
+
+**Qué se construyó**
+
+| Pieza | Qué hace |
+|---|---|
+| `db/schema.sql` | Tabla `contact_requests`. **Fuera de `public/`**: ahí sería descargable |
+| `api/contacto.php` | Valida → guarda en MySQL → avisa a `info@` → acusa recibo al cliente |
+| `api/smtp.php` | Cliente SMTP sin dependencias (no hay Composer en compartido) |
+| `api/config.php` | Credenciales. No versionado; se pone a mano en el servidor |
+| `api/.htaccess` | Solo `contacto.php` es alcanzable desde el navegador |
+
+Va en `api/` y no como `/contacto.php` **a propósito**: Apache con MultiViews
+podría resolver `/contacto` como `contacto.php` en vez de `contacto/index.html`,
+llevándose por delante la página de contacto.
+
+**Decisión del propietario:** vuelven los **dos correos**. El aviso interno se
+había quitado esa misma mañana porque el equipo se enteraba por la colección de
+PocketBase; al desaparecer esa colección del servidor, ese correo pasa a ser la
+vía principal de aviso.
+
+**Cómo se verificó**
+
+Se descargó PHP 8.3.33 portable (hash SHA-256 comprobado contra el oficial) a la
+carpeta temporal, y se levantó un **MySQL 8.4.3 aislado en el puerto 3399** con
+su propio directorio de datos — el MySQL del equipo no se tocó.
+
+| Prueba | Resultado |
+|---|---|
+| Endpoint: método, formato, validación, trampa antibots | **25 de 25** |
+| Diálogo SMTP contra servidor con TLS real y certificado verificado | **18 de 18** |
+| Envío completo desde el navegador | fila guardada + **2 correos capturados**, `mail_status = 'aviso:ok acuse:ok'` |
+| Escapado de HTML malicioso en los correos | `<script>`, `<img onerror>` y un enlace de phishing salen como texto |
+| Límite por hora | las 6 primeras se guardan y envían; de ahí en adelante se guardan y se omite el correo |
+| Salvaguarda del build | un `config.php` señuelo **no** sobrevive a `npm run build` |
+
+La prueba más útil fue la del fallo: con el SMTP caído, la solicitud **se guardó
+igual**, el error quedó en `mail_status` y el visitante vio «Mensaje recibido».
+Es exactamente el comportamiento que se buscaba.
+
+**Estado del backlog**
+- P0-08 (poner en marcha el formulario en el hosting) → ⬜ **nuevo, y bloquea el
+  formulario en producción**
+- P1-05 → anotado: el proxy de Vite ahora apunta a PHP en `:8099`
+
+**Decisiones tomadas**
+- **ADR-012** · El formulario pasa de PocketBase a PHP + MySQL.
+
+**Dónde quedó / qué sigue**
+
+📌 **Cierre de sesión: auditoría de coherencia entre código y documentos.**
+Se comprobó que cada afirmación de los docs coincide con el disco: archivos que
+se citan y existen, los que se dicen borrados y no están, columnas del `INSERT`
+contra `schema.sql`, enlaces internos y fechas. Se corrigieron cuatro cifras que
+habían quedado atrás — `CLAUDE.md` y `03-arquitectura.md` decían «7 dependencias
+y 24 archivos» cuando ya eran **6 y 23** tras retirar `pocketbase`, y
+`09-despliegue.md` decía «20 archivos, 909 KB» cuando el build son **22 y
+918 KB** al haberse añadido `favicon.ico` y el archivo de verificación de Google.
+
+También se generó **`favicon.ico`** (16/32/48 desde el logo) porque
+`/favicon.ico` devolvía 404, y se declaró en `index.html`. No era la causa de que
+Google no muestre aún el logo —eso es cuestión de días, el favicon se rastrea
+aparte— pero cerraba un 404 innecesario.
+
+**El sitio quedó indexado en Google el mismo día**, con su título y descripción
+correctos. Propiedad verificada en Search Console por archivo HTML, que vive en
+`apps/web/public/` para que viaje en cada build y no se pierda al republicar.
+
+---
+
+🎉 **DESPLIEGUE COMPLETO el 2026-09-02.** El sitio está en línea en
+`4dimensionsas.com` **y el formulario funciona de extremo a extremo**: envío
+desde el navegador → «Mensaje recibido» → fila en `contact_requests` con
+`mail_status = aviso:ok acuse:ok` → los dos correos entregados. **P0-06 y P0-08
+cerrados.**
+
+### Los cuatro tropiezos, y qué los causó de verdad
+
+Ninguno fue del código del proyecto. Los cuatro merecen quedar escritos:
+
+1. **PHP no aparecía en hPanel.** El dominio estaba registrado pero **sin sitio
+   de hosting**. En Hostinger, PHP se configura por **sitio**, no por dominio, y
+   los sitios del constructor (*Modo agéntico*) ni siquiera tienen Panel. Hubo
+   que crear un sitio vacío para el dominio.
+
+2. **`config.php` con error de sintaxis.** **Chrome traducía el código PHP** en
+   el editor del administrador de archivos: mostraba y guardaba `declarar` por
+   `declare`, `devolver` por `return` y `'usuario'` por `'user'`. También
+   traducía los nombres de archivo (`assets`→`activos`, `index.html`→
+   `índice.html`), lo que provocó un 404 al buscar un archivo por su nombre real.
+   **Desactivar Google Traductor antes de editar código en el navegador.**
+
+3. **SMTP `535 authentication failed`.** Hostinger **sí** ofrece contraseñas de
+   aplicación para correo — lo dimos por descartado y era justo lo correcto. La
+   que estaba puesta tenía una mayúscula cambiada respecto a la generada
+   (`iKyq` en vez de `ikyq`). Generar una nueva y pegarla con el botón *Copiar*.
+
+4. **Un 500 imposible de cazar.** Se estaba probando en **`localhost:3100`**, no
+   en el dominio. Sin un PHP local escuchando en `:8099`, el proxy de Vite
+   devuelve 500. El endpoint de producción respondía `{"ok":true}` todo ese rato.
+   **Mirar siempre la URL de la petición en el panel Network antes de diagnosticar.**
+
+### Cómo se diagnosticó sin registro de errores
+
+hPanel **no expone el registro de errores de PHP** en este plan. Hubo que subir
+tres scripts temporales a `public_html`, cada uno cerrando un tramo: el diálogo
+SMTP paso a paso, el envío real usando `smtp.php`, y una llamada al propio
+endpoint para leer el cuerpo de la respuesta que la consola del navegador oculta.
+
+El diseño de **ADR-012** demostró su valor en producción: en el primer envío el
+correo falló por la contraseña y **la solicitud se guardó igual**, con el fallo
+anotado en `mail_status`. Nada se perdió.
+
+---
+
+✅ **El sitio está EN LÍNEA en `4dimensionsas.com` desde el 2026-09-02.**
+Los 20 archivos subidos, PHP en 8.3, y **P0-06 resuelto**: el alojamiento
+compartido de Hostinger resuelve `/nosotros` con `nosotros/index.html` por su
+cuenta, sin `.htaccess`. Verificado en WhatsApp — sale el título propio de la
+página, su descripción y la og-image. El prerender cumple su objetivo en
+producción.
+
+📌 **Trampa que costó un rato:** WhatsApp cachea las vistas previas. La primera
+comprobación mostró solo el nombre del dominio, no porque el hosting fallara
+sino porque había guardado la tarjeta de cuando el sitio devolvía 403. Con
+`?x=1` al final del enlace se fuerza una lectura nueva.
+
+📌 **Otras dos trampas del despliegue, ambas del navegador y no del proyecto:**
+el extractor de ZIP de Hostinger crea una carpeta con el nombre del archivo en
+vez de volcar el contenido —hubo que mover los 20 archivos un nivel arriba—, y
+**Chrome traducía el código PHP al español** dentro del editor del
+administrador de archivos: mostraba `declarar`, `devolver` y `'usuario'` en
+lugar de `declare`, `return` y `'user'`. Guardar así habría dejado el
+`config.php` con un error de sintaxis. Hay que desactivar Google Traductor
+antes de editar código en el navegador.
+
+📌 **Avance del despliegue, 2026-09-02 por la tarde.** Al empezar el P0-08
+apareció un paso que faltaba en la guía: **`4dimensionsas.com` no tenía sitio de
+hosting**. En hPanel existían dos sitios del constructor en *Modo agéntico*
+—uno de ellos `fourth-dimension-eso-sas-…hostingersite.com`, el que Horizons
+dejó a medias— y esos **no tienen Panel**, así que no admiten subir archivos ni
+configurar PHP. El propietario creó un sitio vacío para el dominio; ya aparece
+con *Herramientas · Panel*, icono `</>`, SSL activo y copias diarias.
+
+La guía se corrigió: ahora son **siete pasos**, con *Crear el sitio de hosting*
+como paso 01. La confusión de origen es que PHP se configura en **Sitios web**,
+no en **Dominios**, donde el propietario lo estaba buscando.
+
+⚠️ **El formulario NO funciona en producción hasta hacer los tres pasos de
+P0-08**: crear la base de datos e importar el esquema, crear el `config.php` en
+el servidor, y probar un envío real.
+
+- `apps/pocketbase/` **se conserva intacto** como camino de vuelta si algún día
+  se pasa a un VPS. Solo se retiró la dependencia npm `pocketbase` y
+  `src/lib/pocketbaseClient.js`, que ya no importaba nadie. Quedan **6
+  dependencias de ejecución**.
+- Sigue pendiente **P0-06**: confirmar que el hosting resuelve `/nosotros`.
+- Dato a vigilar: el buzón tiene un **límite de envíos por hora** y ahora cada
+  solicitud consume **dos**. Está anotado como pendiente de comprobar desde
+  P1-05. Si resultara ser 5/hora, son 2 solicitudes por hora antes de topar.
+
+---
+
+## 2026-09-02 · Se retira el andamiaje de Horizons: 288 MB → 178 MB
+
+**Origen.** El propietario preguntó por qué la carpeta pesaba 288 MB con 33.958
+archivos si el sitio es sencillo, comparándola con un ecommerce suyo que pesa
+menos. Se midió antes de tocar nada.
+
+**El diagnóstico**
+
+El peso no era del sitio, era del taller. Y el hallazgo que lo explicaba todo:
+la app importaba **7 paquetes** y el `package.json` declaraba **52**. De los 85
+archivos de `src/`, solo **23** estaban conectados a la aplicación.
+
+Los 55 componentes de `src/components/ui/` formaban una isla: los únicos
+archivos que importaban `@/components/ui/*` eran **otros componentes de `ui/`**.
+Y eran ellos los que mantenían "vivas" las 28 dependencias de Radix. `knip.json`
+los declaraba a los 55 como *entry points*, así que la herramienta de limpieza
+del proyecto estaba configurada para no ver el problema: reportaba 4
+dependencias sobrantes en vez de 45.
+
+**Qué se hizo** — en tres fases, con verificación entre cada una
+
+1. **Basura pura.** El binario `pocketbase` (ELF de Linux, 31 MB, inservible en
+   Windows) y la caché de Vite (21 MB). `pb_data/` **no se tocó**.
+2. **Código y dependencias.** 61 archivos muertos borrados, 45 dependencias de
+   ejecución retiradas (quedan 7), más `sharp` y `terser`. `knip.json` depurado
+   de 8.792 a 651 bytes — incluía 26 *entry points* fantasma de un ecommerce con
+   Supabase que nunca existió en el disco.
+3. **El andamiaje.** Los 6 plugins de Vite del editor visual, `vault/`, el
+   `optimizeDeps.include: allDeps` y los 5 scripts que se inyectaban en el HTML
+   **de producción**. `vite.config.js`: ~400 líneas → 40.
+
+**Cómo se verificó que el sitio no cambió**
+
+Se compiló antes de empezar y se guardaron los hashes de los 26 archivos del
+build. Al terminar:
+
+| Comprobación | Resultado |
+|---|---|
+| JS del cliente | **hash idéntico** (`e1c1bad…`), 418.766 bytes |
+| Bundle SSR | idéntico |
+| HTML de las 6 páginas | idéntico salvo los scripts retirados |
+| Clases CSS que el sitio usa | 326 de 326 conservan su regla |
+| Estilos calculados, home | 383 elementos, **0 diferencias** |
+| Estilos calculados, contacto | 154 elementos, **0 diferencias** |
+
+La última prueba fue la decisiva: se cargó el CSS anterior encima del nuevo en
+la página ya renderizada y se compararon 23 propiedades calculadas de cada
+elemento. Ni una cambió. Además se recorrieron las 6 páginas en el navegador
+(sin errores de consola), se probó la navegación SPA y el menú móvil abre y
+cierra con sus 6 enlaces.
+
+**Resultado**
+
+| | Antes | Después |
+|---|---|---|
+| Carpeta | 288 MB | **178 MB** |
+| Archivos | 33.958 | **19.637** |
+| `node_modules` | 265 MB | 172 MB |
+| Dependencias de ejecución | 52 | **7** |
+| Archivos en `src/` | 85 | **24** |
+| CSS publicado | 84,96 KB (14,77 gzip) | **25,05 KB (5,83 gzip)** |
+| HTML por página | −7.465 bytes | |
+| JS publicado | 418,77 KB | **sin cambio** |
+
+**Lo que no mejoró, y por qué**
+
+El JS no bajó **ni un byte**: Vite ya hacía tree-shaking de las 45 dependencias
+muertas, que nunca llegaban al build. Los 418 KB son React, el router,
+framer-motion y helmet — todo en uso. Reducirlos exige **P2-09**
+(code-splitting), no limpieza.
+
+También quedó corta una estimación previa: se anunció que quitar `@babel` y
+`esbuild` ahorraría ~11 MB. No ahorran nada — los arrastran
+`@vitejs/plugin-react` y `vite`, y son obligatorios. La fase 3 no bajó el disco;
+su valor está en el HTML publicado y en el config.
+
+**Estado del backlog**
+- P2-06 (código muerto del scaffold) → ✅
+- P2-11 (scripts de Horizons en producción) → ✅
+- P2-09 (code-splitting) → ⬜, ahora es el único camino para bajar el JS
+
+**Decisiones tomadas**
+- **ADR-011** · Se retira el andamiaje de Hostinger Horizons. **Sustituye al
+  ADR-006** ("no se toca `apps/web/plugins/`"), que existía solo para no romper
+  el editor visual. El propietario confirmó que Horizons dejó el sitio a medias,
+  que lo descargó y que ya no usa ese editor.
+
+**Dónde quedó / qué sigue**
+- El sitio publicado es equivalente al de antes, con menos peso. **Nada que
+  reverificar en producción** más allá de lo habitual.
+- Sigue pendiente **P0-06**: confirmar que el hosting resuelve `/nosotros` con
+  `nosotros/index.html`.
+- ⚠️ Ya **no** se puede reabrir el proyecto en el editor visual de Horizons. Si
+  hiciera falta, `apps/web/plugins/` y el `vite.config.js` viejo están en el
+  historial de git, anteriores a esta fecha.
+- Quedan dos herramientas de desarrollo que pesan ~26 MB entre ellas y sus
+  dependencias: `knip` (arrastra `zod`) y `concurrently` (arrastra `rxjs`).
+  Se conservaron porque los scripts de la raíz las usan.
 
 ---
 

@@ -1,6 +1,6 @@
 # 06 — Backlog priorizado
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-09-02
 **Auditoría base:** 2026-09-01 — revisión técnica, editorial y SEO del sitio completo
 
 ---
@@ -33,9 +33,9 @@
 
 | Prioridad | ✅ | 🟡 ⚠️ | ⬜ ⛔ | Total |
 |---|---|---|---|---|
-| **P0** | 4 | 3 | 1 | 8 |
-| **P1** | 4 | 1 | 1 | 6 |
-| **P2** | 6 | 0 | 6 | 12 |
+| **P0** | 6 | 1 | 1 | 8 |
+| **P1** | 4 | 2 | 0 | 6 |
+| **P2** | 7 | 1 | 5 | 13 |
 
 **Siguiente tarea recomendada:** **P0-06** — confirmar cómo sirve las rutas el
 hosting. Es lo único de P0 que no depende de datos del propietario, y de ello
@@ -251,7 +251,21 @@ al equipo se quitó el 2026-09-02 por decisión del propietario.
 automáticas se generen.
 ---
 
-### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ⬜
+### P0-06 · Confirmar cómo sirve las rutas el hosting — `S` — ✅ *(2026-09-02)*
+
+**Cerrado el 2026-09-02.** El alojamiento compartido de Hostinger resuelve
+`/nosotros` con `nosotros/index.html` **por su cuenta**, sin `.htaccess` ni
+reglas de reescritura. Verificado en producción pegando el enlace en WhatsApp:
+sale «Nosotros — 4D Cuarta Dimensión ES S.A.S.» con su descripción y la
+og-image, no el título del home.
+
+⚠️ **Trampa al verificar:** WhatsApp cachea las vistas previas. La primera
+prueba mostró solo el nombre del dominio porque había guardado la tarjeta de
+cuando el sitio aún devolvía 403. Añadiendo `?x=1` al enlace se fuerza una
+lectura nueva. Si algún día vuelve a parecer roto, descarta la caché antes de
+tocar el hosting.
+
+<details><summary>Diagnóstico original</summary>
 
 **Esta tarea decide si P0-04 sirve de algo o no.**
 
@@ -280,7 +294,7 @@ esa reescritura**, así que `/nosotros` devuelve el home y `/nosotros/` devuelve
 la página correcta. Es un artefacto de la herramienta de previsualización, pero
 sirve de aviso de lo que pasaría en producción con esa configuración.
 
-**Qué hacer:**
+**Qué hacer** *(detalle en [`09-despliegue.md`](09-despliegue.md) → paso 5.2)*:
 
 1. Averiguar cómo sirve Hostinger las rutas de este proyecto.
 2. Si hace fallback a `/index.html`, cambiar la regla por una que pruebe primero
@@ -289,9 +303,100 @@ sirve de aviso de lo que pasaría en producción con esa configuración.
    validador de enlaces de LinkedIn o en un chat de WhatsApp: debe salir
    "Nosotros — 4D Cuarta Dimensión ES S.A.S.", no el título del home.
 
+</details>
+
+---
+
+### P0-08 · Poner en marcha el formulario en el hosting — `S` — ✅ *(2026-09-02)*
+
+**Cerrado el 2026-09-02.** El sitio está en línea en `4dimensionsas.com`, el
+formulario guarda en MySQL y envía los dos correos. Verificado de extremo a
+extremo: envío desde el navegador → «Mensaje recibido» → fila en
+`contact_requests` con `mail_status = aviso:ok acuse:ok`.
+
+Lo que costó, para que no se repita:
+
+| Tropiezo | Causa real |
+|---|---|
+| PHP no aparecía en hPanel | El dominio no tenía sitio de hosting. PHP se configura por **sitio**, no por dominio |
+| `config.php` con error de sintaxis | **Chrome traducía el código**: `declare`→`declarar`, `return`→`devolver`, `'user'`→`'usuario'` |
+| SMTP `535 authentication failed` | Hostinger **sí** usa contraseñas de aplicación para correo, y la copiada tenía una mayúscula cambiada |
+| 500 que no había manera de cazar | Se estaba probando en **`localhost:3100`**, no en el dominio. Sin PHP local, el proxy de Vite devuelve 500 |
+
+El paso a paso corregido está en [`09-despliegue.md`](09-despliegue.md).
+
+<details><summary>Los tres pasos originales</summary>
+
+📖 **Paso a paso detallado, con diagnóstico de fallos:**
+[`09-despliegue.md`](09-despliegue.md).
+
+1. **Crear la base de datos.** hPanel → Bases de datos → MySQL. Anotar nombre,
+   usuario y contraseña. Entrar a phpMyAdmin, elegir la base y en la pestaña
+   «Importar» subir [`db/schema.sql`](../db/schema.sql).
+
+2. **Crear el `config.php`.** En el servidor, dentro de `public_html/api/`,
+   copiar `config.example.php` como `config.php` y rellenar las credenciales de
+   MySQL y la contraseña del buzón `info@4dimensionsas.com`.
+
+   ⚠️ Ese archivo **no viaja en el build a propósito**: `prerender.js` lo borra
+   si aparece. Se pone a mano una vez y no se toca al volver a subir el sitio.
+
+3. **Probar un envío real** y comprobar las tres cosas: llega el aviso a
+   `info@`, llega el acuse a quien escribió, y en phpMyAdmin la fila tiene
+   `mail_status = 'aviso:ok acuse:ok'`.
+
+Si algo falla, el diagnóstico está en `mail_status`. La solicitud **siempre**
+queda guardada aunque el correo falle — se comprobó en producción: el primer
+envío falló el correo por la contraseña y la fila se guardó igual.
+
+⚠️ hPanel **no expone el registro de errores de PHP** en este plan. Para
+diagnosticar hubo que subir scripts temporales a `public_html`.
+
+</details>
+
 ---
 
 # P1 · Alinean el sitio con su objetivo
+
+---
+
+### P1-07 · Dar de alta el sitio en Google Search Console — `S` — ⬜ *(opcional)*
+
+**El SEO técnico está completo y verificado en producción el 2026-09-02**
+(título, descripción, canonical, OG, Twitter Card, JSON-LD, `lang`, alt en las
+9 imágenes, `robots.txt` y `sitemap.xml` con las 6 rutas). Lo que falta no es
+SEO: es **indexación**.
+
+📌 **No es obligatorio.** Google indexa el sitio por su cuenta sin hacer nada;
+un dominio nuevo sin enlaces entrantes tarda semanas. Search Console **no sirve
+para aparecer** en Google: sirve para acelerarlo y para ver qué está pasando
+—cuándo te rastreó, qué páginas leyó, qué búsquedas traen visitas y si hay
+errores—. Es una herramienta de diagnóstico, no un requisito.
+
+Para un sitio institucional de 6 páginas que no depende del tráfico de búsqueda,
+es un «está bien tenerlo».
+
+✅ **Ya preparado:** el archivo de verificación
+`apps/web/public/googlec3de623c2936be96.html` está en el proyecto, así que viaja
+en cada build y no se pierde al volver a publicar. Solo falta subirlo una vez y
+pulsar *Verificar*.
+
+**Qué hacer:**
+
+1. `search.google.com/search-console` → **Añadir propiedad** → *Prefijo de URL*
+   → `https://4dimensionsas.com`
+2. Verificar la propiedad. Lo más simple aquí: subir el archivo HTML que da
+   Google a `public_html`, igual que se hizo con los diagnósticos.
+3. **Sitemaps** → enviar `sitemap.xml`
+4. **Inspección de URLs** → solicitar indexación de `/` y de `/nosotros`
+
+**Cómo comprobar el estado:** buscar `site:4dimensionsas.com` en Google. Si no
+devuelve nada, aún no ha rastreado — no es un problema de posicionamiento.
+
+**Expectativa realista.** Por el nombre propio («4D Cuarta Dimensión»,
+«4dimensionsas») debería aparecer en días tras la indexación. Por términos
+genéricos del sector, meses — y eso está fuera del objetivo del sitio, que
+informa y no capta (**ADR-001**).
 
 ---
 
@@ -378,8 +483,8 @@ etiquetas en un render de servidor.
 - `main.jsx` y `entry-server.jsx` envuelven la app en `HelmetProvider`.
 - En el servidor, `helmetContext.helmet` es lo que `prerender.js` inyecta.
 
-La dependencia vieja `react-helmet` sigue declarada en `package.json` y ya no se
-usa: quitarla junto con el resto del código muerto en **P2-06**.
+La dependencia vieja `react-helmet` ya se quitó, junto con el resto del código
+muerto, al cerrar **P2-06** el 2026-09-02.
 
 ---
 
@@ -397,38 +502,46 @@ Dos piezas:
 ⚠️ Se usa `pb_data_local/` como base, **no** `pb_data/`: la real la creó el
 binario de Linux y puede tener una clave de cifrado que no tenemos.
 
+📌 **Reemplazado el 2026-09-02 por la tarde (ADR-012).** El sitio se publica en
+alojamiento compartido, donde PocketBase no puede correr. El formulario pasó a
+`POST /api/contacto.php` sobre MySQL, y el proxy de Vite ahora apunta a un PHP
+local en `:8099`, no a PocketBase en `:8090`:
+
+```bash
+php -S 127.0.0.1:8099 -t apps/web/public
+```
+
+Sin ese proceso el resto del sitio funciona igual; solo el envío del formulario
+deja de poder probarse en local.
+
 **Verificado el 2026-09-02:** formulario rellenado en el navegador → registro
 guardado con teléfono, consentimiento y marca de tiempo → hook de aviso
 disparado.
 ---
 
-### P1-06 · JSON-LD `Organization` en la home — `M` — 🟡 *(parcial, 2026-09-02)*
+### P1-06 · JSON-LD `Organization` en la home — `M` — 🟡 *(casi completo, 2026-09-02)*
 
-**Hecho.** Las 6 rutas emiten un grafo JSON-LD válido, verificado sobre el HTML
-del build:
+Las 6 rutas emiten un grafo JSON-LD válido, verificado sobre el HTML del build:
+`Organization` + `WebSite` en todas, más `BreadcrumbList` en las 5 internas.
 
-| Ruta | Contenido |
+| Dato | Estado |
 |---|---|
-| `/` | `Organization` + `WebSite` |
-| Las otras 5 | `Organization` + `WebSite` + `BreadcrumbList` |
+| Razón social, nombre comercial, descripción | ✅ |
+| `url` y `logo` (servido del propio dominio) | ✅ |
+| `email` `info@4dimensionsas.com` | ✅ |
+| `telephone` `+57-316-577-5539` | ✅ |
+| `streetAddress` `Cra. 34a #27a-22 sur` | ✅ *(2026-09-02)* |
+| `areaServed`, `contactPoint`, `knowsLanguage` | ✅ |
+| `taxID` (NIT) | ⛔ falta |
+| `foundingDate` (año de fundación) | ⛔ falta |
+| `sameAs` (redes sociales) | ⛔ falta |
 
-📁 [`src/components/JsonLd.jsx`](../apps/web/src/components/JsonLd.jsx)
+📁 [`src/components/JsonLd.jsx`](../apps/web/src/components/JsonLd.jsx) — los
+huecos están marcados en el propio archivo.
 
-Vive en su propio componente, no dentro del `<Helmet>` de cada página, porque
-`tools/generate-llms.js` lee el **primer** `<Helmet>` del archivo con
-expresiones regulares y un bloque JSON ahí dentro podría romperlo.
-
-🐞 **Bug encontrado al hacerlo:** `tools/prerender.js` inyectaba `title`, `meta`
-y `link` de Helmet, pero **no `script`**. El JSON-LD se generaba y no llegaba
-nunca al HTML servido — es decir, Google no lo habría visto jamás. Corregido.
-
-**Falta** (⛔ depende del propietario): `taxID` (NIT), `foundingDate`,
-`streetAddress` y `sameAs` con las redes sociales. Los huecos están marcados en
-el propio componente.
-
-⚠️ **Regla:** en JSON-LD solo entran datos verificados de
-[`02-empresa.md`](02-empresa.md). Un dato inventado aquí no es un adorno: es
-una afirmación que Google publica como oficial.
+⚠️ **Regla:** aquí solo entran datos verificados de
+[`02-empresa.md`](02-empresa.md). Un dato inventado en JSON-LD no es un adorno:
+es una afirmación que Google publica como oficial.
 ---
 
 # P2 · Solidez, rendimiento y pulido
@@ -514,7 +627,18 @@ Shift+Tab; cierra con `Escape` y devuelve el foco al botón que lo abrió.
 `false` y el scroll del cuerpo se restaura.
 ---
 
-### P2-06 · Eliminar el código muerto del scaffold — `M` — ⬜
+### P2-06 · Eliminar el código muerto del scaffold — `M` — ✅
+
+**Cerrado el 2026-09-02.** Ver **ADR-011**. Se borraron los 55 componentes de
+`src/components/ui/` y los 6 huérfanos (61 archivos), y se retiraron 45
+dependencias de ejecución: quedan **7**. El CSS bajó de **85 KB a 25 KB**
+(14,8 → 5,8 KB con gzip) y `node_modules` de 265 MB a 172 MB.
+
+Verificado: el JS quedó byte a byte idéntico y los estilos calculados de 383
+elementos de la home no cambiaron ni en un valor.
+
+<details><summary>Diagnóstico original</summary>
+
 
 Verificado el 2026-09-01: **ningún archivo fuera de `src/components/ui/` importa
 un solo componente de shadcn**. Los 55 archivos de `ui/` y ~30 dependencias de
@@ -525,11 +649,12 @@ No inflan el JS — el tree-shaking funciona: `recharts`, `embla-carousel`,
 pero sí el CSS: Tailwind escanea `src/**` y genera **80 KB** de clases que nadie
 usa.
 
-También son residuo [`AuthContext.jsx`](../apps/web/src/contexts/AuthContext.jsx)
-y [`ProtectedRoute.jsx`](../apps/web/src/components/ProtectedRoute.jsx): no hay
+También son residuo `AuthContext.jsx` y `ProtectedRoute.jsx`: no hay
 área privada ni la habrá. Y desde P1-04, la dependencia `react-helmet`.
 
 `knip.json` en la raíz ya está configurado para detectarlo.
+
+</details>
 
 ---
 
@@ -605,15 +730,16 @@ veces más que un render.
 
 ---
 
-### P2-11 · Scripts de Horizons inyectados en producción — `S` — ⬜
+### P2-11 · Scripts de Horizons inyectados en producción — `S` — ✅
 
-`vite.config.js` inyecta con `addTransformIndexHtml` varios scripts del editor
-visual de Horizons (captura de errores, sobreescritura de `fetch`, silenciado de
-`console.warn`) **también en el build de producción**: el `index.html` pesa
-8.7 KB en vez de ~1 KB, y todo visitante los descarga.
+**Cerrado el 2026-09-02.** El propietario confirmó que ya no usa el editor
+visual de Horizons, así que el **ADR-006** dejó de aplicar y lo sustituyó el
+**ADR-011**. Se retiraron los 5 scripts, los 6 plugins de `plugins/`, `vault/` y
+el `optimizeDeps.include: allDeps`. `vite.config.js` pasó de ~400 líneas a 40.
 
-⚠️ Tocar esto roza el **ADR-006** (no tocar la integración con Horizons).
-Investigar primero si se pueden limitar a desarrollo sin romper el builder.
+Cada una de las 6 páginas pesa **7.465 bytes menos** y ya no queda ni una
+mención a Horizons en lo publicado. También deja de silenciarse `console.warn`,
+lo que cierra de paso el efecto colateral que describía **P2-07**.
 
 ---
 
@@ -641,11 +767,15 @@ listados en [`02-empresa.md`](02-empresa.md):
 3. ~~**P0-03 → P0-02 → P0-04** — El bloque de visibilidad.~~ ✅ / 🟡
 4. ~~**P1-01** — Reescritura editorial.~~ ✅
 5. ~~**P0-05** — Consentimiento en el formulario.~~ 🟡 *(falta la página de política)*
-6. **P0-06** — Confirmar el hosting. Sin esto, P0-04 puede no servir de nada.
+6. ~~**P0-06** — Confirmar el hosting.~~ ✅ ~~**P0-08** — formulario en
+   producción.~~ ✅ *(2026-09-02: el sitio está publicado y funcionando)*.
 7. Cuando llegue el material del propietario: cerrar **P0-02** (logo y
    `og-image`), **P0-05** (página de política) y **P1-06** (JSON-LD).
 8. ~~P2: accesibilidad, entradas del hero, fuente, menú móvil y el bug de la
    barra de progreso.~~ ✅
-9. P2 que queda: **P2-02** (bajar las imágenes del CDN externo), **P2-06**
-   (código muerto), **P2-08** (columna del footer), **P2-09** (code-splitting)
-   y **P2-11** (scripts de Horizons en producción).
+9. ~~P2-06 (código muerto del scaffold) y P2-11 (scripts de Horizons en
+   producción).~~ ✅ *(2026-09-02, ver **ADR-011**)*
+10. P2 que queda: **P2-02** (bajar las imágenes del CDN externo), **P2-08**
+    (columna del footer) y **P2-09** (code-splitting). Este último es ahora el
+    único camino para reducir los 418 KB de JS: el código muerto ya no estorba,
+    pero tampoco pesaba — el bundle no cambió ni un byte al borrarlo.
