@@ -136,4 +136,18 @@ Sitemap: ${SITE_URL}/sitemap.xml
 fs.writeFileSync(path.join(clientDir, 'sitemap.xml'), sitemap, 'utf8');
 fs.writeFileSync(path.join(clientDir, 'robots.txt'), robots, 'utf8');
 
-console.log(`\n✅ prerender: ${written} rutas + sitemap.xml + robots.txt en dist/apps/web\n`);
+// --- salvaguarda: las credenciales nunca salen en el build ------------------
+// Vite copia TODO lo que hay en public/ a dist/. Si alguien crea un
+// `api/config.php` para probar en local, acabaría dentro del build, y al subirlo
+// pisaría el config del servidor con credenciales de desarrollo. El config vive
+// solo en el servidor, puesto a mano una vez. Ver docs/07-decisiones.md → ADR-012.
+
+const configFiltrado = path.join(clientDir, 'api', 'config.php');
+let avisoConfig = '';
+
+if (fs.existsSync(configFiltrado)) {
+	fs.unlinkSync(configFiltrado);
+	avisoConfig = '\n⚠️  Se eliminó api/config.php del build: ese archivo vive solo en el servidor.';
+}
+
+console.log(`\n✅ prerender: ${written} rutas + sitemap.xml + robots.txt en dist/apps/web${avisoConfig}\n`);

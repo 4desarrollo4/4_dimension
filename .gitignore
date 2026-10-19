@@ -30,3 +30,12 @@ npm-debug.log*
 
 # Base de datos local de pruebas (Windows). No es la real.
 apps/pocketbase/pb_data_local/
+
+# Credenciales del formulario de contacto (MySQL y buzon). Se crea a partir de
+# config.example.php y se rellena a mano, tanto en local como en el servidor.
+apps/web/public/api/config.php
+
+# Material en bruto que aporta el propietario: fotos originales, PDF, logos.
+# No entra en git — pesa mucho y git guarda todo para siempre. De aqui sale
+# optimizado a apps/web/public/fotos/, que si se versiona. Ver docs/09.
+material-recibido/

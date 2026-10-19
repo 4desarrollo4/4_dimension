@@ -5,9 +5,13 @@ import JsonLd from '../components/JsonLd';
 import { CheckCircle2, Loader2, Mail, MapPin, Phone, Globe } from 'lucide-react';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
-import pocketbaseClient from '@/lib/pocketbaseClient';
 
 const initialForm = { name: '', company: '', email: '', phone: '', line: 'calzado', message: '', consent: false, website: '' };
+
+// Guarda la solicitud y dispara los dos correos. Es una ruta relativa: en
+// producción la sirve el mismo hosting, y en desarrollo `vite.config.js` la
+// redirige al servidor de PHP local. Ver docs/07-decisiones.md → ADR-012.
+const ENDPOINT = '/api/contacto.php';
 
 // Un envío legítimo no se completa en menos de esto. Los bots sí.
 const SEGUNDOS_MINIMOS = 3;
@@ -58,19 +62,31 @@ export default function ContactoPage() {
 
         setStatus('sending');
         try {
-            await pocketbaseClient.collection('contact_requests').create({
-                name: form.name.trim(),
-                company: form.company.trim(),
-                email: form.email.trim(),
-                phone: form.phone.trim(),
-                line: form.line,
-                message: form.message.trim(),
-                // Prueba del consentimiento, exigida por la Ley 1581 de 2012.
-                // La colección declara `consent` como booleano requerido, así que
-                // el servidor rechaza cualquier registro sin autorización.
-                consent: true,
-                consent_at: new Date().toISOString(),
+            const respuesta = await fetch(ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: form.name.trim(),
+                    company: form.company.trim(),
+                    email: form.email.trim(),
+                    phone: form.phone.trim(),
+                    line: form.line,
+                    message: form.message.trim(),
+                    // Prueba del consentimiento, exigida por la Ley 1581 de 2012.
+                    // El servidor la vuelve a exigir y guarda la marca de tiempo:
+                    // sin autorización no se registra nada.
+                    consent: true,
+                    website: form.website,
+                }),
             });
+
+            // El endpoint responde 200 aunque falle el correo: la solicitud ya
+            // quedó guardada, y para quien escribe eso es un envío correcto.
+            // Ver apps/web/public/api/contacto.php.
+            if (!respuesta.ok) {
+                throw new Error('El servidor respondió ' + respuesta.status);
+            }
+
             setStatus('success');
         } catch {
             setStatus('error');

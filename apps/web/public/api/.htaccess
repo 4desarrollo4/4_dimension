@@ -1,0 +1,32 @@
+# Solo `contacto.php` se puede pedir desde el navegador. Todo lo demás de esta
+# carpeta —la configuración con las contraseñas, el cliente SMTP— queda fuera
+# de alcance.
+#
+# En la práctica Apache ya ejecuta los .php en vez de servirlos, así que nadie
+# vería el contenido de config.php. Esto es el segundo cerrojo: si algún día se
+# rompe el manejador de PHP, los archivos se servirían como texto plano y las
+# contraseñas quedarían a la vista. Ha pasado en hostings reales.
+
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4 / LiteSpeed
+    <FilesMatch ".">
+        Require all denied
+    </FilesMatch>
+    <Files "contacto.php">
+        Require all granted
+    </Files>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    # Apache 2.2
+    <FilesMatch ".">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+    <Files "contacto.php">
+        Order allow,deny
+        Allow from all
+    </Files>
+</IfModule>
