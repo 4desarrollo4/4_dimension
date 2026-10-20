@@ -48,5 +48,11 @@ cd 4_dimension.wiki
 git add -A && git commit -m "Actualizar la wiki desde wiki/" && git push
 ```
 
+> 📌 **Los enlaces entre páginas no llevan `.md`.** En la wiki de GitHub se
+> enlaza por nombre de página — `[Metodología Scrum](Metodologia-Scrum)` — y eso
+> es lo correcto allí, aunque desde el navegador de archivos del repositorio
+> parezcan rotos. **No los "arregles" añadiendo la extensión**: dejarían de
+> funcionar en la wiki, que es donde se leen.
+
 > ⚠️ **Edita siempre aquí, nunca en la web.** Si cambias una página desde la
 > interfaz de GitHub, la siguiente sincronización la sobrescribe.
