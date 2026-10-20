@@ -1,6 +1,6 @@
 # 06 — Backlog priorizado
 
-**Última actualización:** 2026-09-02
+**Última actualización:** 2026-10-20
 **Auditoría base:** 2026-09-01 — revisión técnica, editorial y SEO del sitio completo
 
 ---
@@ -397,6 +397,64 @@ devuelve nada, aún no ha rastreado — no es un problema de posicionamiento.
 «4dimensionsas») debería aparecer en días tras la indexación. Por términos
 genéricos del sector, meses — y eso está fuera del objetivo del sitio, que
 informa y no capta (**ADR-001**).
+
+---
+
+### P1-08 · Subir el `.htaccess` al servidor — `S` — ⬜ ⚠️ **URGENTE**
+
+**Está escrito, probado y sin subir desde el 2026-09-03.** Mientras no se suba:
+
+- `/nosotros` devuelve **301** hacia `/nosotros/`, lo que choca con el canonical
+  y el sitemap —ambos apuntan a la versión sin barra—. Google lo reporta como
+  **Error de redirección** y **solo indexa 1 de 6 páginas**.
+- El sitio no envía **ninguna cabecera de seguridad**: sin HSTS, sin
+  `X-Frame-Options` *(se puede meter el sitio en un iframe ajeno y capturar
+  clics)*, sin `nosniff`, sin `Referrer-Policy`.
+
+El archivo ya está en `apps/web/public/.htaccess` y viaja en cada build. Solo
+hay que subirlo a la **raíz** de `public_html` — no dentro de `api/`.
+
+Después: pedir reindexación en Search Console y verificar que `/nosotros`
+responde **200 sin redirección**.
+
+🔙 Si algo falla, borrarlo del servidor devuelve todo al estado anterior.
+
+---
+
+### P1-09 · Rediseño v2: contenido, legibilidad y fotos — `L` — ⬜
+
+Las cuatro objeciones de la dirección, auditadas y medidas. El plan completo
+está en **[`10-plan-v2.md`](10-plan-v2.md)**, con 6 sprints y 8 historias de
+usuario.
+
+| Objeción | Medición |
+|---|---|
+| «Muy básico» | 4 plantillas de sección repetidas 28 veces |
+| «Las imágenes no nos representan» | 11 de 11 de banco externo, **0 propias** |
+| «Repiten lo mismo» | El cierre de las 3 líneas es la misma cadena literal |
+| «Borroso o muy pequeño» | **75 % del texto a ≤14px** + `antialiased` |
+
+Sprints 0, 1 y 2 **no dependen de nadie**. Los sprints 3 y 4 están 🚧
+**bloqueados** hasta que lleguen las 14 fotos de
+[`wiki/Material-necesario.md`](../wiki/Material-necesario.md).
+
+---
+
+### P1-10 · DMARC sin política de aplicación — `S` — ⬜
+
+De la auditoría de seguridad del 2026-09-03. El dominio tiene **SPF y DKIM
+correctos**, pero el registro DMARC está en `p=none`: detecta y no actúa. Hoy
+cualquiera puede enviar correos que digan venir de `@4dimensionsas.com` y los
+buzones destino los aceptan.
+
+Para una empresa cuyo canal principal es el correo, esto habilita el fraude de
+factura. En hPanel → Editor de zonas DNS, el TXT `_dmarc` debería pasar a:
+
+```
+v=DMARC1; p=quarantine; rua=mailto:info@4dimensionsas.com; pct=100
+```
+
+Vigilar una semana que los correos siguen llegando, y luego subirlo a `p=reject`.
 
 ---
 

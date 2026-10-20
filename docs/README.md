@@ -24,6 +24,7 @@ Este archivo explica **cómo mantener** la documentación.
 | 7 | [`04-diseno.md`](04-diseno.md) | Vas a tocar estilos o añadir una sección |
 | 8 | [`07-decisiones.md`](07-decisiones.md) | Algo te parece mal hecho — mira si fue deliberado |
 | 9 | [`09-despliegue.md`](09-despliegue.md) | Vas a publicar el sitio o a tocar el formulario en producción |
+| 10 | [`10-plan-v2.md`](10-plan-v2.md) | **Siempre, mientras dure la v2.** Diagnóstico, sprints e historias |
 
 **Mínimo antes de editar cualquier cosa:** 1, 2, 3, 4 y 5.
 

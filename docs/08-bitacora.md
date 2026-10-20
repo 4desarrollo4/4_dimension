@@ -1,6 +1,6 @@
 # 08 — Bitácora de sesiones
 
-**Última actualización:** 2026-09-02
+**Última actualización:** 2026-10-20
 
 ---
 
@@ -31,6 +31,72 @@
 > - **No borres entradas antiguas.** Este archivo es el historial.
 > - Si algo se verificó midiéndolo, escribe el dato. Si es una impresión,
 >   dilo así. La bitácora solo sirve si es fiable.
+
+---
+
+## 2026-10-19/20 · Auditoría de las objeciones, plan v2 y el proyecto a GitHub
+
+**Origen.** La dirección de la empresa revisó el sitio y lo rechazó: «muy
+básico», «las imágenes no nos representan», «muchas secciones repiten lo mismo».
+Después añadió una cuarta: los textos «se ven borrosos o muy pequeños».
+
+**Las cuatro son ciertas, y ahora están medidas**
+
+| Objeción | Evidencia |
+|---|---|
+| Muy básico | ~34 secciones, **4 plantillas** repetidas 28 veces |
+| Las imágenes no nos representan | **11 de 11 de banco externo, 0 de la empresa**. Y `NosotrosPage.jsx:57` tenía un `alt` afirmando mostrar al equipo sobre un render genérico |
+| Repiten lo mismo | El cierre de las 3 líneas es **la misma cadena literal**; «no comercializamos catálogos» sale **3 veces en la home**; los 4 proyectos se renderizan **8 veces**; `/nosotros` no aporta **ni un hecho** nuevo |
+| Borroso o muy pequeño | **75 % del texto a ≤14px**, cuerpo a peso 400 sobre fondo casi negro, y `-webkit-font-smoothing: antialiased` adelgazando los trazos. El contraste (7,08:1) estaba bien — **el problema era el grosor, no el color** |
+
+**Auditoría de seguridad** (hecha el 03-sep, documentada ahora). Sin
+vulnerabilidades críticas. Aguantaron en producción: SQL en el campo `line`,
+inyección de cabecera SMTP, consentimiento falsificado, cuerpo de 25 KB, y el
+acceso directo a `config.php`, `smtp.php` y los listados de directorio (403).
+Cinco hallazgos menores, el mayor **DMARC en `p=none`**: SPF y DKIM existen pero
+sin política de aplicación, así que hoy se puede suplantar el dominio.
+
+**Error de redirección de Google** (07-sep). El sitemap entrega `/nosotros`, el
+servidor redirige a `/nosotros/`, y esa página declara como canónica la versión
+que redirige. Google lo reportó y **solo indexó 1 de 6 páginas**. Se preparó un
+`.htaccess` que lo elimina y añade las cinco cabeceras de seguridad que faltaban
+— pero **seis semanas después seguía sin subirse**, así que el error sigue vivo.
+
+> 📌 **Lección registrada:** algo que funciona en local pero no está publicado no
+> está hecho. Por eso la definición de hecho de la v2 exige desplegar y
+> verificar en producción.
+
+**El proyecto a GitHub.** Los 154 cambios del árbol de trabajo, que llevaban
+desde septiembre sin commitear, se repartieron en **4 commits con historia
+legible**: retirada del andamiaje, el formulario a PHP+MySQL, los activos de
+despliegue y la documentación. Repositorio **público** en
+`4desarrollo4/4_dimension`.
+
+Antes de subir se retiraron las credenciales del superusuario de PocketBase de
+`CLAUDE.md` y `03-arquitectura.md` — ahora se leen de variables de entorno.
+Verificado que no queda ninguna contraseña real versionada y que el
+identificador de hosting no aparece en ningún archivo subido.
+
+También salieron de `public/` dos archivos que se habían colado: un PDF de
+8,9 MB y una copia del logo por WhatsApp. `public/` se copia entera al build, así
+que habrían acabado publicados.
+
+**Wiki.** GitHub no da wikis en repos privados del plan gratuito; por eso el repo
+se hizo público. Se escribieron 5 páginas —portada, historias de usuario,
+metodología Scrum, material necesario y barra lateral— que viven en `wiki/` del
+repositorio. **Falta crear la primera página desde la web** para que GitHub
+inicialice el repositorio de la wiki y se puedan subir.
+
+**Decisiones tomadas**
+- Ninguna como ADR todavía. El plan v2 propone dos: **cambiar la tipografía a
+  Archivo** (deroga el cierre tipográfico de `04-diseno.md`) y **«una idea, una
+  página»** contra la repetición. Se registrarán al ejecutarse.
+
+**Dónde quedó / qué sigue**
+- 📖 El plan completo está en **[`10-plan-v2.md`](10-plan-v2.md)**.
+- ⚠️ Lo más urgente sigue siendo **subir el `.htaccess`**: es un arreglo ya
+  escrito y probado que lleva seis semanas sin aplicarse.
+- 🚧 Los sprints 3 y 4 están bloqueados hasta que lleguen **las 14 fotos**.
 
 ---
 

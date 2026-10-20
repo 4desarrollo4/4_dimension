@@ -153,55 +153,86 @@ Sirve el build en `:3000` (el mismo puerto que `dev`, así que no los levantes a
 | [`docs/07-decisiones.md`](docs/07-decisiones.md) | Bitácora de decisiones (ADR) |
 | [`docs/08-bitacora.md`](docs/08-bitacora.md) | Registro de sesiones de trabajo |
 | [`docs/09-despliegue.md`](docs/09-despliegue.md) | **Paso a paso para publicar en Hostinger**, con el formulario |
+| [`docs/10-plan-v2.md`](docs/10-plan-v2.md) | **Plan de la versión 2**: diagnóstico, 6 sprints e historias |
+| [`wiki/`](wiki/) | Páginas de la wiki de GitHub: Scrum, historias y material necesario |
 
 ---
 
-## Estado actual (2026-09-02)
+## Estado actual (2026-10-20)
 
-El sitio **ya cumple su objetivo**: informa, se puede compartir y se puede
-indexar. Lo que queda depende sobre todo de material que debe aportar el
-propietario.
+**El sitio está en línea en `4dimensionsas.com`** y el formulario funciona de
+extremo a extremo. Pero **está en marcha una versión 2**, porque la dirección de
+la empresa revisó el sitio y lo rechazó.
 
-| Dimensión | Nota |
+### 🔴 Lo primero que debe saber una sesión nueva
+
+📖 **El plan completo de la v2 está en [`docs/10-plan-v2.md`](docs/10-plan-v2.md).**
+Léelo antes de tocar nada. Lleva el diagnóstico con evidencia, los 6 sprints y
+las historias de usuario.
+
+| Pendiente | Estado |
 |---|---|
-| Diseño visual | 8.5/10 — lo más sólido. **No lo rediseñes** |
-| Arquitectura de información | 8/10 |
-| SEO y compartibilidad | **10/10** *(era 2/10)* — prerender, JSON-LD, meta, iconos y og-image |
-| Alineación con "informar, no vender" | **9/10** *(era 3/10)* |
-| Accesibilidad | **9/10** *(era 6/10)* — landmark, skip link, foco visible, menú móvil accesible |
+| ⚠️ **Subir `apps/web/public/.htaccess` al servidor** | **Preparado desde el 3-sep y SIN SUBIR.** Hasta que se suba, `/nosotros` devuelve 301 y Google solo indexa 1 de 6 páginas |
+| ⚠️ Subir `favicon.ico` y republicar | `/favicon.ico` da 404; es parte de por qué no sale el logo en el buscador |
+| 🚧 Las 14 fotos de la empresa | Bloquean los sprints 3 y 4. Lista en [`wiki/Material-necesario.md`](wiki/Material-necesario.md) |
+| 🚧 Año de fundación, nombres del equipo, NIT | Bloquean secciones enteras |
+| Cambiar la contraseña de la base de datos | Quedó expuesta en una captura de pantalla |
 
-**Hecho el 2026-09-01:** Git inicializado · build arreglado (dos bugs de
-Windows) · `index.html` completo · prerender de las 6 rutas con OG, Twitter Card
-y canonical · `sitemap.xml` + `robots.txt` · `react-helmet-async` · reescritura
-editorial completa (9 CTA comerciales → 0) · consentimiento en el formulario ·
-correo y teléfono clicables · pulido de frontend: el sitio ya se ve sin esperar
-al JavaScript, accesibilidad de teclado y motion afinado.
+### Las cuatro objeciones de la dirección, auditadas
 
-**Hecho el 2026-09-02:** datos reales de la empresa · logo, iconos y og-image
-propios · el correo del formulario funcionando · **y se retiró todo el andamiaje
-de Horizons**: 288 MB → 177 MB, 52 dependencias → 6, `vite.config.js` de ~400
-líneas a 40, CSS de 85 KB a 25 KB. El sitio publicado quedó equivalente —
-JS byte a byte idéntico y 0 diferencias en los estilos calculados. Ver
-[ADR-011](docs/07-decisiones.md).
+Las cuatro son ciertas y las cuatro están medidas:
 
-**El sitio está en línea en `4dimensionsas.com` desde el 2026-09-02.**
+| Objeción | Qué se encontró |
+|---|---|
+| «Muy básico» | ~34 secciones pero solo **4 plantillas** repetidas 28 veces |
+| «Las imágenes no nos representan» | **11 de 11 imágenes son de banco externo. Cero fotos de la empresa** |
+| «Muchas secciones repiten lo mismo» | El cierre de las 3 páginas de línea es **la misma cadena literal** |
+| «Se ve borroso o muy pequeño» | **75 % del texto a ≤14px**, cuerpo a peso 400, y `font-smoothing: antialiased` adelgaza los trazos |
 
-**Todo P0 está cerrado.** El formulario guarda en MySQL y envía sus dos correos;
-las rutas se sirven bien y las tarjetas de WhatsApp muestran cada página.
-Verificado en producción el 2026-09-02.
+### Decisiones ya tomadas para la v2
 
-**Por dónde seguir:** solo queda P1 y P2, nada bloqueante.
-Ver [`docs/06-backlog.md`](docs/06-backlog.md).
+- **Colores:** se mantienen intactos.
+- **Tipografía: Archivo** sustituye a Manrope en todo el sitio. Requiere un ADR
+  nuevo, porque hoy la tipografía está declarada «cerrada» en `04-diseno.md`.
+- **Escala:** cuerpo 16→18px, tarjetas y listas 14→16px, eyebrows 12→13px.
+- **Alcance:** se mantiene el lenguaje visual y se enriquece el contenido.
+  El ADR-010 sigue vigente — **no es un rediseño visual desde cero**.
+- **Método:** Scrum ligero. La dirección es Product Owner y aprueba cada sprint.
 
-📖 **Para volver a publicar o tocar el hosting:**
-[`docs/09-despliegue.md`](docs/09-despliegue.md). Lleva los cuatro tropiezos que
-costaron tiempo la primera vez — sobre todo: **desactiva el traductor de Chrome
-antes de editar código en el administrador de archivos**.
+### Repositorio y wiki
 
-⛔ **Esperando del propietario:** solo el **NIT**, para la política de datos.
-Dominio, correo, teléfono, dirección y logo ya están aplicados.
+🔗 **https://github.com/4desarrollo4/4_dimension** — rama `main`, **público**.
 
-✅ **Dominio confirmado:** `4dimensionsas.com`, en `apps/web/src/lib/site.js`.
+⚠️ **Es público: nunca escribas una contraseña en un archivo versionado.** Las
+credenciales se leen de variables de entorno o de `api/config.php`, que está
+ignorado.
+
+La carpeta [`wiki/`](wiki/) tiene las páginas de la wiki de GitHub en Markdown.
+**Todavía no están subidas**: GitHub no crea el repositorio de la wiki hasta que
+se guarda la primera página desde la web. Una vez creada, se suben con:
+
+```bash
+git clone https://github.com/4desarrollo4/4_dimension.wiki.git
+# copiar wiki/*.md dentro, commit y push
+```
+
+La wiki **no duplica `docs/`** a propósito: la documentación técnica vive en el
+repositorio y la wiki aporta la capa de Scrum e historias de usuario.
+
+### Lo que ya está hecho
+
+**2026-09-01:** Git · build arreglado · prerender de las 6 rutas con OG y
+canonical · `sitemap.xml` + `robots.txt` · reescritura editorial (9 CTA → 0) ·
+consentimiento en el formulario · accesibilidad.
+
+**2026-09-02:** datos reales · logo e iconos propios · el correo funcionando ·
+**retirada completa del andamiaje de Horizons** (288 MB → 177 MB, 52
+dependencias → 6, `vite.config.js` de ~400 líneas a 40) · **el formulario pasó a
+PHP + MySQL** ([ADR-012](docs/07-decisiones.md)) · publicado e indexado.
+
+**2026-10-19/20:** auditoría de seguridad · auditoría de contenido con evidencia
+· plan de la v2 · **todo el trabajo de septiembre commiteado y subido a GitHub**
+· credenciales retiradas de los archivos versionados.
 
 ### Reglas que impone lo ya construido
 
