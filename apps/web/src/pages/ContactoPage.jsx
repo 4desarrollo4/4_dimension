@@ -5,6 +5,7 @@ import JsonLd from '../components/JsonLd';
 import { CheckCircle2, Loader2, Mail, MapPin, Phone, Globe } from 'lucide-react';
 import Reveal from '../components/Reveal';
 import PageTransition from '../components/PageTransition';
+import { EMAIL, MAILTO, WHATSAPP_URL, MAPS_URL, TELEFONO_VISIBLE, DIRECCION_CALLE, DIRECCION_CIUDAD } from '../lib/contacto';
 
 const initialForm = { name: '', company: '', email: '', phone: '', line: 'calzado', message: '', consent: false, website: '' };
 
@@ -21,7 +22,7 @@ const SEGUNDOS_MINIMOS = 3;
 const soloDigitos = (valor) => String(valor ?? '').replace(/\D/g, '');
 
 const inputClass =
-    'w-full border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors duration-200 focus:border-primary';
+    'w-full border border-input bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors duration-200 focus:border-primary';
 
 export default function ContactoPage() {
     const [form, setForm] = useState(initialForm);
@@ -83,6 +84,12 @@ export default function ContactoPage() {
             // El endpoint responde 200 aunque falle el correo: la solicitud ya
             // quedó guardada, y para quien escribe eso es un envío correcto.
             // Ver apps/web/public/api/contacto.php.
+            // 429: el mismo cliente superó el tope de envíos por hora (ver
+            // contacto.php). No es un error del sitio: se le ofrece otra vía.
+            if (respuesta.status === 429) {
+                setStatus('limite');
+                return;
+            }
             if (!respuesta.ok) {
                 throw new Error('El servidor respondió ' + respuesta.status);
             }
@@ -109,17 +116,17 @@ export default function ContactoPage() {
             <JsonLd migas={[{ nombre: 'Contacto', ruta: '/contacto' }]} />
 
             <section className="mx-auto max-w-6xl px-6 pb-20 pt-32 md:pt-40">
-                <Reveal>
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Contacto</p>
-                    <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-                        Dónde y cómo <span className="text-primary">encontrarnos</span>.
-                    </h1>
-                </Reveal>
+                {/* Entrada por CSS, no con Reveal: con Reveal el H1 se publicaba con
+                    opacity:0 en el HTML prerenderizado (2026-10-26). Ver 04-diseno.md. */}
+                <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-primary">Contacto</p>
+                <h1 className="rise-solid mt-4 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+                    Dónde y cómo <span className="text-primary">encontrarnos</span>.
+                </h1>
 
                 <div className="mt-14 grid gap-14 lg:grid-cols-[1.3fr_1fr]">
                     <Reveal delay={0.1}>
                         {status === 'success' ? (
-                            <div className="flex h-full min-h-[24rem] flex-col items-center justify-center border border-border/70 bg-card/40 p-10 text-center">
+                            <div className="flex h-full min-h-[24rem] flex-col items-center justify-center border border-primary/40 bg-card/40 p-10 text-center">
                                 <CheckCircle2 className="h-12 w-12 text-primary" />
                                 <h2 className="mt-6 text-2xl font-extrabold tracking-tight">Mensaje recibido.</h2>
                                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -169,7 +176,7 @@ export default function ContactoPage() {
                                         />
                                         {errors.phone
                                             ? <p className="text-xs text-destructive">{errors.phone}</p>
-                                            : <p className="text-xs text-muted-foreground/70">Inclúyelo con indicativo del país para poder escribirte por WhatsApp.</p>}
+                                            : <p className="text-xs text-muted-foreground">Inclúyelo con indicativo del país para poder escribirte por WhatsApp.</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -178,6 +185,7 @@ export default function ContactoPage() {
                                         <option value="calzado">Calzado</option>
                                         <option value="ropa">Ropa</option>
                                         <option value="dotaciones">Dotaciones</option>
+                                        <option value="insumos">Insumos</option>
                                         <option value="otro">Otro proyecto</option>
                                     </select>
                                 </div>
@@ -221,17 +229,25 @@ export default function ContactoPage() {
                                         </span>
                                     </label>
                                     {errors.consent && <p className="text-xs text-destructive">{errors.consent}</p>}
-                                    <p className="text-xs leading-relaxed text-muted-foreground/80">
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
                                         Los datos no se comparten con terceros ni se usan con fines publicitarios. Puedes consultarlos, actualizarlos o solicitar su eliminación en cualquier momento escribiendo a{' '}
-                                        <a href="mailto:info@4dimensionsas.com" className="underline transition-colors duration-200 hover:text-primary">
-                                            info@4dimensionsas.com
+                                        <a href={MAILTO} className="enlace-texto">
+                                            {EMAIL}
                                         </a>
                                         . Ley 1581 de 2012.
                                     </p>
                                 </div>
+                                {status === 'limite' && (
+                                    <p className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                                        Recibimos varias solicitudes desde tu conexión en la última hora. Escríbenos directamente a{' '}
+                                        <a href={MAILTO} className="enlace-texto">{EMAIL}</a> o por{' '}
+                                        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="enlace-texto">WhatsApp</a>.
+                                    </p>
+                                )}
                                 {status === 'error' && (
                                     <p className="border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                                        No pudimos enviar tu mensaje. Inténtalo de nuevo o escríbenos directamente a info@4dimensionsas.com.
+                                        No pudimos enviar tu mensaje. Inténtalo de nuevo o escríbenos directamente a{' '}
+                                        <a href={MAILTO} className="enlace-texto">{EMAIL}</a>.
                                     </p>
                                 )}
                                 <button
@@ -247,15 +263,15 @@ export default function ContactoPage() {
                     </Reveal>
 
                     <Reveal delay={0.2}>
-                        <aside className="space-y-8 border border-border/70 bg-card/40 p-8">
+                        <aside className="space-y-8 border border-primary/40 bg-card/40 p-8">
                             <h2 className="text-lg font-bold tracking-tight">Datos de contacto</h2>
                             <ul className="space-y-5 text-sm">
                                 <li className="flex items-start gap-3">
                                     <Mail className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Comercial</p>
-                                        <a href="mailto:info@4dimensionsas.com" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
-                                            info@4dimensionsas.com
+                                        <a href={MAILTO} className="enlace">
+                                            {EMAIL}
                                         </a>
                                     </div>
                                 </li>
@@ -263,8 +279,11 @@ export default function ContactoPage() {
                                     <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Teléfono</p>
-                                        <a href="tel:+573165775539" className="text-muted-foreground transition-colors duration-200 hover:text-primary">
-                                            +57 316 577 5539
+                                        {/* Abre WhatsApp con el mensaje, como en la home y el footer
+                                            (antes era `tel:`, distinto del resto del sitio). */}
+                                        <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="enlace">
+                                            {TELEFONO_VISIBLE}
+                                            <span className="sr-only"> — escribir por WhatsApp</span>
                                         </a>
                                     </div>
                                 </li>
@@ -272,14 +291,20 @@ export default function ContactoPage() {
                                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Oficina principal</p>
-                                        <p className="text-muted-foreground">Cra. 34a #27a-22 sur<br />Bogotá D.C., Colombia</p>
+                                        {/* Antes era texto plano: ahora abre Maps, como en el resto del sitio. */}
+                                        <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className="enlace">
+                                            {DIRECCION_CALLE}
+                                            <br />
+                                            {DIRECCION_CIUDAD}
+                                            <span className="sr-only"> — ver en Google Maps</span>
+                                        </a>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
                                     <Globe className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                                     <div>
                                         <p className="font-semibold">Cobertura internacional</p>
-                                        <p className="text-muted-foreground">Latinoamérica · Norteamérica · Europa</p>
+                                        <p className="text-muted-foreground">Colombia · Latinoamérica · Centroamérica</p>
                                     </div>
                                 </li>
                             </ul>

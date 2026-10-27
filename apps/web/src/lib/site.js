@@ -18,13 +18,14 @@ export const SITE_NAME = '4D Cuarta Dimensión';
 // El dominio ya no bloquea: solo falta el logo.
 export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
-// Las 6 rutas públicas del sitio. Es la lista que consumen el prerender y el
+// Las 7 rutas públicas del sitio. Es la lista que consumen el prerender y el
 // sitemap: si añades una ruta en App.jsx, añádela también aquí.
 export const ROUTES = [
     { path: '/', priority: '1.0' },
     { path: '/calzado', priority: '0.8' },
     { path: '/ropa', priority: '0.8' },
     { path: '/dotaciones', priority: '0.8' },
+    { path: '/insumos', priority: '0.8' },
     { path: '/nosotros', priority: '0.7' },
     { path: '/contacto', priority: '0.6' },
 ];

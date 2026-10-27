@@ -1,10 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import { absoluteUrl } from '@/lib/site';
 import JsonLd from '../components/JsonLd';
 import PageTransition from '../components/PageTransition';
-import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineClosing } from '../components/ProductLine';
-import { IMAGES, projects } from '../data/projects';
+import { Factory, Truck, Stethoscope, UtensilsCrossed, Building2, ShieldCheck } from 'lucide-react';
+import { LineHero, CapabilityList, FeatureGrid, DetailSplit, DesignGallery, LineClosing } from '../components/ProductLine';
+import { IMAGES } from '../data/projects';
+import { GALERIA_DOTACIONES } from '../data/media';
 
 const capabilities = [
     { title: 'Diagnóstico por cargo', description: 'Levantamiento de necesidades por área y cargo: exposición, movimiento, clima e imagen requerida.' },
@@ -16,27 +19,28 @@ const capabilities = [
 ];
 
 const sectors = [
-    { title: 'Industrial y manufactura', description: 'Overoles, pantalones cargo y prendas de alta resistencia con elementos reflectivos.' },
-    { title: 'Logística y transporte', description: 'Dotaciones duraderas para operación intensiva, con visibilidad y confort térmico.' },
-    { title: 'Salud', description: 'Uniformes clínicos y de apoyo con textiles de fácil mantenimiento y alta rotación.' },
-    { title: 'Hotelería y gastronomía', description: 'Vestuario de servicio que cuida la imagen de marca en cada punto de contacto.' },
-    { title: 'Corporativo', description: 'Vestuario de oficina y fuerza comercial con imagen unificada.' },
-    { title: 'Seguridad', description: 'Uniformes tácticos y de vigilancia con especificaciones técnicas exigentes.' },
+    { icon: Factory, title: 'Industrial y manufactura', description: 'Overoles, pantalones cargo y prendas de alta resistencia con elementos reflectivos.' },
+    { icon: Truck, title: 'Logística y transporte', description: 'Dotaciones duraderas para operación intensiva, con visibilidad y confort térmico.' },
+    { icon: Stethoscope, title: 'Salud', description: 'Uniformes clínicos y de apoyo con textiles de fácil mantenimiento y alta rotación.' },
+    { icon: UtensilsCrossed, title: 'Hotelería y gastronomía', description: 'Vestuario de servicio que cuida la imagen de marca en cada punto de contacto.' },
+    { icon: Building2, title: 'Corporativo', description: 'Vestuario de oficina y fuerza comercial con imagen unificada.' },
+    { icon: ShieldCheck, title: 'Seguridad', description: 'Uniformes tácticos y de vigilancia con especificaciones técnicas exigentes.' },
 ];
 
 export default function DotacionesPage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>Dotaciones — Uniformes y EPP | 4D Cuarta Dimensión</title>
+                <title>Dotaciones y uniformes empresariales en Colombia | 4D Cuarta Dimensión</title>
                 <meta
                     name="description"
                     content="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
                 />
             </Helmet>
             <Seo
-                title="Dotaciones — Uniformes y EPP | 4D Cuarta Dimensión"
+                title="Dotaciones y uniformes empresariales en Colombia | 4D Cuarta Dimensión"
                 description="Uniformes corporativos e industriales y EPP con personalización por cliente, producción por volumen y logística internacional multi-país."
+                image={absoluteUrl('/og/dotaciones.jpg')}
             />
             <JsonLd migas={[{ nombre: 'Dotaciones', ruta: '/dotaciones' }]} />
             <LineHero
@@ -52,18 +56,23 @@ export default function DotacionesPage() {
             <DetailSplit
                 title="EPP y normativa, sin improvisación"
                 text="Cascos, guantes, protección visual, calzado de seguridad y prendas de alta visibilidad seleccionados según la normativa aplicable a cada sector y país. Documentamos especificaciones y certificados de cada elemento para las auditorías del cliente."
+                puntos={['Cascos', 'Guantes', 'Protección visual', 'Calzado de seguridad', 'Alta visibilidad']}
                 image={IMAGES.dotacionesDetail}
                 imageAlt="Elementos de protección personal: casco, guantes, gafas y chaleco reflectivo sobre fondo oscuro"
                 reverse
             />
-            <CasesSection cases={projects.filter((p) => p.lineId === 'dotaciones')} />
+            {/* 2026-10-27: sustituye a los casos de éxito. El propietario prefiere
+                enseñar sus productos, como en /calzado. */}
+            <DesignGallery
+                title="Nuestros productos."
+                etiqueta="Calzado de dotación"
+                rotulo="Referencia"
+                designs={GALERIA_DOTACIONES}
+            />
             <LineClosing
+                actual="03"
                 title="Dotaciones es la línea 03 de 4D."
-                text="Comparte con las otras dos líneas la misma metodología —descubrimiento, diseño, desarrollo y evolución— y la misma red de aliados de manufactura en Colombia, Asia y Europa."
-                others={[
-                    { index: '01', label: 'Calzado', to: '/calzado' },
-                    { index: '02', label: 'Ropa', to: '/ropa' },
-                ]}
+                text="Comparte con las otras tres líneas la misma metodología —descubrimiento, diseño, desarrollo y evolución— y la misma red de aliados de manufactura en Colombia, Guatemala, Ecuador y Bolivia."
             />
         </PageTransition>
     );

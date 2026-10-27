@@ -120,7 +120,7 @@ Las 3 páginas de línea usan **los mismos 6 componentes en el mismo orden**. Lo
 
 | | |
 |---|---|
-| **Colores** | Se mantienen intactos |
+| **Colores** | ~~Se mantienen intactos~~ → **DEROGADO el 2026-10-20.** El sitio pasa a tema claro (blanco + petróleo `#036D9B`) con la barra superior en negro. Ver [**ADR-013**](07-decisiones.md) |
 | **Tipografía** | **Archivo** en todo el sitio, sustituyendo a Manrope. Requiere ADR nuevo (hoy la tipografía está declarada «cerrada») |
 | **Escala** | Subida clara: cuerpo 16→18px, tarjetas y listas 14→16px, eyebrows 12→13px |
 | **Alcance** | Se mantiene el lenguaje visual, se enriquece el contenido. ADR-010 sigue vigente |
@@ -145,7 +145,7 @@ Las 3 páginas de línea usan **los mismos 6 componentes en el mismo orden**. Lo
 - **Subir el `.htaccess`** ya preparado: elimina el 301 de `/nosotros` y añade las 5 cabeceras de seguridad.
 - Subir `favicon.ico` y republicar para que el HTML lo declare.
 - Pedir reindexación en Search Console.
-- Verificar: `/nosotros` → 200 sin redirección, cabeceras presentes, las 6 rutas rastreables.
+- Verificar: `/nosotros` → 200 sin redirección, cabeceras presentes, las 7 rutas rastreables.
 
 > **HU-03** · Como responsable, quiero la documentación al día para no repetir diagnósticos.
 
@@ -249,10 +249,11 @@ La home baja de 10 a 8 secciones y el JSON-LD se completa con los datos nuevos.
 
 **Por sprint, antes de dar nada por hecho:**
 
-1. `npm run build --prefix apps/web` compila y prerenderiza las 6 rutas.
+1. `npm run build --prefix apps/web` compila y prerenderiza las **7** rutas
+   (desde el 2026-10-20 se sumó `/insumos` como cuarta línea de negocio).
 2. `npm run lint --prefix apps/web` limpio.
 3. `node tools/check-duplicados.js` — cero frases de ≥12 palabras repetidas entre rutas *(desde el sprint 2)*.
-4. Las 6 rutas abiertas en el navegador: sin errores de consola, sin desborde horizontal a **360 / 768 / 1024 / 1440**.
+4. Las 7 rutas abiertas en el navegador: sin errores de consola, sin desborde horizontal a **360 / 768 / 1024 / 1440**.
 5. Ningún H1 con `opacity: 0` en el HTML prerenderizado.
 6. Con `prefers-reduced-motion` activo, nada se mueve.
 7. Contraste de los nuevos tamaños de texto ≥ 4,5:1.
@@ -262,7 +263,7 @@ La home baja de 10 a 8 secciones y el JSON-LD se completa con los datos nuevos.
 - `/nosotros` → **200 sin redirección** y las 5 cabeceras de seguridad presentes.
 - El formulario sigue guardando: fila nueva con `mail_status = aviso:ok acuse:ok`.
 - Enlace pegado en WhatsApp: título, descripción e imagen propios de cada página.
-- `site:4dimensionsas.com` en Google: las 6 rutas, no una.
+- `site:4dimensionsas.com` en Google: las 7 rutas, no una.
 
 **Métrica de éxito del proyecto**, para que la apruebe la dirección y no sea opinable:
 

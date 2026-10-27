@@ -32,6 +32,14 @@
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 
+	# --- 0 · Un solo dominio: sin www (2026-10-27) ---
+	# Auditoría SEO: https://www.4dimensionsas.com/ respondía 200 con el mismo
+	# contenido que https://4dimensionsas.com/. Dos direcciones para lo mismo
+	# reparten la autoridad entre ambas. El canonical ya apunta a la versión
+	# sin www; esto lo hace cumplir con un 301 y conserva la ruta.
+	RewriteCond %{HTTP_HOST} ^www\.4dimensionsas\.com$ [NC]
+	RewriteRule ^(.*)$ https://4dimensionsas.com/$1 [R=301,L]
+
 	# DirectorySlash Off solo si mod_rewrite existe: si no, dejamos que Apache
 	# siga redirigiendo, que es peor pero funciona. Nunca un 404.
 	<IfModule mod_dir.c>
@@ -89,7 +97,31 @@
 </IfModule>
 
 
-# --- 3 · Sin listados de directorio --------------------------------------
+# --- 3 · Caché del navegador (2026-10-27) ------------------------------
+#
+# La velocidad cuenta para Google (Core Web Vitals) y para quien vuelve.
+#
+#   · assets/   Llevan un hash en el nombre (`index-a1b2c3.js`): cada build
+#               genera nombres nuevos, así que se pueden guardar un año.
+#   · fotos, vídeo, og/ e iconos: 30 días. ⚠️ Si sustituyes una foto,
+#               dale NOMBRE NUEVO, como ya se hace con el vídeo del hero
+#               (CLAUDE.md); si no, quien ya la vio seguirá viendo la vieja.
+#   · HTML      Sin caché: así un despliegue se ve al instante.
+
+<IfModule mod_headers.c>
+	<FilesMatch "\.(js|css|woff2?)$">
+		Header set Cache-Control "public, max-age=31536000, immutable"
+	</FilesMatch>
+	<FilesMatch "\.(webp|jpe?g|png|svg|ico|mp4|webm)$">
+		Header set Cache-Control "public, max-age=2592000"
+	</FilesMatch>
+	<FilesMatch "\.(html|xml|txt)$">
+		Header set Cache-Control "no-cache"
+	</FilesMatch>
+</IfModule>
+
+
+# --- 4 · Sin listados de directorio --------------------------------------
 # El hosting ya los tiene desactivados, pero esto lo garantiza aunque cambie
 # la configuración del servidor. Además es lo que hace segura la línea
 # `DirectorySlash Off` de arriba.

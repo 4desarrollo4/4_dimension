@@ -16,6 +16,32 @@ module.exports = {
 			},
 		},
 		extend: {
+			/*
+				Escala tipográfica subida el 2026-10-20 (ADR-015).
+
+				La dirección se quejó de que el texto «se ve borroso o muy pequeño»
+				y la auditoría lo confirmó: 43 elementos —el 75 % del texto— estaban
+				a 14 px o menos.
+
+				En vez de reescribir 63 clases por el código, se redefine la escala
+				aquí y sube todo de golpe. Los nombres de clase no cambian:
+
+				  text-xs    12 → 13px   (eyebrows en versalitas)
+				  text-sm    14 → 16px   (tarjetas, listas, pies)
+				  text-base  16 → 18px   (cuerpo)
+				  text-lg    18 → 20px
+				  text-xl    20 → 22px
+
+				De text-2xl en adelante se deja la escala de Tailwind: los titulares
+				ya eran grandes y no son el problema.
+			*/
+			fontSize: {
+				'xs': ['0.8125rem', { lineHeight: '1.15rem' }],
+				'sm': ['1rem', { lineHeight: '1.5rem' }],
+				'base': ['1.125rem', { lineHeight: '1.75rem' }],
+				'lg': ['1.25rem', { lineHeight: '1.85rem' }],
+				'xl': ['1.375rem', { lineHeight: '1.95rem' }],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

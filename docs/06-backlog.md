@@ -1,6 +1,6 @@
 # 06 — Backlog priorizado
 
-**Última actualización:** 2026-10-20
+**Última actualización:** 2026-10-27
 **Auditoría base:** 2026-09-01 — revisión técnica, editorial y SEO del sitio completo
 
 ---
@@ -456,6 +456,8 @@ v=DMARC1; p=quarantine; rua=mailto:info@4dimensionsas.com; pct=100
 
 Vigilar una semana que los correos siguen llegando, y luego subirlo a `p=reject`.
 
+**Revisado el 2026-10-26:** sigue en `p=none`. SPF y DKIM siguen correctos.
+
 ---
 
 ### P1-01 · Reescritura editorial: informar en vez de vender — `L` — ✅ *(2026-09-01)*
@@ -815,6 +817,315 @@ listados en [`02-empresa.md`](02-empresa.md):
 | Año de fundación | P1-06 |
 | Perfiles de redes sociales | P1-06 |
 | Fotos reales y equipo | P2-10 |
+
+---
+
+# Nuevas tras el ADR-013 (tema claro) — 2026-10-20
+
+### P1-11 · Rehacer `og-image.jpg` para el tema claro — `S` — ⬜
+
+La imagen que se muestra al compartir un enlace (WhatsApp, LinkedIn) tiene
+fondo oscuro y ya **no corresponde con el sitio**. Hay que rehacerla con la
+paleta clara: fondo `#EBEBEB`, acento PMS 295 `#0F376A`, 1200×630.
+
+Vive en [`apps/web/public/og-image.jpg`](../apps/web/public/og-image.jpg).
+Al cambiarla hay que republicar **y** revalidar el enlace en el depurador de
+cada red, porque las previsualizaciones se cachean.
+
+### P1-12 · Resolver la incoherencia «130» vs «12.000» — `S` — 🟡
+
+**Medio respondida.** El 2026-10-20 el propietario confirmó *«son 130
+dotaciones entregadas»*, así que la cifra de la home es correcta. **Sigue sin
+decir** si eso obliga a corregir la ficha del Programa Atlas.
+
+El 2026-10-20 la cifra de la home pasó de **12.000 dotaciones entregadas en 4
+países** a **130 dotaciones entregadas**, a petición del propietario. Pero la
+ficha del **Programa Atlas** sigue diciendo *«12.000 colaboradores dotados en
+cuatro países»*, y esa ficha se renderiza en la propia home.
+
+Hoy el sitio publica las dos cifras a la vez. Caben dos lecturas:
+
+- **Conviven** — 130 son programas o contratos y 12.000 son personas. Entonces
+  hay que **cambiar el rótulo** de la cifra, porque «Dotaciones entregadas» no
+  distingue una cosa de la otra.
+- **130 sustituye a 12.000** — entonces hay que corregir también la ficha de
+  Atlas en [`02-empresa.md`](02-empresa.md) y en `src/data/projects.js`.
+
+⚠️ No es cosmético: la **Ley 1480 de 2011** obliga a poder sustentar toda
+afirmación publicitaria objetiva, y ahora mismo hay dos que se contradicen.
+
+### P1-13 · Las fotos de banco empeoran con el tema claro — `L` — ⛔
+
+No es un fallo nuevo, es **P2-10 subiendo de prioridad**. Las 11 imágenes de
+contenido tienen fondo oscuro; sobre una página blanca se leen como bloques
+negros. El tema claro no causó el problema, pero lo hizo mucho más visible.
+
+Refuerza la urgencia de las 14 fotos del [plan v2](10-plan-v2.md), sprints 3 y 4.
+
+### P1-14 · `eslint` falla por `sharp` sin instalar — `S` — ⬜
+
+`npm run lint` devuelve **exit 1** desde antes de esta sesión:
+`tools/generate-images.js:38` importa `sharp`, que no está en las dependencias
+(`import/no-unresolved`). Es el **único** error del linter.
+
+Como ese script es de uso puntual, lo razonable es **excluirlo de la
+configuración de eslint** en vez de añadir una dependencia de 30 MB que el
+sitio no usa. Mientras no se arregle, un lint en rojo tapa errores de verdad.
+
+### P1-15 · `/insumos` necesita contenido real — `M` — ⛔
+
+**Bloqueada: necesita material del propietario.**
+
+El 2026-10-20 se añadió **Insumos** como cuarta línea de negocio. Lo único que
+aportó el propietario fue una frase: *«Materiales e insumos para la industria
+de calzado y textil»*. Con eso se creó
+[`InsumosPage.jsx`](../apps/web/src/pages/InsumosPage.jsx), pero la página es
+**mucho más corta que las otras tres**: solo hero y cierre.
+
+No se inventó nada — ni capacidades, ni tipos de material, ni cifras, ni casos.
+Es la regla del proyecto: primero el dato en este documento, después el código.
+
+Para equipararla a `/calzado`, `/ropa` y `/dotaciones` hacen falta:
+
+| Qué | Para qué sección |
+|---|---|
+| 5–6 capacidades con título y descripción | `CapabilityList` |
+| 4 tipos o familias de insumo | `FeatureGrid` |
+| Un párrafo de detalle + su foto | `DetailSplit` |
+| ¿Hay algún proyecto de insumos? | `CasesSection` |
+| ~~Una foto de insumos~~ | ✅ **Entregada el 2026-10-20** — `public/fotos/insumos-materiales.webp` |
+| Un *claim* de una línea | Hero |
+
+✅ **La foto ya está.** El hero de `/insumos` y la tarjeta 04 de la home
+volvieron solos a dos columnas: ambos componentes aceptan `image` nulo y se
+adaptan. La imagen está registrada en `src/data/media.js`, el registro de fotos
+propias que pedía el sprint 3 de [`10-plan-v2.md`](10-plan-v2.md) y que se creó
+con ella.
+
+Sigue faltando **el contenido escrito**: capacidades, tipos de insumo, el
+párrafo de detalle y un *claim*.
+
+### P1-16 · Sitio en tres idiomas (ES / EN / PT) — `L` — ⬜ *(pendiente de aprobación)*
+
+La dirección quiere presentar el sitio en varios países y pidió **español,
+inglés y portugués**. El 2026-10-20 se le entregó el análisis de las tres vías
+posibles con su coste y sus consecuencias de SEO. **No se ha implementado nada:
+espera su decisión.**
+
+Lo que no se puede evitar, decida lo que decida: **hay que traducir el
+contenido** (~2.030 palabras × 2 idiomas) y **alguien tiene que validar las
+traducciones**. Es trabajo de redacción, no de programación, y es la parte que
+más tarda.
+
+⚠️ Afecta a `.htaccess`, `sitemap.xml`, los `hreflang`, el prerender y el
+formulario (los correos también van en español). Decidirlo **antes** de los
+sprints 3 y 4 ahorra rehacer trabajo.
+
+### P1-17 · El navbar está al límite de ancho — `S` — 🟡 *(mitigado 2026-10-20)*
+
+Con la línea Insumos, el menú tiene **6 enlaces más el botón de Contacto**. A
+1024 px —justo donde pasa de hamburguesa a horizontal— quedan **65 px libres**.
+Entra, pero **un enlace más lo rompe**.
+
+**Ocurrió el mismo día.** El propietario pidió un enlace «Inicio» y el hueco
+libre pasó de 65 px a **0**, con el nombre del logo partido en dos líneas.
+
+**Mitigado** subiendo el punto de ruptura del menú de `lg` (1024) a `xl`
+(1280): entre 1024 y 1279 px se usa la hamburguesa, y a 1280 el menú entra con
+**77 px** de holgura. Ver **ADR-018**.
+
+⚠️ **Sigue abierto porque el margen vuelve a ser estrecho.** Con 77 px no cabe
+otro enlace. El siguiente obliga a agrupar las cuatro líneas de producto en un
+desplegable. Medido a 1024, 1280, 1440 y 1680 px.
+
+### P1-18 · El `+120K` de la portada se quedó sin soporte — `S` — ⛔
+
+**Bloqueada: necesita una decisión del propietario.**
+
+El 2026-10-20 el proyecto `runner-x40` dejó de llamarse «Runner X-40» y su
+resultado pasó de **«+120.000 pares comercializados en el primer año»** a
+«Ingeniería de materiales e insumos».
+
+Pero la portada **sigue publicando `+120K · Pares desarrollados y
+comercializados`** como cifra de empresa, y ese proyecto era su único soporte
+visible en el sitio.
+
+⚠️ La **Ley 1480 de 2011** obliga a poder sustentar toda afirmación
+publicitaria objetiva. Hay que decidir si la cifra se mantiene —y con qué
+respaldo— o si se retira.
+
+### P1-19 · Dos proyectos se llaman «Greenloop» — `S` — ⚠️
+
+Tras la reescritura del 2026-10-20, el proyecto de calzado y el de ropa se
+llaman **los dos «Greenloop»**. Es coherente si es la misma marca en dos
+líneas, pero en la portada las dos tarjetas salen **seguidas y con el mismo
+título**, y se lee como un error.
+
+Se puede resolver sin tocar los datos: diferenciarlas por línea en la tarjeta
+(«Greenloop · Calzado» / «Greenloop · Ropa»). Pendiente de confirmar que es
+intencionado.
+
+### P1-20 · Los `alt` de las fotos ya no coinciden con los proyectos — `S` — ⚠️
+
+Los textos alternativos de `projects.js` describen las **fotos de banco**
+antiguas y mencionan nombres que ya no existen en el sitio. No es grave
+—describen la imagen, que sigue siendo la misma— pero hay que reescribirlos
+cuando lleguen las fotos reales (**P1-13**).
+
+### P1-21 · Reencodear cualquier vídeo nuevo del hero — `S` — ⬜ *(nota permanente)*
+
+El vídeo del zapato llegó de Google Flow pesando **8,69 MB**. Se recortó a
+cuadrado, se le quitó el audio y se reencodeó hasta **171 KB** — cincuenta
+veces menos, sin pérdida visible.
+
+⚠️ **Si alguien sustituye el vídeo del hero, tiene que repetir ese proceso.**
+Es el elemento que mide el LCP. Y además hay que **volver a muestrear el color
+de fondo del vídeo nuevo y reajustar `--background`**: están atados desde el
+ADR-016.
+
+Y ahora también **hay que rehacer el bucle**: los vídeos de Flow no cierran
+el giro y dan un salto al reiniciar. El comando exacto (recorte + `xfade` de
+la cola con la cabeza) está en la bitácora del **2026-10-26**, junto con cómo
+medir la costura antes y después.
+
+### P1-22 · El sitio se contradice sobre dónde opera — `S` — ✅ *(2026-10-20)*
+
+**Resuelta el mismo día.** El propietario zanjó la duda: la cobertura es
+**Colombia · Latinoamérica · Centroamérica**, y la red de aliados está en
+**Colombia, Guatemala, Ecuador y Bolivia**. Se retiraron Norteamérica, Europa y
+Asia de **los siete sitios** donde aparecían, incluido el `areaServed` del
+JSON-LD. También se corrigió «tres líneas de negocio» → «cuatro».
+
+⚠️ **Queda pendiente pedir reindexación en Search Console**: el `areaServed`
+anterior ya está indexado por Google.
+
+<details><summary>Diagnóstico original</summary>
+
+El 2026-10-20 la home pasó a decir que 4D **«produce y comercializa en
+Latinoamérica y Centroamérica»**. El footer se corrigió para coincidir. Pero
+otros cuatro sitios siguen anunciando **Norteamérica y Europa**:
+
+| Dónde | Qué dice |
+|---|---|
+| `ContactoPage.jsx:282` | «Latinoamérica · Norteamérica · Europa» |
+| `NosotrosPage.jsx:71` | «Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa» |
+| `NosotrosPage.jsx:77` | Tarjeta dedicada a **Norteamérica** |
+| `JsonLd.jsx:48` | `areaServed` con Norteamérica — **esto lo lee Google** |
+| [`02-empresa.md`](02-empresa.md) | La fuente de verdad sigue listando Norteamérica |
+
+⚠️ No es un cambio de texto: es **retirar una afirmación comercial** de cinco
+sitios, uno de ellos el marcado estructurado que indexan los buscadores. La
+**Ley 1480 de 2011** aplica igual aquí.
+
+Dos salidas, y solo el propietario puede elegir:
+
+- **Ya no opera ahí** → se retira de los cinco sitios, empezando por
+  `02-empresa.md`, y se reindexa.
+- **Sí opera ahí** → entonces lo que hay que corregir es la frase nueva de la
+  home, no los otros cuatro.
+
+**De paso, en el mismo párrafo:** `NosotrosPage.jsx:50` decía
+**«tres líneas de negocio»** cuando ya eran **cuatro**.
+
+</details>
+
+### P1-23 · Fotos para la galería de /calzado — `S` — ✅ *(2026-10-26)*
+
+**Hecha el mismo día.** El propietario envió 4 diseños con dos fotos cada uno
+(producto y ambientada). La galería pasó a una fila por diseño con las dos
+fotos lado a lado. Detalle en la bitácora.
+
+⚠️ **Queda una consulta abierta:** la foto de producto del **diseño 02** lleva
+grabado en el lateral un texto que parece **«REBORN»**. Si es la marca de un
+cliente, el plan v2 exige autorización escrita para mostrarla. A tamaño de la
+web apenas se distingue, pero conviene confirmarlo.
+
+**Lo que sigue pendiente:** los **nombres** de los diseños. Si se añaden en
+`data/media.js` (`nombre`), salen junto a «Diseño 0N».
+
+<details><summary>Descripción original</summary>
+
+Desde el 2026-10-26 /calzado tiene una galería, «Algunos de nuestros
+diseños», en lugar de los casos de éxito. Está montada pero **vacía, y vacía
+no se pinta**.
+
+Para que aparezca: cada foto se optimiza a `public/fotos/` y se añade a
+`GALERIA_CALZADO` en `src/data/media.js` con `src`, `width`, `height`, `alt` y,
+opcional, `nombre` (pie de foto). Se muestran **cuadradas**, en tres columnas:
+lo ideal es un número múltiplo de 3 (3, 6 o 9).
+
+</details>
+
+---
+
+### P1-24 · Publicar la v2: la migración de la tabla va PRIMERO — `S` — ⬜ ⚠️
+
+Desde el 2026-10-26 el formulario acepta la línea **Insumos**, y la columna
+`line` de `contact_requests` es un ENUM que no la tenía. Si se sube el PHP
+nuevo sin migrar, **cada solicitud de Insumos falla con error 500**.
+
+Orden, detallado en [`09-despliegue.md`](09-despliegue.md):
+1. phpMyAdmin → ejecutar `db/migraciones/2026-10-26-linea-insumos.sql`
+   (se puede repetir sin daño).
+2. Subir `dist/apps/web/`.
+3. Comprobar que `.htaccess` está en la raíz (cierra también el **P1-08**).
+
+Después, una solicitud real de Insumos debe quedar con `line = insumos` y
+`mail_status = aviso:ok acuse:ok`.
+
+---
+
+### P1-25 · Confirmar que la CDN de Hostinger envía `X-Forwarded-For` — `S` — ⬜
+
+El límite de envíos por persona (ADR-019) cuenta por `REMOTE_ADDR` + la última
+entrada de `X-Forwarded-For`. Delante del sitio hay una CDN (`Server: hcdn`).
+Si la CDN **no** manda esa cabecera, el límite cuenta por nodo de CDN, como
+antes: no rompe nada, pero tampoco mejora.
+
+Cómo confirmarlo: tras unas solicitudes, mirar en phpMyAdmin si dos personas
+distintas producen `ip_hash` distintos. Si siempre sale el mismo, avisar.
+
+---
+
+### P1-26 · Revisar las transiciones en un navegador normal — `S` — ⬜
+
+El 2026-10-26 se añadieron filetes que se dibujan (`LineaDibujada`), fotos que
+entran con zoom (`ImagenEntrada`) y el hover de `.tarjeta`. El código y el
+prerender están verificados, pero **el movimiento no se pudo ver**: el panel
+de vista previa congela las animaciones cuando la ventana no está al frente
+(0 fps). Lo tiene que mirar una persona en Chrome o Edge, bajando despacio por
+la home, /calzado y /nosotros.
+
+---
+
+### P1-27 · Productos de /dotaciones — `S` — ✅ *(2026-10-27)*
+
+«Casos de éxito» sustituido por «Nuestros productos»: 7 referencias de calzado
+de seguridad con foto de producto y ambientada. Detalle en la bitácora.
+
+⚠️ **Queda una consulta abierta:** varias botas llevan marca visible («G/M»,
+«Velectric», «LEH»). Si alguna es de un cliente, hace falta su autorización
+escrita (misma consulta que «REBORN» en P1-23).
+
+### P1-28 · Productos de /ropa — `S` — ✅ *(2026-10-27)*
+
+«Casos de éxito» sustituido por «Algunos de nuestros productos»: 4 diseños con
+foto de producto y ambientada, en vertical (3:4). Con esto `CasesSection` se
+quedó sin uso y se borró. Detalle en la bitácora.
+
+⚠️ **Consulta abierta:** en la ambientada del Diseño 02 se ve un parche de
+Carhartt en la chaqueta de la modelo (ver `02-empresa.md`).
+
+### P1-29 · SEO después de publicar la v2 — `S` — ⬜ *(2026-10-27)*
+
+La auditoría del 2026-10-27 (`05-contenido-y-seo.md`) dejó el código listo.
+Lo que falta es fuera del código:
+
+- [ ] Subir la v2 con su `.htaccess` (arregla el 301 de las rutas, la copia en
+      `www` y los 404 de `favicon.ico` e `/insumos`).
+- [ ] Search Console: reenviar `sitemap.xml` y pedir indexación de las 7 rutas.
+- [ ] Crear el **Perfil de Empresa de Google** con la dirección de Bogotá.
+- [ ] Revisar en 2–3 semanas cuántas páginas están indexadas (hoy: 1 de 7).
 
 ---
 

@@ -4,10 +4,12 @@ import { AnimatePresence } from 'framer-motion';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import WhatsAppFab from './components/WhatsAppFab';
 import HomePage from './pages/HomePage';
 import CalzadoPage from './pages/CalzadoPage';
 import RopaPage from './pages/RopaPage';
 import DotacionesPage from './pages/DotacionesPage';
+import InsumosPage from './pages/InsumosPage';
 import NosotrosPage from './pages/NosotrosPage';
 import ContactoPage from './pages/ContactoPage';
 
@@ -23,6 +25,7 @@ function AnimatedRoutes() {
                 <Route path="/calzado" element={<CalzadoPage />} />
                 <Route path="/ropa" element={<RopaPage />} />
                 <Route path="/dotaciones" element={<DotacionesPage />} />
+                <Route path="/insumos" element={<InsumosPage />} />
                 <Route path="/nosotros" element={<NosotrosPage />} />
                 <Route path="/contacto" element={<ContactoPage />} />
             </Routes>
@@ -32,7 +35,7 @@ function AnimatedRoutes() {
 
 // El Router NO vive aquí: lo pone cada entrada. `main.jsx` usa BrowserRouter y
 // `entry-server.jsx` usa StaticRouter, que es lo que permite prerenderizar las
-// 6 rutas en el build (docs/06-backlog.md → P0-04).
+// 7 rutas en el build (docs/06-backlog.md → P0-04).
 function App() {
     return (
         <>
@@ -46,6 +49,7 @@ function App() {
                     <AnimatedRoutes />
                 </main>
                 <Footer />
+                <WhatsAppFab />
             </div>
         </>
     );

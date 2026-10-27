@@ -34,7 +34,7 @@ const organizacion = {
     logo: LOGO_ABSOLUTO,
     image: LOGO_ABSOLUTO,
     description:
-        'Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales.',
+        'Empresa colombiana de diseño y desarrollo de producto: calzado, ropa, dotaciones e insumos para la industria de calzado y textil.',
     email: 'info@4dimensionsas.com',
     telephone: '+57-316-577-5539',
     address: {
@@ -43,10 +43,12 @@ const organizacion = {
         addressLocality: 'Bogotá D.C.',
         addressCountry: 'CO',
     },
+    // Esto es lo que lee Google. Se corrigió el 2026-10-20: antes declaraba
+    // Norteamérica y Europa, que el propietario retiró del sitio (P1-22).
     areaServed: [
+        { '@type': 'Place', name: 'Colombia' },
         { '@type': 'Place', name: 'Latinoamérica' },
-        { '@type': 'Place', name: 'Norteamérica' },
-        { '@type': 'Place', name: 'Europa' },
+        { '@type': 'Place', name: 'Centroamérica' },
     ],
     knowsLanguage: ['es'],
     contactPoint: {
@@ -54,7 +56,7 @@ const organizacion = {
         contactType: 'sales',
         email: 'info@4dimensionsas.com',
         telephone: '+57-316-577-5539',
-        areaServed: ['CO', 'US', 'EU'],
+        areaServed: ['CO', '419'],
         availableLanguage: ['Spanish'],
     },
 };

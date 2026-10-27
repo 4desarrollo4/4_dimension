@@ -1,6 +1,6 @@
 # 09 — Despliegue en Hostinger
 
-**Última actualización:** 2026-09-02 *(ejecutada en producción ese mismo día)*
+**Última actualización:** 2026-10-27 *(la primera publicación se ejecutó el 2026-09-02)*
 
 ---
 
@@ -15,6 +15,42 @@
 >
 > ✅ **Ejecutado y verificado en producción el 2026-09-02.** El sitio está en
 > línea y el formulario funciona de extremo a extremo.
+
+---
+
+## 🔴 Publicar la versión 2 (cambios del 20 al 27 de octubre)
+
+> 📖 **La guía completa y explicada para el propietario está en
+> [`12-publicar-v2.md`](12-publicar-v2.md)**: copia de seguridad, base de
+> datos, subida, comprobaciones, Search Console, cambio de contraseña y Perfil
+> de Empresa de Google. Esta sección es el resumen técnico.
+
+Si el sitio **ya está publicado** y vas a subir la v2, sigue este orden. **No es
+opcional**: los pasos 1 y 2 al revés rompen el formulario para Insumos.
+
+| # | Qué | Dónde | Por qué |
+|---|---|---|---|
+| 1 | **Ejecutar [`db/migraciones/2026-10-26-linea-insumos.sql`](../db/migraciones/2026-10-26-linea-insumos.sql)** | phpMyAdmin → la base → pestaña «SQL» | Añade `insumos` a la columna `line`. Si se sube el PHP antes, MySQL en modo estricto **rechaza** las solicitudes de Insumos. Las demás líneas siguen funcionando. Es seguro ejecutarlo dos veces |
+| 2 | Subir **todo** `dist/apps/web/` | Administrador de archivos → `public_html` | El sitio nuevo y el `contacto.php` endurecido |
+| 3 | Comprobar que **`.htaccess`** está en la raíz | `public_html/.htaccess` | Sin él `/nosotros` sigue respondiendo 301 y no hay cabeceras de seguridad (P1-08) |
+| 4 | **No tocar** `public_html/api/config.php` | — | Ya está en el servidor con las contraseñas; el build no lo trae |
+| 5 | (Opcional) Añadir `'tope_por_hora' => 20,` a `config.php` | `public_html/api/config.php` | Si no está, el código usa 20 igualmente |
+
+**Para comprobar después** (todo con el navegador, sin herramientas):
+
+- `https://4dimensionsas.com/nosotros` abre la página directamente, **sin** saltar a `/nosotros/`.
+- `https://4dimensionsas.com/api/config.php` → **403**.
+- `https://www.4dimensionsas.com/ropa` salta a `https://4dimensionsas.com/ropa`
+  (sin `www`). Si diera error, borra el bloque «0 · Un solo dominio» del
+  `.htaccess`: el resto sigue funcionando.
+- `https://4dimensionsas.com/favicon.ico` muestra el icono (antes daba 404).
+- Search Console → **Sitemaps** → reenviar `sitemap.xml`, y **Inspección de
+  URL** → «Solicitar indexación» en cada una de las 7 rutas.
+- Un envío real del formulario eligiendo **Insumos**: llega el aviso a info@ y
+  en la tabla aparece una fila con `line = insumos` y
+  `mail_status = aviso:ok acuse:ok`.
+- El acuse que recibe el cliente **ya no repite su mensaje**: es a propósito
+  (ver ADR-019).
 
 ---
 

@@ -27,8 +27,14 @@
 
 declare(strict_types=1);
 
+// Aunque el hosting tenga los errores de PHP visibles, aquí no se muestran: un
+// aviso con la ruta del servidor o el nombre de la base es información gratis
+// para un atacante. Los fallos van al registro, nunca a la respuesta.
+ini_set('display_errors', '0');
+
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-store');
 
 /** Responde y termina. El visitante nunca ve el detalle interno de un fallo. */
 function responder(int $codigo, array $cuerpo): never
@@ -46,6 +52,36 @@ function registrar(string $mensaje): void
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     header('Allow: POST');
     responder(405, ['ok' => false, 'error' => 'metodo_no_permitido']);
+}
+
+/*
+ * Solo se aceptan envíos del propio sitio (2026-10-26).
+ *
+ * Sin esto, cualquier página de otro dominio podía mandar solicitudes a este
+ * endpoint en nombre de sus visitantes (CSRF): se comprobó en local que un
+ * envío con `Origin: https://evil.example`, o como `text/plain`, se guardaba.
+ *
+ * Dos cerrojos:
+ *   1. Exigir `application/json`. Un formulario HTML de otra web no puede
+ *      mandar ese tipo, y un `fetch` desde otro dominio obliga al navegador a
+ *      preguntar antes (CORS), cosa que aquí nunca se autoriza.
+ *   2. Si el navegador declara de dónde viene (`Origin`), tiene que ser este
+ *      sitio. Se admite localhost para poder probar el formulario en local.
+ */
+$tipo = strtolower(trim(explode(';', (string) ($_SERVER['CONTENT_TYPE'] ?? ''))[0]));
+
+if ($tipo !== 'application/json') {
+    responder(415, ['ok' => false, 'error' => 'tipo_no_admitido']);
+}
+
+$origen = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
+$origenValido = $origen === ''
+    || in_array($origen, ['https://4dimensionsas.com', 'https://www.4dimensionsas.com'], true)
+    || preg_match('#^http://(localhost|127\.0\.0\.1)(:\d+)?$#', $origen) === 1;
+
+if (!$origenValido) {
+    registrar('Envío rechazado por origen ajeno: ' . substr($origen, 0, 100));
+    responder(403, ['ok' => false, 'error' => 'origen_no_permitido']);
 }
 
 $rutaConfig = __DIR__ . '/config.php';
@@ -95,7 +131,17 @@ $telefono = $texto('phone');
 $linea    = $texto('line');
 $mensaje  = $texto('message');
 
-$LINEAS = ['calzado' => 'Calzado', 'ropa' => 'Ropa', 'dotaciones' => 'Dotaciones', 'otro' => 'Otro proyecto'];
+// ⚠️ Cada clave tiene que existir también en el ENUM `line` de la tabla. Insumos
+// se añadió el 2026-10-26: antes de subir este archivo al servidor hay que
+// ejecutar db/migraciones/2026-10-26-linea-insumos.sql, o las solicitudes de
+// Insumos fallarían al guardarse.
+$LINEAS = [
+    'calzado'    => 'Calzado',
+    'ropa'       => 'Ropa',
+    'dotaciones' => 'Dotaciones',
+    'insumos'    => 'Insumos',
+    'otro'       => 'Otro proyecto',
+];
 
 // Los mismos límites que declaraban las migraciones de PocketBase.
 $errores = [];
@@ -156,11 +202,21 @@ try {
 }
 
 /*
- * Huella de la IP, no la IP. Con la sal de la contraseña de base de datos, el
+ * Huella del cliente, no su IP. Con la sal de la contraseña de base de datos, el
  * hash no se puede revertir ni cruzar con otra tabla. Guardar la IP en claro
  * sería un dato personal más que custodiar sin necesidad.
+ *
+ * ⚠️ El sitio está detrás de la CDN de Hostinger (cabecera `Server: hcdn`).
+ * Detrás de una CDN, REMOTE_ADDR puede ser la IP del NODO de la CDN, compartida
+ * por muchos visitantes: el límite por hora dejaría de ser «por persona» y unos
+ * pocos envíos de cualquiera cortarían los correos de todos. Por eso la huella
+ * combina REMOTE_ADDR con la ÚLTIMA entrada de X-Forwarded-For, que es la que
+ * añade el proxy más cercano (la primera la puede inventar el cliente).
+ * Si no hay CDN, X-Forwarded-For viene vacía y todo queda como antes.
  */
-$ipHash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? '') . '|' . $config['db']['clave']);
+$reenviada = array_map('trim', explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '')));
+$cliente   = ($_SERVER['REMOTE_ADDR'] ?? '') . '|' . end($reenviada);
+$ipHash    = hash('sha256', $cliente . '|' . $config['db']['clave']);
 
 $enviarCorreos = true;
 
@@ -170,8 +226,20 @@ try {
          WHERE ip_hash = ? AND created > (NOW() - INTERVAL 1 HOUR)'
     );
     $consulta->execute([$ipHash]);
+    $recientes = (int) $consulta->fetch()['total'];
 
-    if ((int) $consulta->fetch()['total'] >= (int) $config['limite_por_hora']) {
+    /*
+     * Tope duro (2026-10-26). Antes no había ninguno: en local, 60 envíos
+     * seguidos del mismo cliente se guardaron los 60, y cada uno puede pesar
+     * 20 KB. Por encima del tope se rechaza SIN guardar. El valor por defecto
+     * está muy lejos de lo que hace una persona; solo frena una inundación.
+     */
+    if ($recientes >= (int) ($config['tope_por_hora'] ?? 20)) {
+        registrar('Tope por hora superado: solicitud rechazada sin guardar');
+        responder(429, ['ok' => false, 'error' => 'demasiadas_solicitudes']);
+    }
+
+    if ($recientes >= (int) $config['limite_por_hora']) {
         // La solicitud se guarda igual. Lo único que se omite son los correos,
         // para no agotar el cupo del buzón.
         $enviarCorreos = false;
@@ -226,6 +294,21 @@ $escapar = static fn (string $v): string => htmlspecialchars($v, ENT_QUOTES | EN
 
 $lineaLegible = $LINEAS[$linea];
 
+/*
+ * Plantillas de correo con la paleta actual de la marca (2026-10-26): fondo
+ * claro, azul PMS 295 (#0F376A). Antes seguían en el tema oscuro del primer
+ * sitio. Estilos en línea porque la mayoría de clientes de correo ignoran las
+ * hojas de estilo.
+ */
+$c = [
+    'fondo'  => '#ebebeb',
+    'tarjeta'=> '#ffffff',
+    'texto'  => '#15161a',
+    'suave'  => '#5d6165',
+    'azul'   => '#0f376a',
+    'linea'  => '#d9dcdf',
+];
+
 $filas = '';
 
 foreach ([
@@ -236,70 +319,85 @@ foreach ([
     ['Línea de interés', $lineaLegible],
 ] as [$etiqueta, $valor]) {
     $filas .= '<tr>'
-        . '<td style="padding:7px 18px 7px 0;color:#8a8f9c;font-size:12px;white-space:nowrap;vertical-align:top;">' . $escapar($etiqueta) . '</td>'
-        . '<td style="padding:7px 0;color:#f2f4f8;font-size:14px;">' . $escapar($valor) . '</td>'
+        . '<td style="padding:8px 20px 8px 0;color:' . $c['suave'] . ';font-size:12px;white-space:nowrap;vertical-align:top;">' . $escapar($etiqueta) . '</td>'
+        . '<td style="padding:8px 0;color:' . $c['texto'] . ';font-size:14px;">' . $escapar($valor) . '</td>'
         . '</tr>';
 }
 
 $envoltura = static fn (string $contenido): string => '
-    <div style="background:#0a0c14;color:#f2f4f8;font-family:Helvetica,Arial,sans-serif;padding:32px;">
-        <p style="margin:0 0 4px;color:#3d6bff;font-size:11px;letter-spacing:.2em;text-transform:uppercase;">
-            4D Cuarta Dimensión
-        </p>' . $contenido . '
+    <div style="background:' . $c['fondo'] . ';padding:32px 16px;font-family:Helvetica,Arial,sans-serif;">
+        <div style="max-width:560px;margin:0 auto;background:' . $c['tarjeta'] . ';border-top:4px solid ' . $c['azul'] . ';padding:32px;color:' . $c['texto'] . ';">
+            <p style="margin:0 0 6px;color:' . $c['azul'] . ';font-size:11px;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;">
+                4D Cuarta Dimensión
+            </p>' . $contenido . '
+        </div>
+        <p style="max-width:560px;margin:16px auto 0;color:' . $c['suave'] . ';font-size:11px;line-height:1.6;text-align:center;">
+            4D Cuarta Dimensión ES S.A.S. · Bogotá D.C., Colombia
+        </p>
     </div>';
 
 // --- 1 · Aviso interno a info@ ---------------------------------------------
 // Sin base de datos consultable a diario, este correo es la vía por la que el
 // equipo se entera. Lleva Reply-To del cliente: responder desde el buzón
-// escribe directamente a quien preguntó.
+// escribe directamente a quien preguntó. Solo llega a nuestro propio buzón, así
+// que aquí SÍ va todo lo que escribió el visitante (escapado).
 
 $htmlAviso = $envoltura('
-        <h1 style="margin:0 0 24px;font-size:20px;">Nueva solicitud de contacto</h1>
-        <table style="border-collapse:collapse;margin:0 0 18px;">' . $filas . '</table>
-        <div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 28px;font-size:15px;line-height:1.7;white-space:pre-wrap;">' . $escapar($mensaje) . '</div>
-        <p style="margin:0 0 4px;font-size:14px;">
-            Responde a este correo y le llega directo a
-            <a href="mailto:' . $escapar($correo) . '" style="color:#3d6bff;text-decoration:none;">' . $escapar($correo) . '</a>.
-        </p>
-        <p style="margin:0;color:#8a8f9c;font-size:12px;">
-            Solicitud #' . $id . ' · ' . $escapar($ahora->format('d/m/Y H:i')) . ' · autorización de datos registrada
-        </p>');
+            <h1 style="margin:0 0 24px;font-size:22px;color:' . $c['texto'] . ';">Nueva solicitud de contacto</h1>
+            <table style="border-collapse:collapse;margin:0 0 20px;">' . $filas . '</table>
+            <div style="border-left:3px solid ' . $c['azul'] . ';padding-left:16px;margin:0 0 28px;font-size:15px;line-height:1.7;white-space:pre-wrap;color:' . $c['texto'] . ';">' . $escapar($mensaje) . '</div>
+            <p style="margin:0 0 6px;font-size:14px;line-height:1.6;">
+                Responde a este correo y le llega directo a
+                <a href="mailto:' . $escapar($correo) . '" style="color:' . $c['azul'] . ';">' . $escapar($correo) . '</a>.
+            </p>
+            <p style="margin:0;padding-top:16px;border-top:1px solid ' . $c['linea'] . ';color:' . $c['suave'] . ';font-size:12px;">
+                Solicitud #' . $id . ' · ' . $escapar($ahora->format('d/m/Y H:i')) . ' · autorización de datos registrada
+            </p>');
 
 // --- 2 · Acuse de recibo al cliente ----------------------------------------
-// Mismo texto y mismo diseño que enviaba el hook de PocketBase.
+//
+// ⚠️ NO repite nada de lo que escribió el visitante (2026-10-26).
+//
+// Antes incluía su nombre completo, sus datos y su mensaje. El problema: la
+// dirección de destino también la escribe el visitante. Cualquiera podía poner
+// el correo de un tercero y un «mensaje» con publicidad o un enlace, y nuestro
+// servidor se lo enviaba firmado por 4D. Es el abuso clásico de los formularios
+// de contacto, y puede hacer que el buzón acabe en listas de spam.
+//
+// Ahora el acuse solo lleva texto nuestro. Del visitante, como mucho el primer
+// nombre, y solo si son letras: así no puede contener un enlace ni un anuncio.
+// La línea de interés sale de una lista cerrada, no de lo que escribió.
+
+$primerNombre = (string) (preg_split('/\s+/u', $nombre)[0] ?? '');
+$saludo = preg_match("/^\p{L}[\p{L}'\-]{0,29}$/u", $primerNombre) === 1
+    ? 'Hola, ' . $escapar($primerNombre) . '.'
+    : 'Hola.';
 
 $htmlAcuse = $envoltura('
-        <h1 style="margin:0 0 24px;font-size:20px;">Recibimos tu mensaje</h1>
+            <h1 style="margin:0 0 20px;font-size:22px;color:' . $c['texto'] . ';">Recibimos tu mensaje</h1>
 
-        <p style="margin:0 0 20px;font-size:16px;line-height:1.6;">
-            Hola <strong>' . $escapar($nombre) . '</strong>, te escribimos de
-            <strong>4D Cuarta Dimensión</strong>. Tu mensaje llegó bien y
-            pronto nos pondremos en contacto contigo.
-        </p>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">' . $saludo . '</p>
+            <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">
+                Tu solicitud sobre <strong>' . $escapar($lineaLegible) . '</strong> llegó bien.
+                Respondemos en <strong>24 a 48 horas hábiles</strong>.
+            </p>
 
-        <p style="margin:0 0 10px;color:#8a8f9c;font-size:12px;letter-spacing:.1em;text-transform:uppercase;">
-            Esto fue lo que nos enviaste
-        </p>
-        <table style="border-collapse:collapse;margin:0 0 18px;">' . $filas . '</table>
+            <p style="margin:0 0 28px;font-size:15px;line-height:1.7;">
+                Si necesitas algo antes, puedes escribirnos a
+                <a href="mailto:info@4dimensionsas.com" style="color:' . $c['azul'] . ';">info@4dimensionsas.com</a>
+                o por WhatsApp al
+                <a href="https://wa.me/573165775539" style="color:' . $c['azul'] . ';">+57 316 577 5539</a>.
+            </p>
 
-        <div style="border-left:2px solid #3d6bff;padding-left:16px;margin:0 0 28px;font-size:15px;line-height:1.7;white-space:pre-wrap;">' . $escapar($mensaje) . '</div>
+            <p style="margin:0 0 4px;font-size:15px;">Gracias por escribirnos.</p>
+            <p style="margin:0;color:' . $c['suave'] . ';font-size:13px;">El equipo de 4D Cuarta Dimensión</p>
 
-        <p style="margin:0 0 28px;font-size:15px;line-height:1.6;">
-            Respondemos en <strong>24 a 48 horas hábiles</strong>. Si necesitas
-            algo antes, puedes escribirnos a
-            <a href="mailto:info@4dimensionsas.com" style="color:#3d6bff;text-decoration:none;">info@4dimensionsas.com</a>
-            o llamarnos al
-            <a href="tel:+573165775539" style="color:#f2f4f8;text-decoration:none;">+57 316 577 5539</a>.
-        </p>
-
-        <p style="margin:0 0 4px;font-size:15px;">Gracias por escribirnos.</p>
-        <p style="margin:0;color:#8a8f9c;font-size:13px;">4D Cuarta Dimensión ES S.A.S. · Bogotá D.C., Colombia</p>
-
-        <p style="margin:28px 0 0;padding-top:16px;border-top:1px solid #23262d;color:#8a8f9c;font-size:11px;line-height:1.6;">
-            Recibes este correo porque enviaste el formulario de contacto de
-            4dimensionsas.com y autorizaste el tratamiento de tus datos con la
-            única finalidad de responderte. Si no fuiste tú, ignóralo.
-        </p>');
+            <p style="margin:28px 0 0;padding-top:16px;border-top:1px solid ' . $c['linea'] . ';color:' . $c['suave'] . ';font-size:11px;line-height:1.6;">
+                Recibes este correo porque se envió el formulario de contacto de
+                4dimensionsas.com con esta dirección y se autorizó el tratamiento de
+                los datos con la única finalidad de responder. Si no fuiste tú,
+                ignóralo: no volverás a recibir nada.
+            </p>');
 
 $smtp = new Smtp(
     $config['smtp']['host'],

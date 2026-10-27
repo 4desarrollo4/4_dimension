@@ -57,4 +57,12 @@ return [
      * los correos. Nunca se pierde una solicitud por esto.
      */
     'limite_por_hora' => 5,
+
+    /*
+     * Tope duro por cliente y hora (2026-10-26). Por ENCIMA de este número la
+     * solicitud se rechaza sin guardarse. Existe para que un bot no pueda
+     * llenar la base de datos: antes no había ninguno y en pruebas 60 envíos
+     * seguidos se guardaron los 60. Ninguna persona real llega a 20 en una hora.
+     */
+    'tope_por_hora' => 20,
 ];

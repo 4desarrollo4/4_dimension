@@ -7,20 +7,25 @@ import Reveal from './Reveal';
 // la rejilla 2×2. En ese modo, imagen y texto van uno al lado del otro.
 export default function ProjectCard({ project, delay = 0, wide = false }) {
     return (
-        <Reveal delay={delay}>
+        // `h-full` en Reveal y en el enlace: las tarjetas de una misma fila
+        // miden lo mismo aunque una tenga más texto que otra.
+        <Reveal delay={delay} className="h-full">
             {/* La tarjeta lleva a su línea de negocio, no al formulario: es
                 información sobre lo que hacemos, no un CTA (ADR-009). */}
             <Link
                 to={`/${project.lineId}`}
-                className="group block h-full border border-border/70 bg-card transition-colors duration-500 hover:border-primary/50"
+                className="group block h-full border border-primary/40 bg-card transition-colors duration-500 hover:border-primary/85"
             >
                 <div className={wide ? 'grid md:grid-cols-2' : ''}>
-                    <div className="media">
+                    {/* `fondoBlanco`: producto recortado sobre blanco. Va entero
+                        (`object-contain`, sin cortar puntera ni talón) y sin el
+                        velo azul de `.media`, que ensucia el blanco. */}
+                    <div className={project.fondoBlanco ? 'overflow-hidden bg-card' : 'media'}>
                         <img
                             src={project.image}
                             alt={project.alt}
                             loading="lazy"
-                            className={`w-full object-cover ${wide ? 'aspect-[16/10] h-full' : 'aspect-[4/3]'}`}
+                            className={`w-full ${project.fondoBlanco ? 'object-contain p-6 motion-safe:transition-transform motion-safe:duration-700 motion-safe:group-hover:scale-[1.04]' : 'object-cover'} ${wide ? 'aspect-[16/10] h-full' : 'aspect-[4/3]'}`}
                         />
                     </div>
                     <div className={`flex items-start justify-between gap-4 p-6 ${wide ? 'md:flex-col md:justify-center md:p-10' : ''}`}>

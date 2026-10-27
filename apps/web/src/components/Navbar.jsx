@@ -7,11 +7,21 @@ import { Menu, X } from 'lucide-react';
 // se desactiva ese proyecto, el sitio se quedaba sin logo. Ver P2-02.
 export const LOGO_URL = '/logo-4d.png';
 
+// Orden fijado por el propietario el 2026-10-20: primero las cuatro líneas de
+// producto, después proyectos y nosotros. «Contacto» NO va aquí — se renderiza
+// aparte como botón, y es uno de los dos únicos enlaces a /contacto por página
+// que permite el ADR-009.
 const links = [
-    { to: '/#proyectos', label: 'Proyectos' },
+    // `end` para que «Inicio» solo se marque activo en «/» exacto: sin eso,
+    // NavLink considera que «/» coincide con TODAS las rutas y el enlace
+    // quedaría resaltado en todo el sitio.
+    { to: '/', label: 'Inicio', end: true },
     { to: '/calzado', label: 'Calzado' },
     { to: '/ropa', label: 'Ropa' },
     { to: '/dotaciones', label: 'Dotaciones' },
+    { to: '/insumos', label: 'Insumos' },
+    // «Proyectos» salió del menú el 2026-10-26, a petición del propietario. La
+    // sección sigue en la home y el footer conserva su enlace.
     { to: '/nosotros', label: 'Nosotros' },
 ];
 
@@ -79,26 +89,29 @@ export default function Navbar() {
             <motion.header
                 animate={{ y: hidden ? '-100%' : '0%' }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-                    scrolled ? 'border-b border-border/70 bg-background/85 backdrop-blur-md' : 'bg-transparent'
+                className={`navbar-dark fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
+                    scrolled ? 'border-border/70' : 'border-transparent'
                 }`}
             >
                 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 md:h-20">
                     <Link to="/" className="flex items-center gap-3" aria-label="4D Cuarta Dimensión — inicio">
                         <img src={LOGO_URL} alt="Logo 4D Cuarta Dimensión" width="36" height="36" className="h-9 w-9 rounded-full" />
-                        <span className="text-sm font-bold tracking-[0.18em] uppercase">
+                        <span className="whitespace-nowrap text-sm font-bold tracking-[0.18em] uppercase">
                             4D <span className="hidden font-medium text-muted-foreground sm:inline">Cuarta Dimensión</span>
                         </span>
                     </Link>
 
-                    <nav className="hidden items-center gap-8 lg:flex" aria-label="Navegación principal">
+                    {/* xl, no lg: con «Inicio» son 7 enlaces más el botón, y a 1024 px el
+                        navbar se quedaba sin hueco y el logo se partía en dos líneas.
+                        Medido el 2026-10-20. Ver docs/06-backlog.md → P1-17. */}
+                    <nav className="hidden items-center gap-7 xl:flex" aria-label="Navegación principal">
                         {links.map((l) =>
                             l.to.includes('#') ? (
                                 <Link key={l.to} to={l.to} className="nav-link text-sm tracking-wide text-muted-foreground transition-colors duration-200 hover:text-foreground">
                                     {l.label}
                                 </Link>
                             ) : (
-                                <NavLink key={l.to} to={l.to} className={linkClass}>
+                                <NavLink key={l.to} to={l.to} end={l.end} className={linkClass}>
                                     {l.label}
                                 </NavLink>
                             ),
@@ -115,7 +128,7 @@ export default function Navbar() {
                         ref={triggerRef}
                         type="button"
                         onClick={() => setOpen(true)}
-                        className="flex h-11 w-11 items-center justify-center text-foreground lg:hidden"
+                        className="flex h-11 w-11 items-center justify-center text-foreground xl:hidden"
                         aria-label="Abrir menú"
                         aria-expanded={open}
                         aria-controls="menu-movil"

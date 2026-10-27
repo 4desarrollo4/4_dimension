@@ -1,6 +1,6 @@
 # 08 — Bitácora de sesiones
 
-**Última actualización:** 2026-10-20
+**Última actualización:** 2026-10-27
 
 ---
 
@@ -31,6 +31,1015 @@
 > - **No borres entradas antiguas.** Este archivo es el historial.
 > - Si algo se verificó midiéndolo, escribe el dato. Si es una impresión,
 >   dilo así. La bitácora solo sirve si es fiable.
+
+---
+
+## 2026-10-27 · Auditoría de SEO antes de publicar la v2
+
+El propietario preguntó si el sitio tiene buen SEO y posicionamiento, y pidió
+arreglarlo si no. Detalle completo en `05-contenido-y-seo.md` → «Auditoría del
+2026-10-27».
+
+- **El build estaba bien; el servidor no.** El sitio publicado redirige
+  `/nosotros` → `/nosotros/` (Google no indexa esas páginas), sirve una copia
+  en `www`, y da 404 en `/favicon.ico` e `/insumos`. Todo se arregla al subir
+  la v2 con su `.htaccess`.
+- Títulos con palabra clave + «en Colombia»; imagen propia para compartir
+  cada línea (`public/og/`); descripción de Insumos ampliada y en literal
+  (`llms.txt` decía «No description available»); `.htaccess` con 301 de
+  `www` y caché del navegador.
+- Al tocar Insumos, el reemplazo cambió también el texto visible del hero; se
+  devolvió a su texto original.
+- eslint ✅ · build ✅ · títulos y `og:image` comprobados en el HTML generado.
+
+---
+
+## 2026-10-27 · Foto propia en la tarjeta «Greenloop» (calzado) de la home
+
+El propietario pidió cambiar el tenis de running de banco de la tarjeta
+destacada «Greenloop» por un tenis bajo de gamuza gris con suela moteada.
+
+- `fotos/calzado-greenloop.webp` (1600×1195, 2 MB → 123 KB). El fondo de la
+  foto era gris 246–250 y la tarjeta es blanca 255: se notaba un recuadro.
+  Se subió el punto blanco (×255/244) para dejar el fondo en 255 exacto.
+- `ProjectCard` acepta `fondoBlanco` en el proyecto: foto entera
+  (`object-contain` con margen, sin cortar puntera ni talón), sin el velo de
+  `.media`, y zoom suave al pasar el cursor.
+- `IMAGES.runner` borrado: quedan 7 imágenes de banco.
+
+---
+
+## 2026-10-27 · Collage en «Personalización total» y bloques texto + foto animados
+
+- **/ropa · Personalización total:** la foto de banco (telas y cinta
+  métrica) se sustituyó por el collage de botas que aportó el propietario
+  (`fotos/ropa-collage.webp`, 4:3 entero, 2,6 MB → 166 KB, sin el velo de
+  `.media` porque tiene fondo blanco). `IMAGES.ropaDetail` borrado: quedan 8
+  imágenes de banco.
+- **Los tres `DetailSplit` animados** (detalle en `04-diseno.md`): filete
+  vertical, etiquetas desde el propio texto, cortina + zoom en la foto y
+  marco azul desplazado. Nuevas piezas `Cortina` y `FileteVertical` en
+  `Movimiento.jsx`.
+- **La banda de «Capacidades» pasa de azul marino a azul claro**: el
+  propietario la veía «muy molesta». Fondo `hsl(214 60% 94%)`, texto oscuro,
+  números en azul de marca, la fila se pone en blanco al pasar el cursor.
+  Contraste 15,6 / 7,2 / 10,1 : 1.
+- Verificado midiendo el estado final en el navegador (foto destapada, filete
+  a altura completa, 6 etiquetas, collage sin recorte); eslint ✅ · build ✅.
+
+---
+
+## 2026-10-27 · «Capacidades» y «Tipos» dejan de ser planas
+
+El propietario, sobre /ropa: «Capacidades» y «Tipos de prenda» se veían
+«muy básicas, muy planas, no hay nada de atención». Afecta a las tres páginas
+de línea, que comparten los componentes.
+
+**Qué se hizo** (detalle en `04-diseno.md` → «La banda de marca» y «Tarjetas
+con icono»):
+
+- **Capacidades** pasa a una banda azul marino a todo el ancho con retícula
+  tenue (`.banda-marca`): título, «Lo que hacemos» y el recuento («06», sale
+  del array) fijos a la izquierda; lista a la derecha con números grandes en
+  tinte azul; la fila se aclara y le sale un filete al pasar el cursor.
+- **Tipos / Sectores**: icono de lucide-react por tarjeta (ya instalado, sin
+  dependencias nuevas), número grande de marca de agua, y barrido azul al
+  pasar el cursor que deja la tarjeta en blanco sobre marino.
+- Sin texto nuevo salvo el rótulo «Lo que hacemos».
+
+**Verificación:** eslint ✅ · build ✅ · /ropa a 1280 px: banda con título
+fijo, hover de filas y de tarjetas (color final medido: blanco).
+
+---
+
+## 2026-10-27 · Ropa: fuera los casos de éxito, dentro «Algunos de nuestros productos»
+
+El propietario pidió en /ropa lo mismo que en /dotaciones: quitar «Casos de
+éxito» y poner sus productos, dos fotos por diseño, rotulados «Diseño 1,
+Diseño 2…» (sin nombre). Llegaron 8 fotos: 4 diseños.
+
+**Qué se hizo:**
+
+- Fotos en `public/fotos/ropa/0N-{producto,ambiente}.webp`, **verticales 3:4 a
+  900×1200**. Seis de las ocho llegaron así; en 3:2, como calzado y
+  dotaciones, las ambientadas (personas de cuerpo entero) perdían cabeza o
+  pies. Las dos del jean negro llegaron apaisadas y se recortaron a 3:4
+  centradas en la prenda y en la persona, sin cortar nada. 20 MB → 540 KB.
+- `disenio()` de `data/media.js` acepta `width`/`height`; `GALERIA_ROPA` usa
+  `VERTICAL`. El marco de `GalleryPhoto` toma la proporción de la foto, no un
+  `aspect-[3/2]` fijo.
+- Dos fotos 3:4 a todo el ancho medían 720 px de alto y una fila no cabía en
+  la pantalla de un portátil: las filas verticales se ciñen a `max-w-4xl`
+  (583 px de alto) y se arriman a izquierda y derecha alternando, como los
+  lados de las fotos.
+- **`CasesSection` borrada**: era /ropa la última página que la usaba.
+  `ProjectCard` sigue vivo en «Proyectos con resultado» de la home.
+
+**Abierto:** parche de Carhartt visible en la ambientada del Diseño 02 (ver
+`02-empresa.md` y P1-28).
+
+**Después, el mismo día, dos ajustes más pedidos por el propietario:**
+
+- **Rótulo vertical.** Las filas verticales dejaban un hueco al lado de las
+  fotos. Con un boceto, pidió llevar «Diseño» a ese hueco: en escritorio
+  (`lg+`) el rótulo va ahí en grande (72 px), en vertical, de abajo arriba,
+  con un filete azul del lado de las fotos (`RotuloVertical` en
+  `ProductLine.jsx`). La cabecera horizontal se oculta en `lg` y sigue en
+  móvil y tableta, donde no hay hueco. Calzado y dotaciones (3:2) no cambian.
+- **Hero de /ropa con foto propia.** La chaqueta de banco (Unsplash) se
+  sustituyó por la foto de una modelo con chaqueta de cuero y jean negro
+  (`fotos/ropa-modelo.webp`, 4:5, 960×1200, 2,5 MB → 60 KB). `LineHero` acepta
+  `imageWidth`/`imageHeight`: si la foto es vertical, el marco toma su
+  proporción y se ciñe a `max-w-md`. También es ya la foto de Ropa en la home
+  y en los cierres de línea (`data/lineas.js`), con `posicion: '50% 10%'`
+  para que el recorte 3:2 / 4:3 no le corte la cabeza. `IMAGES.ropaHero`
+  borrado de `projects.js`: quedan 9 imágenes de banco.
+
+Verificado en el navegador a 1280 px y a 375 px; eslint ✅ · build ✅.
+
+**Verificación:** eslint ✅ · build ✅ (7 rutas) · /ropa en el navegador: 4
+filas «Diseño 01–04», 8 imágenes 900×1200 servidas, sin «Casos de éxito», 0
+errores de consola.
+
+---
+
+## 2026-10-27 · Las líneas en azul y negro
+
+El propietario pidió color azul en las líneas de los cuadros y de separación,
+repartido «para que se vea bien y no sobrecargado».
+
+**Qué se hizo:** una jerarquía de tres niveles, documentada en
+`04-diseno.md` → «Las líneas»: **azul** para lo que agrupa contenido
+(tarjetas, filas de listas, cabeceras de la galería, línea bajo las cifras),
+**negro al 30 %** para lo que separa secciones, y **neutro** para marcos de
+fotos, divisiones internas y campos del formulario. Las tarjetas llevan además
+un acento azul corto arriba a la izquierda que se estira al pasar el cursor
+(antes la línea solo aparecía con el cursor encima).
+
+**Medido, no supuesto:** al primer intento (azul al 30 %) las capturas
+mostraban las líneas grises. Se subió a 40 % en tarjetas y 60 % en filas.
+
+**Verificación:** eslint ✅ · build ✅ · capturas a 1280 px de /dotaciones
+(capacidades, sectores, galería) y de la home (líneas, «Dónde operamos»).
+
+---
+
+## 2026-10-27 · Dotaciones: fuera los casos de éxito, dentro «Nuestros productos»
+
+El propietario pidió, antes de publicar, quitar de /dotaciones la sección
+«Casos de éxito» y poner sus productos con el mismo formato que la galería de
+/calzado: dos fotos por referencia, y como nombre **el del archivo** de la
+primera foto (`polar.jpg` → «Polar»).
+
+**Qué se hizo**
+- 7 referencias, 14 fotos, tomadas de `Descargas` con sus nombres originales:
+  Soldador, Petrolera, Vigilante, Polar, Work Confort, Work Confort N y Work
+  520 sin puntera. Registradas en `docs/02-empresa.md` (dato nuevo del
+  propietario → primero ahí).
+- Recorte a 3:2 y 1200×800, **centrado en las botas** midiendo su caja sobre
+  el fondo blanco. Soldador y Vigilante no cabían en un 3:2 sin perder unos
+  píxeles de caña: en vez de cortar, se **ensanchó el fondo** repitiendo el
+  borde fila a fila (el fondo es casi plano: 243–254). De 37 MB a 1,1 MB.
+- `DesignGallery` acepta `etiqueta` y `rotulo`; en /dotaciones dice
+  «Calzado de dotación · Nuestros productos.» y «Referencia 0N». El helper
+  `disenio()` de `media.js` recibe ahora la carpeta, y lleva el nombre.
+- `CasesSection` ya solo la usa /ropa.
+
+**Lo que NO se publicó:** la ficha de catálogo de «Soldador» (normas ASTM,
+DIN, NTC-ISO y la marca «Work Life»). No se pidió para el sitio; publicar
+normas exige la ficha de cada referencia.
+
+**Verificación:** eslint ✅ · build ✅ (7 rutas) · en /dotaciones: 7 filas en el
+orden enviado, lados alternos, 14 fotos servidas a 1200×800, sin «Casos de
+éxito», 0 errores de consola · la galería de /calzado sigue igual (8 fotos,
+«Diseño 0N»). No hubo captura: el panel no pinta con la ventana en segundo
+plano.
+
+**Dónde quedó / qué sigue**
+- Fotos de ropa.
+- Marcas visibles en las botas («G/M», «Velectric», «LEH»): confirmar que no
+  son de clientes, como «REBORN».
+
+---
+
+## 2026-10-26/27 · Seguridad del formulario, y una pasada visual a todo el sitio
+
+El propietario pidió, antes de mandar las fotos de ropa y dotaciones, revisar
+la seguridad, que todo el backend funcione (correos, enlaces, la tabla de
+contactos), que se le explique cómo funciona el formulario, y mejorar el sitio
+«en todos los sentidos», también lo visual y las transiciones.
+
+### 1 · El formulario, probado de verdad
+
+Banco local desechable, sin tocar la base del propietario ni producción:
+PHP 8.3 de Laragon, un **MySQL 8.4 nuevo en el puerto 3399** creado para la
+prueba (modo estricto, como Hostinger) y un **SMTP falso con TLS** que guarda
+cada correo en un archivo para leerlo. La batería son 18 casos.
+
+**Primera pasada: cinco problemas reales** (detalle en **ADR-019**): Insumos
+daba 422, el formulario aceptaba envíos desde cualquier web, el límite por IP
+podía contar por nodo de CDN, no había tope de almacenamiento (60 envíos
+seguidos → 60 filas) y el acuse repetía el mensaje del visitante a una
+dirección que pone él — servía para mandar spam firmado por 4D.
+
+**Segunda pasada, ya corregido: 18 de 18.** Lo más importante:
+
+| Caso | Resultado |
+|---|---|
+| Solicitud válida | 200 · `aviso:ok acuse:ok` · 2 correos capturados |
+| Insumos | 200 · `line = insumos` |
+| `Origin` ajeno / `text/plain` | 403 / 415 · **0 filas** |
+| 7 envíos seguidos | 5 con correo, 2 `omitido_por_limite` |
+| 25 envíos seguidos | 20 guardados, **5 rechazados con 429** |
+| Dos clientes tras el mismo nodo de CDN | cuentan por separado |
+| Cae el SMTP | **la solicitud se guarda** · `aviso:fallo acuse:fallo` |
+| Cae la base | 500 con JSON genérico, sin rutas ni avisos de PHP |
+| Spam por el acuse | el enlace **no** llega a la víctima |
+
+La migración `db/migraciones/2026-10-26-linea-insumos.sql` se ejecutó dos
+veces seguidas sobre la tabla con datos: idempotente, sin pérdida.
+
+### 2 · Lo que se miró en producción (solo lectura)
+
+Sin enviar nada por el formulario real. `config.php` y `smtp.php` → **403**
+(bien). `contacto.php` por GET → 405 (bien). `/nosotros` → **301** (el
+`.htaccess` sigue sin subir, P1-08). Sin cabeceras de seguridad (las pone el
+`.htaccess`). `/favicon.ico` → 404. SPF y DKIM correctos, **DMARC en
+`p=none`** (P1-10). Historial de Git: **ninguna credencial real**, solo
+marcadores de ejemplo. `npm audit`: 0 vulnerabilidades.
+
+**Enlaces:** 182 revisados en las 7 rutas, 0 rotos. `wa.me` y el enlace de
+Maps responden 200.
+
+### 3 · Pasada visual
+
+- **Contraste:** la auditoría del 20-oct trataba el color con alfa como opaco.
+  Rehecha mezclando con el fondo real, salieron dos fallos: la numeración
+  `.text-outline` a **1,59:1** y los textos de ayuda del formulario. Ambos
+  corregidos → 0 fallos.
+- **Dos H1 invisibles en el HTML prerenderizado** (`/contacto`, `/nosotros`):
+  estaban en un `Reveal`. Pasan a `.rise-solid`.
+- **Tarjetas en vez de celdas pegadas:** las rejillas `gap-px bg-border` de la
+  home, las páginas de línea y Nosotros pasan a `.tarjeta` (blanca, borde que
+  se tiñe y línea azul que se dibuja al pasar el cursor). «Dónde operamos» en
+  la home: cada tarjeta entera es el enlace.
+- **Proyectos de la home:** el huérfano de la tablet ocupa la fila entera y
+  todas las tarjetas igualan altura.
+- **Transiciones nuevas** (`components/Movimiento.jsx`): filetes que se dibujan
+  en las listas numeradas y fotos que entran con un zoom leve. Ambas respetan
+  `prefers-reduced-motion` y llevan `data-reveal` para el `<noscript>`.
+- **Plantillas de correo** con la paleta actual (blanco y PMS 295).
+
+### Verificación
+
+Build ✅ · eslint ✅ · 7 rutas sin errores de consola · 0 fallos de contraste ·
+sin desborde horizontal en móvil · los H1 presentes en el HTML prerenderizado.
+
+⚠️ **No verificado:** el movimiento en sí. El panel de vista previa midió
+**0 fps** con la ventana en segundo plano, así que las animaciones no se pueden
+ver desde aquí → **P1-26**.
+
+**Estado del backlog**
+- Nuevos: **P1-24** (migración antes del PHP) ⬜ · **P1-25** (`X-Forwarded-For`
+  en la CDN) ⬜ · **P1-26** (revisar transiciones) ⬜
+- P1-08 (`.htaccess`) y P1-10 (DMARC) siguen ⬜
+
+**Decisiones tomadas**
+- **ADR-019**: endurecimiento del formulario y acuse sin contenido del visitante.
+
+**Dónde quedó / qué sigue**
+- Publicar la v2 en el orden de `09-despliegue.md` (migración primero).
+- Fotos de ropa y dotaciones, que el propietario manda a continuación.
+- Siguen abiertas: secciones de proyectos de la home, /ropa y /dotaciones;
+  nombres de los 4 diseños; la marca «REBORN» del diseño 02; el commit.
+
+---
+
+## 2026-10-26 · Nuevo vídeo del hero, con bucle sin costura
+
+El propietario generó un segundo vídeo con Flow —un zapato de **denim**— y
+pidió sustituir el anterior y que «parezca bucle».
+
+### Lo que traía el original
+
+| | |
+|---|---|
+| Formato | **Vertical**, 720×1280, 24 fps, 10 s (240 fotogramas) |
+| Peso | 5,49 MB, con pista de audio |
+| Fondo | `rgb(234,234,234)` — **el mismo gris que el vídeo anterior** |
+
+Como el fondo es idéntico, **`--background` no hubo que tocarlo** (la regla del
+ADR-016 se comprobó, no se supuso).
+
+### Tres problemas, medidos antes de tocar nada
+
+1. **El giro no cierra.** Se comparó cada fotograma con el primero: el mejor
+   cierre natural es el fotograma 237, con una diferencia de **5,35** frente a
+   **1,64** entre fotogramas consecutivos. El giro se queda corto de 360° y al
+   reiniciar habría un brinco cada 10 s.
+2. **De perfil, el vídeo de origen corta la puntera** contra el borde izquierdo
+   (comprobado a tamaño real en el fotograma de 3,5 s). No se puede recuperar.
+3. **El WebM pesaba más que el MP4** (1,1 MB frente a 482 KB) por la textura del
+   denim, y el navegador elige el WebM primero.
+
+### Cómo se resolvió
+
+**Bucle — fundido de la cola con la cabeza.** Se descartan los primeros 15
+fotogramas del cuerpo y se funden con los 15 últimos, de modo que el vídeo
+termina en el fotograma 14 del original y empieza en el 15: consecutivos.
+
+```
+[0:v]fps=24,crop=720:720:0:402,scale=640:640:flags=lanczos,setsar=1,split[a][b];
+[a]trim=start_frame=15,setpts=PTS-STARTPTS,fps=24,settb=1/24[main];
+[b]trim=end_frame=15,setpts=PTS-STARTPTS,fps=24,settb=1/24[head];
+[main][head]xfade=transition=fade:duration=0.625:offset=8.75,format=yuv420p[v]
+```
+
+`xfade` exige tasa de fotogramas constante: sin el `fps=24,settb=1/24` tras
+cada `trim`, falla con «current rate of 1/0 is invalid».
+
+**Resultado medido sobre el archivo final:** costura de **2,08** frente a un
+paso medio de **3,71** entre fotogramas. El salto del final al principio es
+ahora más suave que el propio movimiento del giro.
+
+**Recorte:** cuadrado de 720 centrado en el zapato (envolvente vertical
+y 510–1015 en todo el giro → recorte desde y=402), escalado a 640.
+
+**Puntera cortada:** la máscara `.shoe-feather` pasó de una elipse radial (que
+en los laterales solo desvanecía un ~27 %) a **dos fundidos lineales cruzados**:
+16 % en horizontal y 10 % en vertical. De perfil la puntera se funde con el
+gris en vez de verse cortada; de frente y de espaldas el zapato ocupa el 28–72 %
+central y la máscara no lo toca.
+
+**Peso:** WebM a **dos pasadas con objetivo de 380 kb/s** → 436 KB, por debajo
+del MP4. Comparado a nivel de textura con el MP4: conserva el tejido diagonal
+del denim.
+
+| Archivo | Peso |
+|---|---|
+| `zapato.webm` | 436 KB |
+| `zapato.mp4` | 482 KB |
+| `zapato-poster.jpg` | 21 KB |
+
+El visitante descarga **uno** de los dos vídeos más el póster: **~460 KB**.
+Más que los ~190 KB del vídeo anterior, porque el denim tiene mucho más detalle
+y este giro es completo. De 5,49 MB a 460 KB igualmente.
+
+### Verificación
+
+- Servido en `localhost:3100`: el navegador carga el WebM, 9,38 s, 640×640,
+  en bucle, sin `autoplay` en el atributo, máscara con `intersect` aplicada.
+- Sin errores de consola. Build 7 rutas ✅ · `eslint src` limpio ✅
+- Como las capturas del panel no pintan vídeo, se reconstruyó en un lienzo lo
+  que ve el visitante (fotograma + máscara sobre el gris de la página) en 0,1 ·
+  2,9 · 5,3 · 9,3 s: **el primero y el último son el mismo fotograma de frente**
+  y la puntera de perfil se desvanece sin corte.
+
+El vídeo anterior quedó como copia de seguridad en el scratchpad de la sesión;
+**no estaba en git** (nunca se commiteó).
+
+### Segunda iteración: el difuminado se comía la puntera y el talón
+
+El propietario aprobó el bucle, pero no el difuminado: *«cuando el zapato está
+totalmente vertical se le difumina la punta y la parte de atrás»*. Tenía razón,
+y medirlo explicó por qué no había arreglo con ese vídeo: **el original
+vertical no tiene la puntera** en 68 de sus 240 fotogramas (entre 2,4 y 4,3 s
+corta hasta 190 filas contra el borde, es decir, la puntera entera).
+
+Se probó a darle margen con un lienzo pintado fila a fila y a difuminar solo
+la puntera y solo en esos tramos. Funcionaba, pero en esos tramos la puntera
+seguía sin existir. Entonces el propietario aportó **el mismo giro en
+horizontal** (1280×720), y ahí el zapato **nunca toca los bordes**
+(x 196–1082). Se rehizo todo con ese.
+
+#### Proceso final
+
+1. **Recorte 3:2** (1080×720 desde x=99), no cuadrado: de perfil el zapato
+   mide 886 px y el vídeo 720 de alto. Escalado a 960×640.
+2. **Aplanado del fondo al gris de la página (235)**, fotograma a fotograma y
+   solo en lo que es fondo: píxeles claros y sin color. El denim es azul y
+   cordones, forro y suela son crema, así que no se tocan. Sin esto se veía la
+   peana blanca (244) y la pared de los lados (226–230) como un recuadro.
+3. **Bucle** con el mismo `xfade` de 0,625 s que en la primera iteración.
+4. Codificación: MP4 `crf 30` y WebM a dos pasadas a 400 kb/s.
+
+```python
+# aplanar.py — RGB24 por stdin/stdout:  python aplanar.py 1080 720
+import sys, numpy as np
+PAGINA = 235.0
+LUM_DESDE, LUM_RAMPA = 200.0, 18.0   # < 200 no se toca; a 218 pesa del todo
+SAT_LLENO, SAT_NADA = 7.0, 12.0      # saturación ≤ 7 se corrige entera; ≥ 12 nada
+w, h = int(sys.argv[1]), int(sys.argv[2]); tam = w*h*3
+while len(buf := sys.stdin.buffer.read(tam)) == tam:
+    a = np.frombuffer(buf, np.uint8).reshape(h, w, 3).astype(np.float32)
+    lum, sat = a.mean(2), a.max(2) - a.min(2)
+    peso = np.clip((lum-LUM_DESDE)/LUM_RAMPA, 0, 1) * np.clip((SAT_NADA-sat)/(SAT_NADA-SAT_LLENO), 0, 1)
+    sys.stdout.buffer.write(np.clip(a + (PAGINA-a)*peso[..., None], 0, 255).astype(np.uint8).tobytes())
+```
+
+```
+ffmpeg -i ORIGINAL -vf "fps=24,crop=1080:720:99:0" -f rawvideo -pix_fmt rgb24 - \
+ | python aplanar.py 1080 720 \
+ | ffmpeg -f rawvideo -pix_fmt rgb24 -s 1080x720 -r 24 -i - \
+     -vf "scale=960:640:flags=lanczos,setsar=1,format=yuv444p" -c:v ffv1 compuesto.mkv
+```
+
+Y después, sobre `compuesto.mkv`, el `xfade` de la primera iteración.
+
+#### Dos callejones sin salida, para no repetirlos
+
+- **Un modelo de fondo por mediana temporal** dejaba **halos blancos** pegados
+  al contorno del zapato: justo ahí el modelo es menos fiable, porque esos
+  píxeles están tapados buena parte del giro. Decidir fotograma a fotograma
+  qué es fondo lo resolvió.
+- **El filtro `blend` de ffmpeg** con una imagen en bucle como segunda entrada
+  dejaba **las dos últimas columnas en negro** en el vídeo completo (en pruebas
+  cortas no). No se averiguó la causa; se sustituyó por el script de Python
+  entre dos ffmpeg, que es determinista.
+
+#### Medido
+
+| | Resultado |
+|---|---|
+| Borde del vídeo frente a la página | **< 1,5 niveles** (antes 5–6) |
+| Cambio en el zapato | **0,75 niveles de media**: imperceptible |
+| Cordones, flecos, etiqueta del forro | Comparados a tamaño real: idénticos |
+| Costura del bucle | 2,71 frente a 2,93 de paso medio: sin salto |
+| Peso servido | **~485 KB** (WebM 459 · MP4 478 · póster 25) |
+| Calidad | WebM 39,0 dB · MP4 38,3 dB de PSNR |
+
+En la web: el vídeo pasa a 960×640 y `max-w-[520px]` (452×301 en escritorio,
+331×221 en móvil), y la máscara `.shoe-feather` se quedó en el 6 % lateral, 12 %
+arriba y 5 % abajo — zonas donde el zapato no entra en ningún fotograma.
+
+Verificado en el navegador pintando el fotograma de perfil en un lienzo con la
+misma clase CSS: puntera y talón completos, sin recuadro visible.
+
+### Tercera iteración: el zapato, más grande
+
+El propietario: *«siento que está muy pequeño para el espacio que tiene»*.
+Había dos frenos, y se soltaron los dos:
+
+1. **El margen dentro del vídeo.** El zapato ocupaba el 82 % del ancho y el
+   66 % del alto. Se midió su contorno en todo el giro con tres criterios
+   distintos (denim y suela; + flecos y crema; + sombras suaves) y los tres
+   coinciden: x 194–1084, y 162–647. Nuevo recorte **960×600 a resolución
+   nativa** (sin reescalar, así además gana nitidez): el zapato ocupa el
+   **93 %** del ancho. Ningún píxel del zapato cae en los 20 px del borde en
+   ningún fotograma.
+2. **El reparto de columnas del hero.** Pasa a 50/50 **solo desde 1280 px**
+   (`xl:grid-cols-2`). La palabra más larga del titular, «desarrollamos», mide
+   497 px: a 1024 px no cabría en una columna a partes iguales (468), así que
+   por debajo de `xl` se mantiene el reparto anterior.
+
+| Ancho | Zapato antes | Zapato ahora |
+|---|---|---|
+| 1440 px | ~371 px | **~493 px (+33 %)** |
+| 1024 px | ~320 px | ~363 px (+13 %) |
+| 375 px | ~271 px | ~307 px (+13 %) |
+
+Verificado en 1440, 1280, 1100, 1024, 768 y 375: el titular no se sale de su
+columna, el vídeo no pisa el texto y la página no desborda.
+
+**Y destapó dos halos que había que quitar.** El hero tenía `glow-tr`, un
+degradado del azul de marca anclado arriba a la derecha: con el vídeo más
+grande, su esquina caía encima y la página quedaba **5 niveles más oscura**
+justo ahí, dejando ver el recuadro. Y el componente traía un halo heredado del
+cubo que en móvil (256 px) asomaba por encima y por debajo del vídeo (207 px).
+Los dos eran decoración del tema oscuro; retirados.
+
+Archivos: `zapato-denim-960.*` (WebM 460 KB · MP4 584 KB · póster 28 KB).
+Bucle: costura 3,72 frente a 4,13 de paso medio.
+
+⚠️ **Los archivos van con nombre nuevo** (`zapato-denim-3x2.*`). Al sustituir
+el primer vídeo con el mismo nombre, una pestaña con el anterior en caché pidió
+un rango de bytes que ya no existía y el servidor respondió **416**. En
+producción le pasaría a cualquier visitante recurrente.
+
+---
+
+## 2026-10-26 · Enlaces en azul en todo el sitio y nuevo cierre de las líneas
+
+### 1 · Todo lo que se pulsa, en azul
+
+El propietario pidió que los datos que llevan a un enlace se vean en azul, y
+revisar **toda** la web. Se hizo con un inventario automático de las 7 páginas
+(cada enlace de contenido que no fuera azul, con su texto y su sección), no a
+ojo. Salieron:
+
+| Dónde | Qué |
+|---|---|
+| Home, «Dónde operamos» | correo, teléfono (WhatsApp) y dirección (Maps) |
+| /nosotros, «Nuestra historia» | los cuatro enlaces a las líneas, dentro del párrafo |
+| /contacto, «Datos de contacto» | correo y teléfono |
+| Footer, en las 7 páginas | todos sus enlaces |
+
+Se resolvió con **dos clases** (`.enlace` y `.enlace-texto`, ver
+`04-diseno.md`) en lugar de colores sueltos. Los enlaces dentro de un párrafo
+van **siempre subrayados**, porque el azul marino y el gris del cuerpo se
+parecen demasiado en luminosidad para distinguirse solo por color (WCAG 1.4.1).
+
+**Y destapó dos incoherencias en /contacto**, corregidas leyendo de
+`lib/contacto.js` como el resto del sitio: el teléfono abría una **llamada**
+(`tel:`) en vez de WhatsApp con el mensaje, y la **dirección no era un enlace**.
+De paso, el correo del mensaje de error del formulario también pasó a enlace.
+
+Resultado: **0 enlaces de contenido sin azul** en las 7 páginas, y **0 fallos
+de contraste**; el enlace con menos contraste da 5,66:1.
+
+### 2 · El cierre de las páginas de línea, rehecho
+
+El propietario lo veía «muy cuadrado, muy genérico». Además tenía **un fallo
+de fondo**: cada página enseña las otras tres líneas en una rejilla de dos
+columnas, así que **siempre quedaba una celda vacía** (el bloque gris de su
+captura).
+
+- **Registro único `data/lineas.js`** con las cuatro líneas. La home y el
+  cierre leen de ahí; `LineClosing` recibe `actual` y enseña las demás. Se
+  acabaron las listas de «otras líneas» copiadas en cada página, que ya se
+  habían desincronizado una vez («las otras dos líneas» tras añadir Insumos).
+- **Tres tarjetas con la foto de cada línea**: número de dimensión en azul,
+  título y un botón de flecha azul que se rellena al pasar el cursor; la foto
+  se acerca ligeramente (`motion-safe:`). En móvil, filas compactas con
+  miniatura de 110 px y botón de 44 px.
+
+Verificado: cada página de línea muestra exactamente las otras tres; sin
+errores de consola en ninguna de las 7 páginas; sin desborde a 375 px; build ✅
+y `eslint src` ✅.
+
+### 3 · «Proyectos» sale también del footer
+
+El propietario vio que el footer seguía enlazando a proyectos. Se quitaron el
+enlace «Proyectos» de la columna Empresa y **la columna Proyectos entera**; la
+rejilla pasa de marca + 4 columnas a marca + 3. La columna de líneas pasó a leer
+de `data/lineas.js` (estaba copiada a mano).
+
+Con eso **ya no queda ningún enlace a `#proyectos` en todo el sitio**. Pero el
+**contenido** de proyectos sigue en tres sitios, pendiente de que el
+propietario decida: la sección «Proyectos con resultado» de la home, y los
+casos de éxito de /ropa y /dotaciones.
+
+⚠️ Durante la edición la consola mostró `LINEAS is not defined`: era un estado
+intermedio de la recarga en caliente (componente editado antes que su import).
+Comprobado con una carga limpia de las 7 páginas: ningún error.
+
+---
+
+## 2026-10-26 · Calzado: foto propia, galería de diseños y fuera «Proyectos»
+
+Tres peticiones del propietario, y una cuarta a mitad de camino.
+
+1. **«Proyectos» sale del menú** (escritorio y móvil). La sección sigue en la
+   home y el footer conserva su enlace. Se midió si el menú volvía a caber a
+   1024 px: quedarían **53 px** de holgura, menos que los 65 que ya se daban por
+   justos, así que el menú horizontal sigue empezando en 1280 px.
+2. **Hero de /calzado:** fuera el zapato blanco de banco, entra una foto de un
+   par de tenis de cuero café. **Recortada a 3:2** —la proporción en que la
+   muestra el hero— antes de optimizarla, para no descargar píxeles que nunca se
+   ven: de 479 KB a **120 KB**. Registrada en `data/media.js`.
+3. **Los casos de éxito de /calzado se sustituyen** por una galería, «Algunos de
+   nuestros diseños», para enseñar zapatos propios. Componente nuevo
+   `DesignGallery`, alimentado por `GALERIA_CALZADO` en `data/media.js`.
+   ⚠️ **La galería está vacía y por eso no se ve**: con cero fotos no pinta nada,
+   ni el título — ni huecos ni relleno genérico. Aparece sola en cuanto lleguen
+   las fotos.
+4. *(A mitad de tarea)* **La tarjeta de Calzado de la home** también pasa a la
+   foto café. El zapato blanco (`IMAGES.calzadoHero`) quedó sin uso y se retiró
+   de `projects.js`.
+
+La galería **se probó con datos temporales** (las dos fotos propias que ya
+existen) antes de vaciarla: tres columnas, pie de foto, entradas con `Reveal`.
+La prueba sirvió para corregir una decisión: las fotos iban en **vertical
+4:5**, pero un zapato es un objeto apaisado y en un marco vertical quedaba
+pequeño o cortado. Ahora son **cuadradas**.
+
+#### La galería, ya con fotos
+
+El propietario envió **4 diseños con dos fotos cada uno**: una de producto
+(fondo blanco o gris) y una ambientada. Venían en proporciones distintas
+(cuadradas y 16:9), así que:
+
+- **Las 8 se recortaron a 3:2**, centrando el recorte en el **zapato** y no en
+  la imagen, y se comprobó una a una que ninguno pierde puntera ni talón.
+- Optimizadas a 1200×800 en WebP: **de 2,76 MB a 561 KB**, y con carga diferida.
+- **Maqueta:** una fila por diseño, ambientada y producto lado a lado, y el lado
+  de la ambientada **alterna** fila a fila (mismo recurso que las líneas de la
+  home). Encabezado «Diseño 0N». En móvil se apilan, primero la ambientada.
+- La estructura de datos pasó de «una foto por entrada» a «un diseño con dos
+  fotos». El encuadre cuadrado que se había decidido para fotos sueltas ya no
+  aplica: ahora es 3:2.
+- El zoom al pasar el cursor va con `motion-safe:`, así que no se mueve con
+  `prefers-reduced-motion`. No se reutilizó `.media` porque su tinte azul sobre
+  una foto de producto con fondo blanco quedaba sucio.
+
+**Sin nombres:** el propietario no los dio y no se inventaron. Si se añaden
+(`nombre` en `data/media.js`), salen junto a «Diseño 0N».
+
+⚠️ La foto de producto del **diseño 02** lleva grabado en el lateral un texto
+que parece **«REBORN»** — posible marca de un cliente. Anotado en **P1-23**.
+
+Verificado: 8/8 fotos cargan, la alternancia es correcta en las cuatro filas,
+sin desborde a 375 px, la galería está en el HTML prerenderizado, build ✅ y
+`eslint src` ✅.
+
+Ojo: /ropa y /dotaciones **siguen con su sección de casos de éxito**. Solo se
+cambió /calzado, que es lo que se pidió.
+
+Verificado: build 7 rutas ✅ · `eslint src` limpio ✅ · sin errores de consola ·
+el HTML prerenderizado de /calzado lleva la foto nueva y ya no contiene
+«Resultados que hablan por sí solos».
+
+---
+
+## 2026-10-20 · Tema claro, barra negra y los primeros textos de la v2
+
+Primera sesión de cambios de la v2. El propietario fue pidiendo punto por punto.
+
+### Textos (5 cambios en la home)
+
+- **H1:** desaparece la palabra «producto» y el acento azul se traslada a
+  «calzado, ropa y dotaciones», para no perder el color en el titular.
+- **Entradilla:** «comercializadora internacional colombiana» → «empresa
+  colombiana»; «desarrollamos producto a medida» → «Diseñamos soluciones a
+  medida».
+- **Cifra:** `12.000 · Dotaciones entregadas en 4 países` → `130 · Dotaciones
+  entregadas`. Se actualizó **primero** [`02-empresa.md`](02-empresa.md), según
+  la regla del proyecto.
+- **Quiénes somos:** «comercializadora internacional» → «empresa colombiana»;
+  caen «en mercados exigentes» y «verificable».
+
+⚠️ **Quedó una contradicción publicada:** la ficha del Programa Atlas sigue
+diciendo «12.000 colaboradores dotados en cuatro países». Abierta como
+**P1-12**, bloqueada a la espera del propietario.
+
+### Tema claro — ADR-013
+
+El propietario aportó una captura de referencia y pidió su paleta. Los valores
+**no se estimaron a ojo**: GDI+ no decodifica WebP, así que se cargó la imagen
+en un lienzo del navegador y se muestreó píxel a píxel, buscando el píxel más
+oscuro de cada zona de texto para no caer en el antialiasing entre letras.
+
+Salió: primary `hsl(198 96% 31%)` (#036D9B), fondo blanco, titulares
+`hsl(228 11% 9%)`, párrafos `hsl(210 4% 38%)`.
+
+El cambio fue pequeño porque el color estaba **bien centralizado**: bastó el
+bloque `:root` más cuatro literales (`body`, `::selection`, `.text-outline`,
+`.watermark`) y el cubo del hero. Navbar y footer voltearon solos.
+
+### Barra superior en negro
+
+Pedida a mitad de sesión. Se resolvió con `.navbar-dark`, que **redefine los
+tokens dentro del `<header>`** en lugar de reescribir una docena de clases de
+`Navbar.jsx`. El menú móvil es hermano del header, así que se queda en blanco
+—correcto, porque ocupa toda la pantalla.
+
+### Verificación
+
+- Build con prerender: **6 rutas** ✅
+- Contraste automático sobre todo el texto de las 6 rutas: **0 fallos AA**.
+  Petróleo sobre blanco 5,74:1; navbar sobre negro 10,33:1.
+- Sin desborde horizontal a 375 px. Menú móvil correcto.
+- Sin errores de consola.
+
+### Tres hallazgos que no estaban previstos
+
+1. **`.media::after` jugaba en contra.** Ese degradado fundía una foto oscura
+   en una página oscura; sobre blanco lavaba el tercio inferior de cada imagen.
+   Suavizado. Efecto secundario: la regla de «30 % inferior libre» del plan v2
+   se relaja a ~20 %.
+2. **`npm run lint` ya fallaba antes de esta sesión** (`sharp` sin instalar en
+   `tools/generate-images.js`). Comprobado revirtiendo los cambios: falla
+   igual. Abierto como **P1-14**.
+3. **El H1 de `/nosotros` se sigue prerenderizando con `opacity:0`**, como
+   anticipaba el plan para el sprint 2. Confirmado sobre el HTML generado.
+
+### Segunda tanda del mismo día: cuarta línea de negocio
+
+El propietario siguió pidiendo cambios en la misma sesión.
+
+- **Se elimina el difuminado de las fotos** (`.media::after`). Lo rechazó
+  explícitamente: *«eso se ve feo»*. Consecuencia documentada: **decae la regla
+  de «30 % inferior libre de caras y rótulos»** del plan v2 — ya no hay
+  degradado que se coma esa zona.
+- **«Tres dimensiones de producto» → «Cuatro dimensiones de producto».**
+- **Reescritas las tres descripciones** de las líneas en la home.
+- **Nuevo orden del menú**: Calzado · Ropa · Dotaciones · Insumos · Proyectos ·
+  Nosotros · Contacto. Antes Proyectos iba primero.
+- **Nueva línea 04 «Insumos»** con ruta propia `/insumos`, registrada en
+  `App.jsx` **y** en `site.js` como exige la regla del proyecto. Entra en el
+  sitemap y en el prerender: el sitio pasa de **6 a 7 rutas**.
+- **La cifra de 130 queda confirmada** por el propietario.
+
+⚠️ **`/insumos` es una página mínima a propósito.** Lo único que se aportó fue
+una frase. No se inventaron capacidades, tipos, cifras ni casos: la página
+lleva hero y cierre, y nada más, hasta que haya material real (**P1-15**).
+Ni la tarjeta 04 de la home ni el hero de `/insumos` tienen foto, así que se
+renderizan **sin hueco de imagen** — se tocó `LineHero` para que `image` y
+`claim` sean opcionales.
+
+⚠️ **El navbar quedó al límite:** 6 enlaces más el botón dejan **65 px libres a
+1024 px**. Entra, pero uno más lo rompe (**P1-17**).
+
+### Verificación de esta segunda tanda
+
+- Build: **7 rutas** prerenderizadas ✅ · `/insumos` en el sitemap ✅
+- `eslint src` limpio ✅ *(el fallo de `sharp` en `tools/` sigue, es P1-14)*
+- Contraste en las **7** rutas: **0 fallos** · sin desborde horizontal
+- Menú correcto a 1024 y 1440; menú móvil sin cambios
+
+### Lo que se entregó sin implementar
+
+- **El prompt para Google Flow**, detallado, para que el propietario genere el
+  vídeo del zapato giratorio con **un zapato real de la empresa** (que es lo
+  que resuelve la objeción, no el vídeo en sí).
+- **El análisis de las tres vías para el sitio trilingüe** (ES/EN/PT), con
+  coste y consecuencias de SEO. Pedido explícitamente como *«primero dime cómo
+  hacerlo y yo miro si lo apruebo»*. Abierto como **P1-16**.
+
+### Tercera tanda: el zapato, los contactos y la tipografía
+
+#### El vídeo del hero
+
+El propietario generó el vídeo con Flow **partiendo de la foto de un zapato
+real de la empresa**, que era la parte importante. Llegó así: 1280×720, 9,17 s,
+pista de audio AAC y **8,69 MB**.
+
+No se podía publicar: es el elemento que mide el LCP. Se encontró un ffmpeg que
+venía con el paquete `imageio_ffmpeg` de Python y se procesó:
+
+```
+crop=720:720:260:0,scale=640:640:flags=lanczos
+libx264 crf 30 · sin audio · +faststart        → 171 KB
+libvpx-vp9 crf 38                               → 210 KB
+póster JPG                                      →  18 KB
+```
+
+El recorte **no se eligió a ojo**: se midió la envolvente del zapato en cinco
+fotogramas del giro (x 291–948) para garantizar que no se corta en ningún
+momento. Resultado: **de 8,69 MB a 404 KB en total**.
+
+También se midió la costura del bucle comparando el primer y el último
+fotograma: **1 % de diferencia media**, lo bastante poco para que no se note.
+
+`Tesseract.jsx` se borró — ya no se usaba y el proyecto no guarda código
+muerto (ADR-011). Está en git.
+
+#### El fondo de la página cambió por culpa del vídeo
+
+El propietario detectó que *«el fondo del zapato con el fondo de la página no
+coinciden»*. Cierto: el vídeo tiene fondo gris, no blanco. Se muestreó el
+archivo — **`rgb(234,234,234)` = `hsl(0 0% 92%)`** — y la página adoptó ese
+color.
+
+No bastaba con eso: el fondo del vídeo **no es plano**, va del 88 % al 95 %,
+así que un gris liso seguiría sin casar en las esquinas. Se añadió una máscara
+radial (`.shoe-feather`) que desvanece los bordes. Las dos cosas, no una.
+
+`--card` pasó a blanco puro para que las superficies elevadas sigan leyéndose
+por encima del fondo, y `--border` se oscureció al 78 % para seguir viéndose.
+
+#### Contactos
+
+Nuevo `src/lib/contacto.js` como punto único. De ahí salen el `mailto`, el
+enlace de WhatsApp **con el mensaje ya escrito** y el de Google Maps con la
+dirección ya buscada. La sección «Dónde operamos» ahora tiene los tres
+enlazados, y hay un **botón flotante de WhatsApp** en las siete rutas.
+
+⚠️ Ese botón **rompe el ADR-009**. Queda registrado en el **ADR-014**: es el
+tercer punto de contacto del sitio y está en todas las páginas. Si la dirección
+vuelve a decir que «parece que vende», es lo primero que hay que mirar.
+
+#### Tipografía — el sprint 1 del plan, completo
+
+Cuatro cambios y uno que no estaba previsto:
+
+1. **Fuera `-webkit-font-smoothing: antialiased`.** Coste cero, mayor impacto.
+2. **Archivo sustituye a Manrope.**
+3. **Escala arriba.** En vez de reescribir las **63** clases `text-sm`/`text-xs`
+   del código, se redefinió la escala en `tailwind.config.js`. Un solo cambio.
+4. **Peso del cuerpo 400 → 450.**
+5. **Los números delineados pasan a relleno.** El propietario avisó de que «se
+   ven medio delineados». Eran `-webkit-text-stroke` de 1 px: a baja densidad
+   el antialiasing se come el trazo. Ya no queda ni un `text-stroke`.
+
+**Medido sobre el texto renderizado de las 7 rutas: el texto a ≤14 px bajó del
+75 % al 12 %.** Y ese 12 % restante son los eyebrows a los 13 px que el propio
+plan fijó, más el enlace «Saltar al contenido», que está oculto. El objetivo
+del plan era «< 10 %», así que queda por encima en la métrica — pero no hay
+nada que bajar sin contradecir el plan.
+
+### Verificación de la tercera tanda
+
+- Build: **7 rutas** ✅ · `eslint src` limpio ✅
+- Contraste tras el cambio de fondo: **0 fallos AA en las 7 rutas**
+- Sin desborde horizontal a 375 ni a 1440
+- Botón de WhatsApp 56×56 px — por encima del mínimo táctil de 44 px de WCAG
+- Vídeo: sin atributo `autoplay`, con `playsInline`, `loop`, `muted` y póster.
+  Comprobado que la rama de pausa funciona
+
+⚠️ **Lo que NO se pudo verificar aquí:** el panel del navegador no permite
+emular `prefers-reduced-motion`, así que la rama que muestra el póster fijo se
+comprobó por estructura (ausencia de `autoplay`, pausa efectiva), no con la
+preferencia real del sistema. Conviene probarlo a mano en un equipo con el
+movimiento reducido activado.
+
+⚠️ **Las capturas del panel no componen fotogramas de vídeo**, así que el hero
+sale vacío en ellas. Se confirmó que el vídeo se decodifica dibujándolo en un
+lienzo y midiendo el rango de luminancia (37–250).
+
+### Cuarta tanda: el footer, y lo que destapó
+
+El propietario señaló que el footer estaba desactualizado. Lo estaba, pero el
+problema de fondo era otro: **los nombres de los proyectos estaban copiados a
+mano** en `Footer.jsx`, así que al renombrarlos en `projects.js` el footer
+siguió anunciando «Runner X-40», «Colección Origin» y «Programa Atlas» —
+proyectos que ya no existen en el sitio.
+
+Arreglado de raíz: ahora **se derivan de `data/projects.js`**. No pueden volver
+a desincronizarse. De paso, los dos «Greenloop» se desambiguan con su línea
+(«Greenloop · Calzado» / «Greenloop · Ropa»), que es el apaño del **P1-19**
+aplicado al footer.
+
+Lo demás del footer:
+
+- **Descripción:** «Comercializadora internacional…» → «Empresa colombiana de
+  diseño y desarrollo de producto: calzado, ropa, dotaciones e insumos».
+  Se alinea con el lenguaje nuevo y suma la cuarta línea.
+- **Contacto enlazado**, leyendo de `lib/contacto.js`: correo, WhatsApp con el
+  mensaje escrito y Maps con la dirección buscada.
+- La dirección es **un solo enlace en dos líneas**, no dos enlaces al mismo
+  destino: así un lector de pantalla no anuncia «ver en Google Maps» dos veces.
+
+#### 🔴 Lo que destapó: el sitio se contradice sobre dónde opera
+
+Al cambiar «Dónde operamos» en la home a **«Latinoamérica y Centroamérica»**,
+el resto del sitio se quedó anunciando lo contrario. El footer se corrigió,
+pero **la contradicción sigue viva en cuatro sitios más**:
+
+| Dónde | Qué sigue diciendo |
+|---|---|
+| `ContactoPage.jsx:282` | «Latinoamérica · Norteamérica · Europa» |
+| `NosotrosPage.jsx:71` | «Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa» |
+| `NosotrosPage.jsx:77` | Una tarjeta entera dedicada a **Norteamérica** |
+| `JsonLd.jsx:48` | `areaServed` incluye Norteamérica — **es lo que lee Google** |
+| `02-empresa.md:172` | La fuente de verdad sigue listando Norteamérica |
+
+**No se tocaron a propósito.** Si la empresa ya no opera en Norteamérica y
+Europa, no es un cambio de texto: es retirar una afirmación comercial de cinco
+sitios, incluida la que leen los buscadores. Y si sí opera, entonces lo que
+está mal es la frase nueva de la home. Hace falta que lo diga el propietario.
+Abierto como **P1-22**.
+
+Además, `NosotrosPage.jsx:50` sigue diciendo **«tres líneas de negocio»**
+cuando ya son cuatro. Es consecuencia directa de añadir Insumos. Incluido en
+el mismo **P1-22** porque está en el mismo párrafo.
+
+### Quinta tanda: se zanja dónde opera 4D (cierra el P1-22)
+
+El propietario resolvió la contradicción que había destapado el footer, y de
+paso reescribió «Nuestra historia».
+
+**La cobertura real es Colombia · Latinoamérica · Centroamérica**, y los
+aliados de manufactura están en **Colombia, Guatemala, Ecuador y Bolivia**.
+Fuera Norteamérica, Europa y Asia.
+
+No era cambiar un texto: la afirmación estaba copiada en **siete sitios**.
+
+| Dónde | Qué se corrigió |
+|---|---|
+| `NosotrosPage` · historia | Texto nuevo, con las **cuatro líneas enlazadas** a su página |
+| `NosotrosPage` · capacidad | Párrafo + las tres tarjetas (Colombia / Latinoamérica / Centroamérica) |
+| `ContactoPage:282` | «Latinoamérica · Norteamérica · Europa» → cobertura nueva |
+| `Footer` | Línea de cobertura |
+| `JsonLd` | **`areaServed` y la descripción** — es lo que indexa Google |
+| Cierres de las 4 páginas de línea | Aliados, y «otras **dos** líneas» → «otras **tres**» |
+| `02-empresa.md` | La fuente de verdad |
+
+⚠️ **Hay que pedir reindexación en Search Console.** El `areaServed` anterior,
+con Norteamérica y Europa, ya está indexado por Google. Cambiar el marcado no
+borra lo indexado.
+
+Las cuatro líneas de la historia van enlazadas dentro del párrafo. **No cuentan
+como CTA** a efectos del ADR-009: son navegación dentro del texto, no llamadas
+a contactar.
+
+### Verificación
+
+- Build 7 rutas ✅ · `eslint src` limpio ✅
+- Contraste en las 7 rutas: **0 fallos** · sin desborde
+- `areaServed` publicado comprobado sobre el HTML generado
+- Cero apariciones de «Norteamérica», «Asia y Europa», «tres líneas de
+  negocio» y «otras dos líneas» en todo `src/`
+
+⚠️ **Una cosa que no apliqué:** el propietario escribió el nombre como «4D
+Cuarta Dimensión S.A.S.», **sin el «ES»**. Se mantuvo **«4D Cuarta Dimensión ES
+S.A.S.»**, que es la razón social registrada según `02-empresa.md`. Si el «ES»
+sobra de verdad, hay que cambiarlo en la fuente de verdad primero — aparece
+también en el JSON-LD y en los títulos de página.
+
+### Sexta tanda: PMS 295 y el botón de Inicio
+
+#### El azul de marca
+
+El propietario aportó el color corporativo real —**PMS 295**— en una
+fotografía de un muestrario impreso. Se muestreó el área central: la moda de
+color da **`rgb(15,55,106)` = `#0F376A` = `hsl(214 75% 24%)`**.
+
+⚠️ **Queda dicho que es un escaneo, no el Pantone exacto.** Las conversiones
+publicadas de Pantone 295 C quedan algo más oscuras (`#002F5F`–`#003057`). Si
+existe el valor del manual de marca, ese manda.
+
+**Destapó un problema real:** PMS 295 es un azul marino muy oscuro, y la barra
+superior es negra. Ahí el azul se usa en el subrayado de 1 px del enlace activo
+y en el botón «Contacto» — habría quedado **invisible**. Se resolvió
+redefiniendo `--primary` dentro de `.navbar-dark` a un **tinte del mismo
+color** (`hsl(214 75% 58%)`): mismo matiz, misma saturación, solo más claro.
+
+**El cambio mejora la accesibilidad**, no la empeora:
+
+| | Antes (petróleo) | Ahora (PMS 295) |
+|---|---|---|
+| Acento sobre la página | 4,77:1 | **9,92:1** |
+| Blanco sobre el acento | 5,74:1 | **11,83:1** |
+
+#### El botón de Inicio, y lo que rompió
+
+Se añadió «Inicio» como primer enlace, con `end: true` en el `NavLink` — sin
+eso React Router da por activa la ruta `/` en **todas** las páginas y el enlace
+se quedaría resaltado siempre.
+
+**Y activó el P1-17**, que estaba avisado desde la segunda tanda:
+
+| a 1024 px | Antes de «Inicio» | Con «Inicio» |
+|---|---|---|
+| Hueco libre en el navbar | 65 px | **0 px** |
+| Nombre del logo | Una línea | **Partido en dos** |
+
+Mitigado subiendo el punto de ruptura del menú de `lg` (1024) a `xl` (1280),
+bajando el espaciado a `gap-7` y poniendo `whitespace-nowrap` al logo. Entre
+1024 y 1279 px se usa la hamburguesa, que ya existía.
+
+**Medido a 1024, 1280, 1440 y 1680 px**, abriendo la página en un iframe de
+cada ancho: a 1280 el menú entra con **77 px** de holgura y el logo en una
+línea.
+
+⚠️ El P1-17 **sigue abierto**: con 77 px no cabe otro enlace. El siguiente
+obliga a agrupar las cuatro líneas en un desplegable.
+
+### Verificación de la sexta tanda
+
+- Build 7 rutas ✅ · `eslint src` limpio ✅
+- Contraste en las 7 rutas: **0 fallos** · sin desborde
+- Cero restos del azul anterior (`198 96% 31%` / `#036D9B`) en `src/`
+- Subrayado del enlace activo comprobado visualmente sobre la barra negra
+
+### Séptima tanda: la primera foto que no es de banco
+
+El propietario aportó una imagen para **Insumos**: una mesa de trabajo con
+cueros, rollos de tela, conos de hilo, suelas, cremalleras, cordones y
+herrajes, con un taller al fondo.
+
+- **Optimizada antes de entrar:** de **397 KB a 190 KB** (escalada a 1400 px de
+  ancho y reencodeada a WebP con calidad 80).
+- **Se creó `src/data/media.js`**, el registro de fotos propias que pedía el
+  sprint 3 del plan. Lleva `src`, `width`, `height` y `alt`. Las medidas no son
+  decorativas: sin ellas el navegador no reserva el hueco y la página salta al
+  cargar.
+- Se usa en **dos sitios**: el hero de `/insumos` y la tarjeta 04 de la home.
+
+**Lo bonito:** no hubo que tocar ni `LineHero` ni la tarjeta de la home. Ambos
+aceptaban `image` nulo desde la segunda tanda, así que **volvieron solos a dos
+columnas** en cuanto la foto existió. La regla de «si falta la foto, no hay
+hueco» se pagó sola.
+
+⚠️ **Dos registros de imagen, y no se mezclan:** `data/media.js` para las fotos
+propias de `public/fotos/`, e `IMAGES` de `data/projects.js` para las 11
+imágenes de banco en CDN externo que siguen pendientes de sustituir.
+
+### Verificación
+
+- Build 7 rutas ✅ · `eslint src` limpio ✅
+- Imagen comprobada en las dos ubicaciones: carga, dimensiones naturales
+  1400×788, `loading="lazy"` en la tarjeta de la home
+- La tarjeta 04 pasó a rejilla de dos columnas (520 px + 520 px)
+
+### Pendiente de decisión del propietario
+
+- ✅ ~~El zapato giratorio del hero~~ — resuelto: vídeo de Flow con un zapato
+  real, comprimido y publicado (ADR-016).
+- ✅ ~~La cifra de 130~~ — confirmada. *(Lo del Programa Atlas decayó: el
+  proyecto se renombró a «Diseño Personalizado» y su cifra es ahora
+  +20.000 prendas.)*
+- **Aprobar la vía del sitio trilingüe** (P1-16).
+- **El contenido de `/insumos`** (P1-15).
+- **Si se mantiene el `+120K` de portada**, que se quedó sin soporte (P1-18).
+- **Si es intencionado que dos proyectos se llamen «Greenloop»** (P1-19).
+- ✅ ~~Si el sitio sigue anunciando Norteamérica y Europa~~ — resuelto: la
+  cobertura es Colombia · Latinoamérica · Centroamérica (P1-22).
+- **Si la razón social lleva «ES» o no** — hoy el sitio publica «4D Cuarta
+  Dimensión ES S.A.S.» en siete sitios, incluido el JSON-LD.
+- **Si el PMS 295 muestreado del escaneo (`#0F376A`) vale**, o hay que usar el
+  valor oficial del manual de marca (ADR-017).
 
 ---
 

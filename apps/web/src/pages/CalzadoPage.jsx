@@ -1,10 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
+import { absoluteUrl } from '@/lib/site';
 import JsonLd from '../components/JsonLd';
 import PageTransition from '../components/PageTransition';
-import { LineHero, CapabilityList, FeatureGrid, DetailSplit, CasesSection, LineClosing } from '../components/ProductLine';
-import { IMAGES, projects } from '../data/projects';
+import { Footprints, Activity, HardHat, Briefcase } from 'lucide-react';
+import { LineHero, CapabilityList, FeatureGrid, DetailSplit, DesignGallery, LineClosing } from '../components/ProductLine';
+import { IMAGES } from '../data/projects';
+import { FOTOS, GALERIA_CALZADO } from '../data/media';
 
 const capabilities = [
     { title: 'Investigación y tendencias', description: 'Análisis de mercado, comportamiento del consumidor y dirección de producto por categoría y región.' },
@@ -16,25 +19,26 @@ const capabilities = [
 ];
 
 const types = [
-    { title: 'Casual', description: 'Siluetas urbanas y lifestyle con identidad de marca propia.' },
-    { title: 'Deportivo', description: 'Performance real: amortiguación, soporte y materiales técnicos.' },
-    { title: 'Industrial', description: 'Calzado de seguridad con puntera, antideslizante y dieléctrico según norma.' },
-    { title: 'Corporativo', description: 'Calzado formal y de servicio para equipos que representan una marca.' },
+    { icon: Footprints, title: 'Casual', description: 'Siluetas urbanas y lifestyle con identidad de marca propia.' },
+    { icon: Activity, title: 'Deportivo', description: 'Performance real: amortiguación, soporte y materiales técnicos.' },
+    { icon: HardHat, title: 'Industrial', description: 'Calzado de seguridad con puntera, antideslizante y dieléctrico según norma.' },
+    { icon: Briefcase, title: 'Corporativo', description: 'Calzado formal y de servicio para equipos que representan una marca.' },
 ];
 
 export default function CalzadoPage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>Calzado — Diseño y desarrollo | 4D Cuarta Dimensión</title>
+                <title>Diseño y desarrollo de calzado en Colombia | 4D Cuarta Dimensión</title>
                 <meta
                     name="description"
                     content="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
                 />
             </Helmet>
             <Seo
-                title="Calzado — Diseño y desarrollo | 4D Cuarta Dimensión"
+                title="Diseño y desarrollo de calzado en Colombia | 4D Cuarta Dimensión"
                 description="Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto a la producción y comercialización internacional."
+                image={absoluteUrl('/og/calzado.jpg')}
             />
             <JsonLd migas={[{ nombre: 'Calzado', ruta: '/calzado' }]} />
             <LineHero
@@ -42,26 +46,27 @@ export default function CalzadoPage() {
                 title="Calzado"
                 claim="Del concepto a la horma, y de la horma al mercado."
                 description="Diseñamos y desarrollamos calzado que combina identidad, confort y desempeño. Acompañamos todo el ciclo: investigación, diseño, ingeniería de materiales, prototipado, producción y comercialización internacional."
-                image={IMAGES.calzadoHero}
-                imageAlt="Calzado premium de cuero blanco flotando sobre fondo oscuro con luz azul"
+                image={FOTOS.calzadoHero.src}
+                imageAlt={FOTOS.calzadoHero.alt}
             />
             <CapabilityList capabilities={capabilities} />
             <FeatureGrid title="Tipos de calzado" items={types} />
             <DetailSplit
                 title="Materiales que hacen la diferencia"
                 text="Trabajamos cueros de curtidurías certificadas, textiles técnicos, mallas de alto rendimiento y suelas desarrolladas a medida. Cada material se elige por tres criterios: desempeño en uso real, consistencia en producción y costo objetivo del proyecto."
+                puntos={['Cueros', 'Textiles técnicos', 'Mallas', 'Suelas a medida']}
                 image={IMAGES.calzadoDetail}
                 imageAlt="Manos de un artesano cosiendo la suela de un calzado de cuero en un taller"
                 reverse
             />
-            <CasesSection cases={projects.filter((p) => p.lineId === 'calzado')} />
+            {/* Antes: casos de éxito (Greenloop, Línea Executive). Desde el
+                2026-10-26, galería de diseños propios. Mientras GALERIA_CALZADO
+                esté vacía no se pinta nada: ver data/media.js. */}
+            <DesignGallery title="Algunos de nuestros diseños." designs={GALERIA_CALZADO} />
             <LineClosing
+                actual="01"
                 title="Calzado es la línea 01 de 4D."
-                text="Comparte con las otras dos líneas la misma metodología —descubrimiento, diseño, desarrollo y evolución— y la misma red de aliados de manufactura en Colombia, Asia y Europa."
-                others={[
-                    { index: '02', label: 'Ropa', to: '/ropa' },
-                    { index: '03', label: 'Dotaciones', to: '/dotaciones' },
-                ]}
+                text="Comparte con las otras tres líneas la misma metodología —descubrimiento, diseño, desarrollo y evolución— y la misma red de aliados de manufactura en Colombia, Guatemala, Ecuador y Bolivia."
             />
         </PageTransition>
     );

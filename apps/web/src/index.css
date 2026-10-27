@@ -8,12 +8,19 @@
   (un solo archivo para los pesos 400–800). Ver docs/06-backlog.md → P2-01.
 */
 body {
-  font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   overflow-x: clip;
-  background-color: hsl(223 30% 4.5%);
-  color: hsl(220 16% 96%);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background-color: hsl(0 0% 92%);
+  color: hsl(228 11% 9%);
+  /*
+    ⛔ Aquí había `-webkit-font-smoothing: antialiased` y
+    `-moz-osx-font-smoothing: grayscale`. Se quitaron el 2026-10-20 (ADR-015).
+    Desactivaban el renderizado subpíxel y ADELGAZABAN los trazos, sobre todo
+    en Mac: era la causa principal del «se ve borroso» de la dirección.
+    No los vuelvas a poner.
+  */
+  font-weight: 450;
+  text-rendering: optimizeLegibility;
 }
 
 /*
@@ -21,36 +28,60 @@ body {
 */
 
 @layer base {
+  /*
+    Tema claro — ADR-013 (2026-10-20). Sustituye a la paleta oscura, que se
+    conserva intacta más abajo en `.dark`.
+
+    Los valores salen de la referencia que aportó el propietario, muestreados
+    píxel a píxel, no estimados a ojo:
+      primary     hsl(214 75% 24%)  = #0F376A  (PMS 295 — acento, botón)
+      foreground  hsl(228 11% 9%)             (titulares)
+      muted-fg    hsl(210 4% 38%)             (párrafos)
+    Contraste sobre blanco: primary 5,74:1 · muted-foreground 5,6:1 — AA.
+  */
   :root {
-    --background: 223 30% 4.5%;
-    --foreground: 220 16% 96%;
-    --card: 222 18% 11%;
-    --card-foreground: 220 16% 96%;
-    --popover: 222 20% 8%;
-    --popover-foreground: 220 16% 96%;
-    --primary: 224 100% 62%;
+    /*
+      --background NO es blanco puro a propósito. Es `hsl(0 0% 92%)`, que es
+      exactamente el gris de fondo del vídeo del zapato del hero, muestreado
+      del propio archivo. Si fuera blanco, el vídeo se vería como un rectángulo
+      gris pegado encima. Si algún día se cambia el vídeo del hero, hay que
+      volver a muestrear su fondo y ajustar este valor.
+      --card pasa a blanco puro: así las superficies elevadas siguen leyéndose
+      por encima de la página en vez de por debajo.
+    */
+    --background: 0 0% 92%;
+    --foreground: 228 11% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 228 11% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 228 11% 9%;
+    --primary: 214 75% 24%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 18% 13%;
-    --secondary-foreground: 220 16% 96%;
-    --muted: 222 14% 14%;
-    --muted-foreground: 220 10% 62%;
-    --accent: 224 100% 62%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 228 11% 9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 210 4% 36%;
+    --accent: 214 75% 24%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 222 14% 15%;
-    --input: 222 14% 20%;
-    --ring: 224 100% 62%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 8% 78%;
+    --input: 210 8% 70%;
+    --ring: 214 75% 24%;
     --radius: 0.25rem;
-    --sidebar-background: 222 18% 9%;
-    --sidebar-foreground: 220 16% 96%;
-    --sidebar-primary: 224 100% 62%;
+    --sidebar-background: 210 20% 97%;
+    --sidebar-foreground: 228 11% 9%;
+    --sidebar-primary: 214 75% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 18% 13%;
-    --sidebar-accent-foreground: 220 16% 96%;
-    --sidebar-border: 222 14% 15%;
-    --sidebar-ring: 224 100% 62%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 228 11% 9%;
+    --sidebar-border: 210 14% 85%;
+    --sidebar-ring: 214 75% 24%;
   }
+  /*
+    Paleta oscura anterior. Hoy está INERTE: ningún elemento lleva la clase
+    `dark`. Se conserva como camino de vuelta si se revierte el ADR-013.
+  */
   .dark {
     --background: 223 30% 4.5%;
     --foreground: 220 16% 96%;
@@ -97,8 +128,8 @@ body {
   }
 
   ::selection {
-    background: hsl(224 100% 62% / 0.35);
-    color: hsl(220 16% 96%);
+    background: hsl(214 75% 24% / 0.20);
+    color: hsl(228 11% 9%);
   }
 
   /*
@@ -216,9 +247,161 @@ body {
 }
 
 /* ---- outlined display text ---- */
+/*
+  Texto secundario grande: los números de las listas y el «de lo mismo» de la
+  home. Relleno en vez de contorno (ADR-015).
+
+  Era `hsl(228 11% 9% / 0.22)` y daba 1,59:1 de contraste: por debajo del
+  mínimo de 3:1 que WCAG pide incluso al texto grande (auditoría del
+  2026-10-26, una vez corregida para mezclar la transparencia con el fondo).
+  Ahora es un gris sólido: 3,4:1 sobre la página y 4:1 sobre blanco. Sigue
+  leyéndose como secundario frente al casi negro de los títulos.
+*/
 .text-outline {
-  -webkit-text-stroke: 1px hsl(220 16% 96% / 0.28);
-  color: transparent;
+  color: hsl(210 4% 50%);
+}
+
+/*
+  ---- barra superior en negro (ADR-013) ----
+  Es la única superficie oscura del tema claro. En vez de reescribir una a una
+  las clases de color de Navbar.jsx, se redefinen los tokens DENTRO de la
+  cabecera: así `text-foreground`, `text-muted-foreground` y `border-border`
+  siguen usándose igual, pero se resuelven en claro sobre el negro.
+  El menú móvil es hermano del header, no hijo, así que no hereda esto.
+*/
+.navbar-dark {
+  --background: 228 16% 4%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 220 9% 74%;
+  --border: 228 10% 24%;
+  /*
+    ⚠️ El azul de marca (PMS 295, `hsl(214 75% 24%)`) es un azul marino muy
+    oscuro: sobre el negro de esta barra sería INVISIBLE. Y aquí se usa en un
+    subrayado de 1 px (`.nav-link::after`) y en el botón «Contacto».
+    Por eso dentro de la cabecera se usa un TINTE del mismo tono —mismo matiz
+    (214) y misma saturación (75 %), solo más claro—, no otro color.
+    Si cambias `--primary` arriba, recalcula también este tinte.
+  */
+  --primary: 214 75% 58%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/*
+  ---- banda de marca (2026-10-27) ----
+  Sección en AZUL CLARO a todo el ancho, para romper la sucesión de secciones
+  grises iguales que el propietario veía «muy básica, muy plana». Mismo truco
+  que `.navbar-dark`: se redefinen los tokens DENTRO de la banda, así que
+  `text-muted-foreground`, `border-border` y `text-primary` se usan igual.
+
+  Primero se hizo en azul marino; el mismo día el propietario lo vio «muy
+  molesto» y pidió algo más clarito. Ahora:
+  - Fondo: el matiz de PMS 295 (214) muy aclarado (94 %). Texto oscuro de
+    siempre; el azul de marca vuelve a ser el de marca.
+  - La retícula de fondo es textura, no contenido: azul de marca al 6 %.
+  Contraste medido: texto 15,6:1, `muted-foreground` 7,2:1, azul 10,1:1.
+*/
+.banda-marca {
+  --background: 214 60% 94%;
+  --muted-foreground: 214 25% 32%;
+  --border: 214 40% 72%;
+  background-color: hsl(var(--background));
+  background-image:
+    linear-gradient(hsl(214 75% 24% / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(214 75% 24% / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  color: hsl(var(--foreground));
+}
+
+/*
+  ---- enlaces de contenido ----
+  Regla desde el 2026-10-26, pedida por el propietario: TODO LO QUE SE PUEDE
+  PULSAR VA EN AZUL, para que el visitante sepa dónde hacer clic. Antes el
+  correo, el teléfono, la dirección y el footer se veían como texto normal.
+
+  .enlace        Enlace suelto (un correo en una tarjeta, una línea del footer).
+                 Azul; subrayado al pasar el cursor.
+  .enlace-texto  Enlace DENTRO de un párrafo. Azul y SIEMPRE subrayado: el azul
+                 marino y el gris del cuerpo se parecen en luminosidad, y WCAG
+                 1.4.1 pide algo más que el color para distinguir un enlace en
+                 mitad de un texto.
+
+  Excepciones a propósito: el menú superior (navegación, sobre negro), los
+  botones y las tarjetas enteras clicables, que ya se leen como pulsables.
+*/
+.enlace {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  transition: color 0.2s ease-out;
+}
+.enlace:hover {
+  text-decoration-line: underline;
+}
+.enlace-texto {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: hsl(var(--primary) / 0.45);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.2s ease-out;
+}
+.enlace-texto:hover {
+  text-decoration-color: hsl(var(--primary));
+}
+
+/*
+  ---- tarjeta ----
+  Sustituye (2026-10-26) al patrón de «celdas pegadas con borde de 1 px»
+  (`grid gap-px bg-border`), que el propietario veía «muy cuadrado, muy
+  genérico» y que además, al entrar cada celda con animación, dejaba ver
+  rectángulos grises vacíos mientras aparecían.
+
+  Tarjetas separadas, fondo blanco, borde fino en azul de marca al 40 % y un
+  acento azul corto arriba a la izquierda (2026-10-27: el propietario pidió las
+  líneas de los cuadros en azul; al 30 % se leía gris). Al pasar el cursor: el
+  borde se intensifica, el acento se estira a todo el ancho y la tarjeta sube
+  2 px. Sin sombras: el sistema de diseño usa bordes, no sombras.
+  Con `prefers-reduced-motion` no hay desplazamiento ni dibujo.
+*/
+.tarjeta {
+  position: relative;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--primary) / 0.4);
+  transition: border-color 0.3s ease-out, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Acento azul de 2 px arriba a la izquierda, siempre visible; al pasar el
+   cursor se estira a todo el ancho. */
+.tarjeta::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: 3rem;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.tarjeta:hover,
+.tarjeta:focus-visible {
+  border-color: hsl(var(--primary) / 0.85);
+  transform: translateY(-2px);
+}
+.tarjeta:hover::before,
+.tarjeta:focus-visible::before {
+  width: calc(100% + 2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta,
+  .tarjeta::before {
+    transition: none;
+  }
+  .tarjeta:hover,
+  .tarjeta:focus-visible {
+    transform: none;
+  }
 }
 
 /* ---- subrayado del enlace activo del navbar ---- */
@@ -267,24 +450,57 @@ body {
    Añadido el 2026-09-01 con el rediseño de composición. Ver docs/04-diseno.md.
    ============================================================================ */
 
-/* ---- media: integra la imagen con el fondo en vez de dejarla pegada ---- */
+/*
+  ---- fundido de bordes del vídeo del hero ----
+  Desvanece los bordes para que el vídeo se funda con la página en lugar de
+  quedar como un recuadro. Es una máscara, no un degradado encima: no tiñe.
+
+  ⛔ ESTA MÁSCARA NO PUEDE TOCAR EL ZAPATO. El propietario lo pidió el
+  2026-10-26: puntera y talón tienen que verse nítidos y con todo el detalle.
+  Una primera versión desvanecía el 16 % lateral y se comía ambos extremos.
+
+  Con el vídeo actual (960×600) ya casi no hace falta: su fondo está aplanado
+  al gris de la página dentro del propio vídeo, y el borde queda idéntico a la
+  página (diferencia media 0,01). La máscara solo remata ese borde, en zonas
+  donde el zapato no entra NUNCA a lo largo del giro (medido fotograma a
+  fotograma, con flecos y sombra incluidos):
+
+    ancho  → el zapato ocupa el 3,6–96,4 %  · fundido en el 2 % exterior
+    alto   → el zapato ocupa el 9,7–90,5 %  · fundido en el 5 % exterior
+
+  El margen es mínimo a propósito: el propietario pidió el zapato más grande.
+  Si cambias el vídeo, vuelve a medir dónde cae el zapato antes de tocar esto.
+
+  Las dos capas se cruzan (intersect). Safari usa el nombre antiguo,
+  `source-in`, con prefijo.
+*/
+.shoe-feather {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 2%, #000 98%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 2%, #000 98%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* ---- media: marco de la imagen ---- */
 .media {
   position: relative;
   overflow: hidden;
 }
-/* Degradado hacia el fondo: la foto "se apoya" en la página. */
-.media::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    hsl(var(--background)) 0%,
-    hsl(var(--background) / 0.35) 38%,
-    transparent 72%
-  );
-}
+/*
+  ⛔ Aquí había un `.media::after` con un degradado hacia el fondo, para fundir
+  una foto oscura en una página oscura. Con el tema claro (ADR-013) hacía lo
+  contrario —lavaba el tercio inferior de cada foto— y el propietario lo
+  rechazó el 2026-10-20. Eliminado.
+
+  Consecuencia: **decae la regla de «30 % inferior libre de caras y rótulos»**
+  de docs/10-plan-v2.md. Ya no hay degradado que se coma esa zona, así que las
+  fotos se pueden encuadrar sin reservar margen abajo.
+  No lo vuelvas a añadir sin preguntar.
+*/
 /* Tinte de marca al pasar el cursor. */
 .media::before {
   content: "";
@@ -332,9 +548,15 @@ body {
 }
 
 /* ---- marca de agua tipográfica ---- */
+/*
+  Antes era un contorno de 1 px con el relleno transparente. El propietario
+  avisó el 2026-10-20 de que «algunas cosas medio están delineadas y no se
+  ven». Pasa a relleno sólido muy tenue: se lee como marca de agua, no como un
+  número a medio dibujar, y aguanta mejor en pantallas de baja densidad, donde
+  un trazo de 1 px se come el antialiasing.
+*/
 .watermark {
-  -webkit-text-stroke: 1px hsl(220 16% 96% / 0.09);
-  color: transparent;
+  color: hsl(228 11% 9% / 0.07);
   line-height: 0.8;
   user-select: none;
   pointer-events: none;

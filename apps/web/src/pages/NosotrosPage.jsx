@@ -1,8 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
 import JsonLd from '../components/JsonLd';
 import Reveal from '../components/Reveal';
+import { LineaDibujada } from '../components/Movimiento';
 import PageTransition from '../components/PageTransition';
 import { IMAGES } from '../data/projects';
 
@@ -30,24 +32,32 @@ export default function NosotrosPage() {
             <JsonLd migas={[{ nombre: 'Nosotros', ruta: '/nosotros' }]} />
 
             <section className="mx-auto max-w-6xl px-6 pb-16 pt-32 md:pt-40">
-                <Reveal>
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Nosotros</p>
-                    <h1 className="mt-4 max-w-4xl text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl">
-                        Una empresa, cuatro dimensiones: <span className="text-primary">visión, diseño, desarrollo y resultados</span>.
-                    </h1>
-                </Reveal>
+                {/* Entrada por CSS, no con Reveal: con Reveal el H1 se publicaba con
+                    opacity:0 en el HTML prerenderizado (2026-10-26). Ver 04-diseno.md. */}
+                <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-primary">Nosotros</p>
+                <h1 className="rise-solid mt-4 max-w-4xl text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl">
+                    Una empresa, cuatro dimensiones: <span className="text-primary">visión, diseño, desarrollo y resultados</span>.
+                </h1>
             </section>
 
-            <section className="border-t border-border/60">
+            <section className="border-t border-foreground/30">
                 <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 md:py-24 lg:grid-cols-2">
                     <Reveal>
                         <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Nuestra historia</h2>
                         <div className="mt-5 space-y-5 leading-relaxed text-muted-foreground">
                             <p>
-                                4D Cuarta Dimensión ES S.A.S. nace en Colombia con una convicción: los mejores productos no se compran en un catálogo, se diseñan con propósito. Empezamos desarrollando calzado para marcas que querían dejar de competir por precio y empezar a competir por identidad.
+                                4D Cuarta Dimensión ES S.A.S. nace en Colombia con una convicción: los mejores productos no se compran en un catálogo, se diseñan con propósito. Empezamos desarrollando y produciendo calzado para cadenas y marcas que querían dejar de competir por precios y empezar a competir por identidad.
                             </p>
+                            {/* Las cuatro líneas van enlazadas a su página, petición del
+                                propietario del 2026-10-20. No cuentan como CTA: son
+                                navegación dentro del texto, no llamadas a contactar. */}
                             <p>
-                                Hoy operamos como comercializadora internacional con tres líneas de negocio — calzado, ropa y dotaciones — y una red de aliados de manufactura en Colombia, Asia y Europa que nos permite desarrollar, producir y entregar en múltiples mercados con el mismo estándar.
+                                Hoy operamos con cuatro líneas de negocio —{' '}
+                                <Link to="/calzado" className="enlace-texto">calzado</Link>,{' '}
+                                <Link to="/ropa" className="enlace-texto">ropa</Link>,{' '}
+                                <Link to="/dotaciones" className="enlace-texto">dotaciones</Link>{' '}e{' '}
+                                <Link to="/insumos" className="enlace-texto">insumos</Link>{' '}
+                                — y una red de aliados de manufactura en Colombia, Guatemala, Ecuador y Bolivia que nos permite desarrollar, producir y entregar en múltiples mercados con el mismo estándar.
                             </p>
                         </div>
                     </Reveal>
@@ -63,22 +73,23 @@ export default function NosotrosPage() {
                 </div>
             </section>
 
-            <section className="border-t border-border/60 bg-card/40">
+            <section className="border-t border-foreground/30 bg-card/40">
                 <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
                     <Reveal>
                         <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Capacidad internacional</h2>
                         <p className="mt-5 max-w-2xl leading-relaxed text-muted-foreground">
-                            Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa. Consolidamos producción, documentación y logística para que el producto cruce fronteras sin fricción.
+                            Producimos y comercializamos en Colombia, Latinoamérica y Centroamérica. Consolidamos producción, documentación y logística para que el producto cruce fronteras sin fricción.
                         </p>
                     </Reveal>
-                    <div className="mt-10 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
+                    {/* Tarjetas en vez de celdas pegadas (2026-10-26): ver `.tarjeta`. */}
+                    <div className="mt-10 grid gap-5 sm:grid-cols-3">
                         {[
-                            { region: 'Latinoamérica', detail: 'Desarrollo y producción cercana con manufactura colombiana y regional.' },
-                            { region: 'Norteamérica', detail: 'Entregas consolidadas y documentación completa para importación.' },
-                            { region: 'Europa', detail: 'Aliados de manufactura y distribución para colecciones premium.' },
+                            { region: 'Colombia', detail: 'Desarrollo y producción cercana con manufactura colombiana y regional.' },
+                            { region: 'Latinoamérica', detail: 'Entregas consolidadas y documentación completa para importación.' },
+                            { region: 'Centroamérica', detail: 'Aliados de manufactura y distribución para colecciones premium.' },
                         ].map((r, i) => (
-                            <Reveal key={r.region} delay={i * 0.06}>
-                                <div className="h-full bg-background p-8">
+                            <Reveal key={r.region} delay={i * 0.06} className="h-full">
+                                <div className="tarjeta h-full p-8">
                                     <h3 className="text-lg font-bold tracking-tight text-primary">{r.region}</h3>
                                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{r.detail}</p>
                                 </div>
@@ -88,7 +99,7 @@ export default function NosotrosPage() {
                 </div>
             </section>
 
-            <section className="border-t border-border/60">
+            <section className="border-t border-foreground/30">
                 <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
                     <Reveal>
                         <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Nuestros compromisos</h2>
@@ -96,7 +107,8 @@ export default function NosotrosPage() {
                     <div className="mt-10">
                         {commitments.map((c, i) => (
                             <Reveal key={c.title} delay={i * 0.05}>
-                                <div className="grid gap-2 border-t border-border/60 py-6 sm:grid-cols-[3rem_1fr_2fr] sm:items-baseline sm:gap-6">
+                                <div className="relative grid gap-2 py-6 sm:grid-cols-[3rem_1fr_2fr] sm:items-baseline sm:gap-6">
+                                    <LineaDibujada delay={i * 0.05} />
                                     <span className="text-sm font-semibold text-primary">{String(i + 1).padStart(2, '0')}</span>
                                     <h3 className="text-lg font-bold tracking-tight">{c.title}</h3>
                                     <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>

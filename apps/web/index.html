@@ -28,18 +28,20 @@
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
 		<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-		<meta name="theme-color" content="#0a0c14" />
+		<meta name="theme-color" content="#ebebeb" />
 
 		<!--
-			Manrope variable: un solo archivo cubre los pesos 400–800. Antes entraba
-			por @import dentro del CSS, que bloquea el render y encadena dos
-			peticiones. Ver docs/06-backlog.md → P2-01.
+			Archivo variable: un solo archivo cubre los pesos 400–800. Sustituyó a
+			Manrope el 2026-10-20 (ADR-015) porque tiene mayor altura de x y trazos
+			más firmes a tamaños pequeños, que era la queja de la dirección.
+			Entra por <link>, no por @import dentro del CSS: el @import bloquea el
+			render y encadena dos peticiones. Ver docs/06-backlog.md → P2-01.
 		-->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
 			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..800&display=swap"
 		/>
 
 		<!--
@@ -52,6 +54,7 @@
 				[data-reveal] {
 					opacity: 1 !important;
 					transform: none !important;
+					clip-path: none !important;
 				}
 			</style>
 		</noscript>

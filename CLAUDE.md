@@ -154,11 +154,13 @@ Sirve el build en `:3000` (el mismo puerto que `dev`, así que no los levantes a
 | [`docs/08-bitacora.md`](docs/08-bitacora.md) | Registro de sesiones de trabajo |
 | [`docs/09-despliegue.md`](docs/09-despliegue.md) | **Paso a paso para publicar en Hostinger**, con el formulario |
 | [`docs/10-plan-v2.md`](docs/10-plan-v2.md) | **Plan de la versión 2**: diagnóstico, 6 sprints e historias |
+| [`docs/11-prompt-video-hero.md`](docs/11-prompt-video-hero.md) | Prompt de Google Flow para el vídeo del zapato del hero |
+| [`docs/12-publicar-v2.md`](docs/12-publicar-v2.md) | **Guía para el propietario: publicar la v2** paso a paso, con lista para imprimir |
 | [`wiki/`](wiki/) | Páginas de la wiki de GitHub: Scrum, historias y material necesario |
 
 ---
 
-## Estado actual (2026-10-20)
+## Estado actual (2026-10-27)
 
 **El sitio está en línea en `4dimensionsas.com`** y el formulario funciona de
 extremo a extremo. Pero **está en marcha una versión 2**, porque la dirección de
@@ -173,6 +175,7 @@ las historias de usuario.
 | Pendiente | Estado |
 |---|---|
 | ⚠️ **Subir `apps/web/public/.htaccess` al servidor** | **Preparado desde el 3-sep y SIN SUBIR.** Hasta que se suba, `/nosotros` devuelve 301 y Google solo indexa 1 de 6 páginas |
+| ⚠️ **Al publicar la v2: migración de la tabla PRIMERO** | `db/migraciones/2026-10-26-linea-insumos.sql` en phpMyAdmin **antes** de subir el PHP, o Insumos da 500. Ver `docs/09-despliegue.md` y **P1-24** |
 | ⚠️ Subir `favicon.ico` y republicar | `/favicon.ico` da 404; es parte de por qué no sale el logo en el buscador |
 | 🚧 Las 14 fotos de la empresa | Bloquean los sprints 3 y 4. Lista en [`wiki/Material-necesario.md`](wiki/Material-necesario.md) |
 | 🚧 Año de fundación, nombres del equipo, NIT | Bloquean secciones enteras |
@@ -191,10 +194,17 @@ Las cuatro son ciertas y las cuatro están medidas:
 
 ### Decisiones ya tomadas para la v2
 
-- **Colores:** se mantienen intactos.
-- **Tipografía: Archivo** sustituye a Manrope en todo el sitio. Requiere un ADR
-  nuevo, porque hoy la tipografía está declarada «cerrada» en `04-diseno.md`.
-- **Escala:** cuerpo 16→18px, tarjetas y listas 14→16px, eyebrows 12→13px.
+- **Colores:** ⚠️ **cambiado el 2026-10-20.** El sitio pasó a **tema claro**
+  (fondo blanco, acento petróleo `#036D9B`) con la **barra superior en negro**.
+  Deroga el «se mantienen intactos» del plan. Ver **ADR-013** en
+  [`docs/07-decisiones.md`](docs/07-decisiones.md) y la tabla de tokens en
+  [`docs/04-diseno.md`](docs/04-diseno.md).
+  La paleta oscura sigue en el bloque `.dark` de `index.css`, pero **inerte**.
+- ✅ **Tipografía: Archivo** ya sustituyó a Manrope (2026-10-20, **ADR-015**),
+  junto con la subida de escala y el fin del `font-smoothing: antialiased`.
+  El texto a ≤14px bajó del **75 % al 12 %**.
+- ✅ **Escala:** hecha. Y **no se toca en los componentes**: está redefinida en
+  `tailwind.config.js`, así que `text-sm` ya son 16px y `text-base` 18px.
 - **Alcance:** se mantiene el lenguaje visual y se enriquece el contenido.
   El ADR-010 sigue vigente — **no es un rediseño visual desde cero**.
 - **Método:** Scrum ligero. La dirección es Product Owner y aprueba cada sprint.
@@ -237,6 +247,7 @@ PHP + MySQL** ([ADR-012](docs/07-decisiones.md)) · publicado e indexado.
 ### Reglas que impone lo ya construido
 
 - Una ruta nueva se registra en `App.jsx` **y** en `src/lib/site.js`.
+  (Último ejemplo: `/insumos`, la cuarta línea de negocio, el 2026-10-20.)
 - Nada nuevo dentro de `public/` que lleve secretos: Vite copia esa carpeta
   entera al build.
 - Ningún componente toca `window`, `document` o `localStorage` fuera de un
@@ -258,6 +269,45 @@ PHP + MySQL** ([ADR-012](docs/07-decisiones.md)) · publicado e indexado.
   No existe `src/components/ui/` ni `lib/utils.js` (`cn`): si necesitas un
   componente de shadcn, genéralo con su CLI — `components.json` sigue ahí — y
   déjalo anotado. Ver [ADR-011](docs/07-decisiones.md).
+- **Todo lo que se pulsa va en azul**: `.enlace` para enlaces sueltos,
+  `.enlace-texto` (siempre subrayado) dentro de un párrafo. Nunca un enlace con
+  el color del texto normal. Ver `docs/04-diseno.md`.
+- **Las cuatro líneas de negocio viven en `src/data/lineas.js`**. La home y el
+  cierre de cada página de línea leen de ahí: no las copies a mano.
+- **Nada de halos ni degradados detrás del vídeo del hero.** Cualquier tinte
+  bajo él deja ver su recuadro: por eso el hero ya no lleva `glow-tr`.
+- **El fondo de la página y el vídeo del hero están atados.** El fondo del vídeo
+  está aplanado al gris de la página (235 = `hsl(0 0% 92%)`). Si cambias
+  `--background`, hay que regenerar el vídeo; si cambias el vídeo, hay que
+  aplanarlo. Receta en la bitácora del 2026-10-26. Ver **ADR-016**.
+- **Cualquier vídeo del hero se reencodea y se le fabrica el bucle antes de
+  publicarlo.** Es el elemento que mide el LCP, y los vídeos de Flow no cierran
+  el giro. El actual pasó de 5,79 MB a ~485 KB servidos. Y **cada vídeo nuevo
+  lleva nombre de archivo nuevo**: sobrescribir uno en caché provoca errores 416.
+- **Nunca `-webkit-font-smoothing: antialiased` ni `-webkit-text-stroke`.**
+  El primero adelgaza los trazos (era el «se ve borroso»); el segundo deja los
+  números a medio dibujar. Ver **ADR-015**.
+- **Los datos de contacto salen de `src/lib/contacto.js`**, no escritos a mano.
+  De ahí leen el botón flotante de WhatsApp, la home y el footer.
+- **Nada de rejillas `gap-px bg-border`.** Se rehicieron como tarjetas
+  `.tarjeta` separadas (2026-10-26): eran lo «muy cuadrado» que veía la
+  dirección. Ver `docs/04-diseno.md`.
+- **Líneas: azul agrupa, negro separa.** Tarjetas `border-primary/40`, filas
+  de lista `primary/60`, separación entre secciones `border-foreground/30`,
+  fotos y campos en neutro. Tabla en `docs/04-diseno.md`.
+- **`.banda-marca` (sección en azul CLARO), una por página como mucho.**
+  Fue marino y al propietario le resultó «muy molesto»: no vuelvas a él.
+  Hoy la lleva «Capacidades». Dentro, las líneas van en `bg-border`.
+- **Movimiento nuevo, con las piezas de `components/Movimiento.jsx`**:
+  `LineaDibujada` para los filetes de listas, `ImagenEntrada` para fotos bajo
+  el pliegue. Respetan `prefers-reduced-motion` y el `<noscript>`.
+- **El formulario solo acepta JSON desde el propio dominio, y el acuse al
+  cliente no repite nada de lo que escribió** (salvo el primer nombre si son
+  solo letras). No lo «mejores» volviendo a meter su mensaje: era un relé de
+  spam. Una línea de negocio nueva necesita **migración del ENUM** en
+  `db/migraciones/`. Ver **ADR-019**.
+- **Texto que se tiene que leer, nunca con alfa** (`text-foreground/60`): usa
+  `text-muted-foreground`. El alfa engañó a la auditoría de contraste.
 - **Nada de `Reveal` en la primera pantalla.** El sitio se prerenderiza y un
   `Reveal` se sirve con `opacity: 0`. El hero entra con CSS (`.rise-in` /
   `.rise-solid`). Ver [`docs/04-diseno.md`](docs/04-diseno.md).

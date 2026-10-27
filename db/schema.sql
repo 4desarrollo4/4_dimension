@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS contact_requests (
     company     VARCHAR(160)        NULL,
     email       VARCHAR(255)    NOT NULL,
     phone       VARCHAR(40)     NOT NULL,
-    line        ENUM('calzado', 'ropa', 'dotaciones', 'otro') NOT NULL DEFAULT 'calzado',
+    -- 'insumos' se añadió el 2026-10-26 (db/migraciones/2026-10-26-linea-insumos.sql).
+    line        ENUM('calzado', 'ropa', 'dotaciones', 'otro', 'insumos') NOT NULL DEFAULT 'calzado',
     message     TEXT            NOT NULL,
 
     -- Prueba del consentimiento, exigida por la Ley 1581 de 2012. El

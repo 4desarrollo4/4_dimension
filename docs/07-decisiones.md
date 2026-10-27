@@ -1,6 +1,6 @@
 # 07 — Bitácora de decisiones (ADR)
 
-**Última actualización:** 2026-09-02
+**Última actualización:** 2026-10-27
 
 ---
 
@@ -442,3 +442,423 @@ Los pasos para ponerlo en marcha están en [`09-despliegue.md`](09-despliegue.md
 25 pruebas del endpoint, 18 del diálogo SMTP contra un servidor con TLS real,
 envío completo desde el navegador con los dos correos capturados, escapado de
 HTML malicioso y límite por hora.
+
+---
+
+## ADR-013 · El sitio pasa a tema claro, con la barra superior en negro
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** El sitio nació en modo oscuro y así se publicó. El
+[`10-plan-v2.md`](10-plan-v2.md) cerró la cuestión en su tabla de decisiones con
+un escueto *«Colores: se mantienen intactos»*, y el
+[**ADR-010**](#adr-010--se-rehace-la-composición-no-el-lenguaje-visual) había
+establecido que la v2 rehace la composición pero **no** el lenguaje visual.
+
+El 2026-10-20 el propietario aportó una referencia visual concreta —una captura
+de un sitio de fondo blanco y acento azul petróleo— y pidió explícitamente
+adoptar su paleta, aclarando que **solo** quería la parte cromática, no el
+contenido ni la estructura de la referencia. En la misma sesión añadió que la
+barra de navegación superior debía llevar fondo propio **en negro**.
+
+**Decisión.** Se sustituye la paleta oscura por una clara y se da a la cabecera
+una superficie negra propia. Esto **deroga** la línea «los colores se mantienen
+intactos» del plan v2. El ADR-010 **sigue vigente en lo demás**: no es un
+rediseño de composición ni de tipografía.
+
+Los valores no se estimaron a ojo. Se muestrearon píxel a píxel sobre la
+referencia aportada, decodificándola en un lienzo del navegador:
+
+| Token | Valor | Dónde se ve |
+|---|---|---|
+| `--primary` | `hsl(198 96% 31%)` · `#036D9B` | Acento, botones, cifras |
+| `--background` | `hsl(0 0% 100%)` | Fondo de página |
+| `--foreground` | `hsl(228 11% 9%)` | Titulares |
+| `--muted-foreground` | `hsl(210 4% 38%)` | Cuerpo de texto |
+| `--border` | `hsl(210 14% 85%)` | Filetes y separadores |
+
+**Cómo se implementó, y por qué así.**
+
+1. **Un solo punto de cambio.** El color estaba bien centralizado: bastó
+   reescribir el bloque `:root` de [`index.css`](../apps/web/src/index.css).
+   Navbar y footer no se tocaron — son 100 % tokens y voltearon solos.
+2. **Cuatro literales que asumían fondo oscuro** sí hubo que corregirlos a mano:
+   el `body`, `::selection`, `.text-outline` y `.watermark` llevaban
+   `hsl(220 16% 96%)` escrito a fuego.
+3. **La barra negra se hizo redefiniendo tokens, no reescribiendo clases.** La
+   clase `.navbar-dark` redeclara `--background`, `--foreground`,
+   `--muted-foreground` y `--border` **dentro** de la cabecera. Así
+   `text-muted-foreground` y `border-border/70` siguen escritos igual en
+   `Navbar.jsx` pero se resuelven en claro sobre el negro. El menú móvil es
+   *hermano* del `<header>`, no hijo, así que no hereda el ámbito y se queda en
+   blanco — que es lo correcto, porque ocupa la pantalla entera.
+4. **La paleta oscura se conserva íntegra** en el bloque `.dark` de `index.css`.
+   Hoy está **inerte**: ningún elemento lleva esa clase. Es el camino de vuelta
+   si se revierte este ADR.
+5. **`theme-color`** pasa de `#0a0c14` a `#ffffff`.
+
+**Consecuencias.**
+
+- ✅ Contraste verificado en las 6 rutas con una auditoría automática que
+  recorre todo el texto renderizado: **cero elementos por debajo de AA**. El
+  petróleo sobre blanco da 5,74:1 y los enlaces del navbar sobre negro, 10,33:1.
+- ⚠️ **`.media::after` hubo que suavizarlo.** Ese degradado existía para fundir
+  una foto oscura en una página oscura; sobre blanco hacía lo contrario y
+  lavaba el tercio inferior de cada imagen. Al bajarlo, la regla de
+  «30 % inferior libre de caras y rótulos» del plan v2 se relaja a ~20 %.
+- 🔴 **Las 11 imágenes de banco quedan peor que antes.** Todas tienen fondo
+  oscuro y ahora se leen como bloques negros sobre una página blanca. No es un
+  fallo nuevo: es el mismo problema del diagnóstico («las imágenes no nos
+  representan»), pero **el tema claro lo hace mucho más visible**. Sube la
+  urgencia de las fotos propias de los sprints 3 y 4.
+- 🔴 **`og-image.jpg` queda desalineado.** Es una imagen de fondo oscuro; al
+  compartir un enlace ya no corresponde con el sitio. Hay que rehacerla.
+- ✅ El logo (`logo-4d.png`) se lee **mejor** sobre la barra negra que sobre
+  blanco: es un círculo oscuro con tipografía metálica clara.
+
+**Lo que NO cambia este ADR:** tipografía (sigue Manrope, pendiente de pasar a
+Archivo en el sprint 1), escala tipográfica, composición y contenido.
+
+---
+
+## ADR-014 · Botón flotante de WhatsApp, y lo que rompe
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** El [**ADR-009**](#adr-009--dos-enlaces-de-contacto-por-página-y-ninguno-más)
+fijó **dos enlaces de contacto por página** —navbar y footer— y ninguno más en
+el cuerpo. El motivo no era estético: el
+[**ADR-001**](#adr-001) define el sitio como **informativo, no de ventas**, y
+nueve CTA repartidos por la página lo hacían parecer un embudo.
+
+El 2026-10-20 el propietario pidió **un botón flotante de WhatsApp fijo en la
+esquina inferior derecha, en todas las páginas**.
+
+**Decisión.** Se añade. Manda el propietario.
+
+**Pero queda dicho con todas las letras:** es el **tercer** punto de contacto,
+está en **las siete** rutas, y es el elemento más visible de la pantalla
+después del hero. En la práctica **deroga el ADR-009**, que queda reducido a
+«dos enlaces a `/contacto`» — el de WhatsApp no apunta a `/contacto`, pero
+cumple la misma función.
+
+Si en algún momento la dirección vuelve a decir que el sitio «parece que vende»,
+este botón es lo primero que hay que mirar.
+
+**Cómo está hecho.**
+
+- `WhatsAppFab.jsx`, montado una sola vez en `App.jsx`, fuera de las rutas.
+- Es un `<a>`, no un `<button>`: navega fuera. Con un botón se perdería abrir
+  en pestaña nueva y la navegación por teclado sería peor.
+- `target="_blank"` **siempre** con `rel="noopener noreferrer"`: sin `noopener`
+  la pestaña nueva puede manipular la nuestra a través de `window.opener`.
+- Icono SVG **inline**. No se añadió ninguna librería de iconos por una marca,
+  ni se carga de una CDN externa (ADR-011).
+- 56 × 56 px: por encima del objetivo táctil de 44 px de las WCAG.
+- `aria-label="Escribirnos por WhatsApp"`, porque no lleva texto visible.
+
+**El enlace y el mensaje** salen de `src/lib/contacto.js`, que es desde hoy el
+punto único de los datos de contacto. Se usa `wa.me` y no `api.whatsapp.com`
+porque el segundo mete una pantalla intermedia en móvil.
+
+---
+
+## ADR-015 · Tipografía: Archivo, escala mayor y fin del «borroso»
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** La cuarta objeción de la dirección era que los textos **«se ven
+borrosos o muy pequeños»**. La auditoría del 2026-10-19 la midió y le encontró
+tres causas, no una:
+
+| Causa | Medida |
+|---|---|
+| `-webkit-font-smoothing: antialiased` | Desactiva el subpíxel y **adelgaza los trazos**, sobre todo en Mac |
+| Texto a ≤14 px | **43 elementos — el 75 %** del texto de la página |
+| Peso del cuerpo a 400 | Demasiado ligero para el cuerpo de un sitio |
+
+[`04-diseno.md`](04-diseno.md) declaraba la tipografía «cerrada». Este ADR lo
+deroga, como ya preveía el sprint 1 del [plan v2](10-plan-v2.md).
+
+**Decisión y orden de impacto.**
+
+1. **Fuera `-webkit-font-smoothing: antialiased`** y `-moz-osx-font-smoothing`.
+   Coste cero y es el mayor salto percibido. **No los vuelvas a poner.**
+2. **Archivo sustituye a Manrope.** Variable, 400–800 en un solo archivo, misma
+   forma de cargarla (`<link>`, nunca `@import`). Mayor altura de x y trazos
+   que aguantan mejor a tamaño pequeño.
+3. **Sube la escala.** Y aquí está lo importante: en vez de reescribir las
+   **63** clases `text-sm` y `text-xs` repartidas por el código, se **redefine
+   la escala de Tailwind** en `tailwind.config.js`. Un solo cambio, los nombres
+   de clase intactos:
+
+   | Clase | Antes | Ahora | Dónde se nota |
+   |---|---|---|---|
+   | `text-xs` | 12 px | **13 px** | Eyebrows en versalitas |
+   | `text-sm` | 14 px | **16 px** | Tarjetas, listas, pies |
+   | `text-base` | 16 px | **18 px** | Cuerpo |
+   | `text-lg` | 18 px | **20 px** | Entradillas |
+   | `text-xl` | 20 px | **22 px** | Destacados |
+
+   De `text-2xl` en adelante se deja la escala original: los titulares ya eran
+   grandes y nunca fueron el problema.
+4. **Peso del cuerpo 400 → 450.** Archivo es variable: no cuesta ni un byte.
+
+**Y una cuarta cosa que no estaba en el plan.** El propietario señaló que
+*«algunas cosas medio están delineadas y no se ven, como los números que tienen
+relleno blanco»*. Eran `.watermark` y `.text-outline`, que usaban
+`-webkit-text-stroke` de 1 px con el relleno transparente. Un trazo de 1 px se
+lo come el antialiasing en pantallas de baja densidad y el número queda a medio
+dibujar. **Ahora son relleno sólido muy tenue** (7 % y 22 %). Ya no queda ni un
+`text-stroke` en el proyecto.
+
+**Resultado medido** sobre las 7 rutas, con el texto renderizado:
+
+| | Antes | Ahora |
+|---|---|---|
+| Texto a ≤14 px | **75 %** | **12 %** |
+| Fallos de contraste AA | 0 | **0** |
+| Peso del cuerpo | 400 | 450 |
+| `font-smoothing` | `antialiased` | `auto` |
+
+> ⚠️ El 12 % restante **no es texto pequeño por descuido**: son los *eyebrows*
+> en versalitas, exactamente a los 13 px que el propio plan v2 fijó, más el
+> enlace «Saltar al contenido», que está oculto hasta que se navega con
+> teclado. El objetivo del plan era «< 10 %», así que la métrica queda
+> técnicamente por encima — pero no hay nada que bajar sin contradecir el plan.
+
+---
+
+## ADR-016 · El hero deja de ser un cubo y pasa a ser un zapato real
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** El hero mostraba un **tesseract**: dos cubos de alambre girando
+con CSS. Era bonito y no mentía sobre nada, pero tampoco decía nada de lo que
+hace la empresa. Y la objeción principal de la dirección seguía siendo que
+**«las imágenes no nos representan»**.
+
+Se le propuso al propietario un *turntable* de fotos reales. Prefirió generar
+un vídeo con **Google Flow**, y se le advirtió de que un zapato **inventado**
+por el modelo reincidiría en la misma objeción. **Partió de la foto de un
+zapato real de la empresa** — que era la parte que importaba. El prompt está en
+[`11-prompt-video-hero.md`](11-prompt-video-hero.md).
+
+**Decisión.** `Tesseract.jsx` se elimina (recuperable en git) y lo sustituye
+`ShoeTurntable.jsx`.
+
+**El vídeo hubo que trabajarlo.** El archivo de Flow venía así:
+
+| | Original de Flow | Publicado |
+|---|---|---|
+| Tamaño | **8,69 MB** | **171 KB** (mp4) · 210 KB (webm) |
+| Dimensiones | 1280×720 (16:9) | 640×640 (1:1) |
+| Audio | Pista AAC de 128 kb/s | Ninguna |
+
+8,69 MB en el elemento que mide el LCP era inaceptable. Se recortó a cuadrado
+—midiendo antes la envolvente del zapato en todo el giro, x 291–948, para no
+cortarlo en ningún fotograma—, se escaló a 640, se quitó el audio y se
+reencodeó. **Cincuenta veces menos peso, sin pérdida visible.**
+
+**Reglas que quedan atadas al componente:**
+
+- **Sin atributo `autoplay`.** La reproducción la arranca un efecto, después de
+  consultar `prefers-reduced-motion`. Con `autoplay` el navegador empezaría a
+  reproducir antes de que pudiéramos comprobar la preferencia. Si el visitante
+  tiene el movimiento reducido activado, **ve el póster fijo**.
+- **`playsInline` es obligatorio.** Sin él, Safari en iPhone abre el vídeo a
+  pantalla completa.
+- Si algún día se cambia el vídeo, **hay que volver a comprimirlo**.
+
+### Consecuencia inesperada: la página cambió de color
+
+El fondo del vídeo no es blanco puro, es un gris con degradado. Sobre la página
+blanca del [ADR-013](#adr-013--el-sitio-pasa-a-tema-claro-con-la-barra-superior-en-negro)
+se veía como **un rectángulo gris pegado encima**, y el propietario lo detectó.
+
+Se muestreó el fondo del propio archivo: **`rgb(234,234,234)` = `hsl(0 0% 92%)`**.
+Dos cambios, no uno:
+
+1. **`--background` pasa de blanco puro a `hsl(0 0% 92%)`**, el gris del vídeo.
+   `--card` pasa a blanco puro para que las superficies elevadas sigan
+   leyéndose *por encima* de la página y no por debajo. `--border` se oscurece
+   a 78 % para seguir siendo visible sobre el gris.
+2. **Los bordes del vídeo se difuminan** con una máscara radial
+   (`.shoe-feather`). Hacía falta igualmente: el fondo del vídeo **no es
+   plano**, va del 88 % al 95 %, así que un gris liso nunca habría casado en
+   las cuatro esquinas. Es una máscara, no un degradado encima: no tiñe.
+
+⚠️ **Si se cambia el vídeo del hero, hay que volver a muestrear su fondo y
+reajustar `--background`.** Están atados.
+
+Contraste reverificado tras el cambio de fondo: **0 fallos AA en las 7 rutas**.
+
+### Actualización 2026-10-26 · segundo vídeo
+
+Se sustituyó por un zapato de denim, también de Flow. Tres cambios respecto a
+lo anterior, detallados en la bitácora del 2026-10-26:
+
+- **El bucle se fabrica**, no se confía en el vídeo: se funden los últimos
+  0,625 s con los primeros (`xfade`). Costura medida: 2,08 frente a 3,71 de paso
+  medio entre fotogramas.
+- **La máscara pasa de radial a dos fundidos lineales cruzados** (16 % lateral,
+  10 % vertical), porque de perfil el vídeo de origen corta la puntera.
+- **Peso servido ~460 KB** (WebM a dos pasadas). El fondo del vídeo nuevo es el
+  mismo `rgb(234,234,234)`: `--background` sigue igual.
+
+**Ese mismo día se sustituyó por la versión horizontal del giro**, porque el
+vertical cortaba la puntera de perfil y el propietario quiere puntera y talón
+nítidos en todo el giro. Lo que cambia de fondo en esta decisión:
+
+- **Se invierte la dependencia.** Antes la página copiaba el gris del vídeo;
+  ahora **el vídeo se aplana al gris de la página** (235), solo en los píxeles
+  de fondo. Si algún día cambia `--background`, hay que regenerar el vídeo con
+  el valor nuevo.
+- **Formato 3:2** (960×640), no cuadrado.
+- **Ningún difuminado sobre el zapato.** La máscara solo remata el borde.
+- **Recorte ajustado al zapato** (960×600, el zapato ocupa el 93 % del ancho) y
+  **hero a 50/50 desde 1280 px**, porque el propietario lo veía pequeño.
+- **Nada decorativo detrás del vídeo.** Se quitaron el `glow-tr` del hero y el
+  halo del componente: cualquier tinte bajo el vídeo hace visible su recuadro.
+
+---
+
+## ADR-017 · El azul de marca pasa a PMS 295
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** El [ADR-013](#adr-013--el-sitio-pasa-a-tema-claro-con-la-barra-superior-en-negro)
+adoptó un azul petróleo `#036D9B` muestreado de una referencia que aportó el
+propietario. El 2026-10-20 aportó el color corporativo real: **PMS 295**.
+
+**Decisión.** `--primary` pasa a **`hsl(214 75% 24%)` = `#0F376A`**.
+
+**De dónde sale ese valor, y qué hay que saber.** El propietario entregó una
+**fotografía de un muestrario impreso** con la etiqueta «PMS 295». Se muestreó
+el área central de la imagen y la moda de color da `rgb(15,55,106)`.
+
+> ⚠️ **No es necesariamente el Pantone exacto.** Es un escaneo de tinta bajo
+> una luz desconocida, así que lleva la desviación del dispositivo. Las
+> conversiones publicadas de **Pantone 295 C** quedan algo **más oscuras**
+> (en torno a `#002F5F`–`#003057`). Si alguien dispone del valor oficial de la
+> guía o del manual de marca, **ese manda** sobre este.
+
+### El problema que destapó: la barra negra
+
+El azul de marca es un **azul marino muy oscuro**. Sobre el negro de la
+cabecera (`#09090c`) sería **prácticamente invisible** — y allí se usa en dos
+sitios que importan: el subrayado de 1 px del enlace activo (`.nav-link::after`)
+y el botón «Contacto» al pasar el cursor.
+
+**Solución:** dentro de `.navbar-dark` se redefine `--primary` a un **tinte del
+mismo color**: `hsl(214 75% 58%)`. Mismo matiz (214), misma saturación (75 %),
+solo más claro. No es otro color, es el mismo aclarado para fondo oscuro.
+
+⚠️ **Están atados: si cambias `--primary`, recalcula el tinte del navbar.**
+
+### Contraste, medido tras el cambio
+
+| | Ratio | |
+|---|---|---|
+| PMS 295 sobre la página | **9,92:1** | Antes el petróleo daba 4,77:1 |
+| Blanco sobre PMS 295 (botones) | **11,83:1** | |
+| Tinte sobre la barra negra | **5,63:1** | |
+
+**El cambio mejora la accesibilidad**, no la empeora: el petróleo anterior
+rozaba el mínimo AA de 4,5:1 y este lo dobla con holgura.
+0 fallos en las 7 rutas.
+
+---
+
+## ADR-018 · «Inicio» en el menú, y el menú se rompe a 1280 px
+
+**Fecha:** 2026-10-20 · **Estado:** ✅ Aceptada · **Decide:** propietario
+
+**Contexto.** El propietario pidió un enlace **«Inicio»** en la barra. Hasta
+entonces solo se volvía a la portada pulsando el logo — que funciona, pero no
+todo el mundo lo sabe.
+
+**Decisión.** Se añade como primer enlace. Dos detalles no evidentes:
+
+1. **`end: true` en el `NavLink`.** Sin eso, React Router considera que la ruta
+   `/` coincide con **todas** las demás, y «Inicio» aparecería resaltado como
+   activo en todo el sitio.
+2. **El menú horizontal pasa de `lg` (1024 px) a `xl` (1280 px).**
+
+### Por qué hubo que mover el punto de ruptura
+
+Ya estaba avisado en el **P1-17**: con 6 enlaces más el botón, a 1024 px
+quedaban **65 px libres**. Al añadir «Inicio» se midió de nuevo:
+
+| | Antes de «Inicio» | Con «Inicio» (a 1024 px) |
+|---|---|---|
+| Hueco libre | 65 px | **0 px** |
+| Logo | Una línea | **Partido en dos líneas** |
+
+Con el menú a `xl`, entre 1024 y 1279 px se usa la hamburguesa —que ya existía
+y funciona— y a partir de 1280 px el menú horizontal entra con **77 px de
+holgura**. Se bajó además el espaciado de `gap-8` a `gap-7` y se añadió
+`whitespace-nowrap` al nombre del logo para que no se vuelva a partir.
+
+**Medido a 1024, 1280, 1440 y 1680 px.**
+
+> ⚠️ **El margen vuelve a ser estrecho.** Un enlace más y habrá que agrupar las
+> cuatro líneas de producto en un desplegable. El P1-17 sigue abierto por eso.
+
+---
+
+## ADR-019 · El formulario se endurece, y el acuse deja de repetir al visitante
+
+**Fecha:** 2026-10-26 · **Estado:** ✅ Aceptada · **Pide:** propietario («mira la parte de seguridad, que todo el backend funcione»)
+
+**Contexto.** El backend de ADR-012 estaba bien planteado: guarda antes de
+enviar correo, consultas preparadas, trampa antibots, `config.php` fuera del
+repositorio y protegido en el servidor (comprobado en producción: 403). Pero
+se probó **de verdad**, en local, con un MySQL 8.4 desechable en modo estricto
+y un servidor SMTP falso con TLS que captura los correos, y aparecieron cinco
+problemas medidos, no supuestos:
+
+| # | Problema | Cómo se vio |
+|---|---|---|
+| 1 | **Insumos no existía** ni en el backend ni en el ENUM de la tabla | Una solicitud de Insumos devolvía 422 |
+| 2 | **Cualquier web ajena podía enviar solicitudes** (CSRF) | Con `Origin: evil.example` o como `text/plain`, se guardaba |
+| 3 | **Detrás de la CDN** (`Server: hcdn`) el límite por IP podía ser por **nodo**, no por persona | Diagnóstico sobre producción: la CDN está delante |
+| 4 | **Ningún tope de almacenamiento** | 60 envíos seguidos del mismo cliente: se guardaron los 60 |
+| 5 | **El acuse repetía nombre, datos y mensaje** a una dirección que escribe el visitante | Permitía mandar spam firmado por 4D a terceros |
+
+**Decisión.**
+
+1. **Insumos** en el formulario, en `$LINEAS` y en el ENUM, con la migración
+   `db/migraciones/2026-10-26-linea-insumos.sql`. ⚠️ **Se ejecuta ANTES de
+   subir el PHP** (ver `09-despliegue.md`).
+2. **Solo desde el propio sitio:** se exige `application/json` (415 si no) y,
+   si el navegador declara `Origin`, tiene que ser 4dimensionsas.com, `www.` o
+   localhost para desarrollo (403 si no).
+3. **Huella del cliente = `REMOTE_ADDR` + última entrada de `X-Forwarded-For`**
+   (la que añade el proxy más cercano; la primera la puede inventar el
+   cliente). Sin CDN, la cabecera viene vacía y todo queda como antes.
+4. **Tope duro `tope_por_hora` (20 por defecto):** por encima se responde 429
+   **sin guardar**. El límite blando de 5 sigue igual: guarda pero no envía
+   correos. El formulario muestra un mensaje propio con correo y WhatsApp.
+5. **El acuse solo lleva texto nuestro.** Del visitante, como mucho el primer
+   nombre y solo si son letras (`/^\p{L}[\p{L}'\-]{0,29}$/u`): no cabe ni un
+   enlace ni un anuncio. La línea de interés sale de la lista cerrada. El
+   **aviso interno sí lleva todo** (escapado): solo llega a nuestro buzón.
+6. `display_errors` forzado a 0 y `Cache-Control: no-store` en la respuesta.
+7. Las dos plantillas de correo pasan a la paleta actual (blanco, PMS 295).
+
+**Verificado** con una batería de 18 casos sobre el banco local. Todos pasan.
+Los que importan: el correo falla → **la solicitud se guarda igual**
+(`aviso:fallo acuse:fallo`); la base falla → error genérico, **sin rutas ni
+avisos de PHP** aunque PHP se arrancó con los errores visibles; dos clientes
+tras el mismo nodo de CDN → **cuentan por separado**; intento de spam por el
+acuse → el enlace **no** llega a la víctima. Asunto y remitente con tildes,
+bien codificados (RFC 2047).
+
+**Lo que NO se pudo verificar desde aquí:** si la CDN de Hostinger envía de
+verdad `X-Forwarded-For`. Si no la envía, el código se comporta como antes
+(ni mejor ni peor). Se puede confirmar mirando `error_log` tras unos envíos.
+
+**Consecuencia para el cliente:** el acuse es más escueto. Antes le devolvía
+su propio mensaje; ahora le confirma la línea y el plazo de respuesta. Es el
+precio de que el formulario no sirva para mandar spam en nombre de 4D.

@@ -4,43 +4,19 @@ import { Helmet } from 'react-helmet-async';
 import Seo from '../components/Seo';
 import JsonLd from '../components/JsonLd';
 import { motion, useReducedMotion, useScroll } from 'framer-motion';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import Reveal from '../components/Reveal';
+import { LineaDibujada, ImagenEntrada } from '../components/Movimiento';
 import CountUp from '../components/CountUp';
-import Tesseract from '../components/Tesseract';
+import ShoeTurntable from '../components/ShoeTurntable';
 import PageTransition from '../components/PageTransition';
 import ProjectCard from '../components/ProjectCard';
-import { IMAGES, projects } from '../data/projects';
+import { projects } from '../data/projects';
+import { LINEAS } from '../data/lineas';
+import { EMAIL, MAILTO, WHATSAPP_URL, MAPS_URL, TELEFONO_VISIBLE, DIRECCION_CALLE, DIRECCION_CIUDAD } from '../lib/contacto';
 
-const lines = [
-    {
-        index: '01',
-        title: 'Calzado',
-        to: '/calzado',
-        image: IMAGES.calzadoHero,
-        alt: 'Calzado premium de cuero blanco flotando sobre fondo oscuro',
-        description:
-            'Diseño y desarrollo integral de calzado casual, deportivo, industrial y corporativo. Del concepto y la horma al producto listo para producción y comercialización internacional.',
-    },
-    {
-        index: '02',
-        title: 'Ropa',
-        to: '/ropa',
-        image: IMAGES.ropaHero,
-        alt: 'Chaqueta técnica azul oscuro en forma fantasma sobre fondo oscuro',
-        description:
-            'Indumentaria para marcas que buscan diferenciarse: diseño de colecciones, patronaje, desarrollo de textiles y personalización total, con producción a escala.',
-    },
-    {
-        index: '03',
-        title: 'Dotaciones',
-        to: '/dotaciones',
-        image: IMAGES.dotacionesHero,
-        alt: 'Uniforme industrial azul con casco de seguridad blanco sobre fondo oscuro',
-        description:
-            'Uniformes corporativos e industriales y elementos de protección personal, con personalización por cliente, volumen y logística internacional.',
-    },
-];
+// Las cuatro líneas salen del registro único `data/lineas.js` (2026-10-26).
+const lines = LINEAS;
 
 const values = [
     { word: 'Visión', text: 'Leemos el mercado antes de dibujar una sola línea. Cada producto nace de una oportunidad real.' },
@@ -60,7 +36,7 @@ const steps = [
 // No las toques sin actualizar antes ese archivo.
 const stats = [
     { value: 120, prefix: '+', suffix: 'K', label: 'Pares desarrollados y comercializados' },
-    { value: 12, suffix: '.000', label: 'Dotaciones entregadas en 4 países' },
+    { value: 130, label: 'Dotaciones entregadas' },
     { value: 98, suffix: '%', label: 'Entregas a tiempo en programas vigentes' },
 ];
 
@@ -75,14 +51,14 @@ export default function HomePage() {
     return (
         <PageTransition>
             <Helmet>
-                <title>4D Cuarta Dimensión | Diseño y desarrollo de producto</title>
+                <title>4D Cuarta Dimensión | Diseño de calzado, ropa y dotaciones en Colombia</title>
                 <meta
                     name="description"
                     content="Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
                 />
             </Helmet>
             <Seo
-                title="4D Cuarta Dimensión | Diseño y desarrollo de producto"
+                title="4D Cuarta Dimensión | Diseño de calzado, ropa y dotaciones en Colombia"
                 description="Comercializadora internacional colombiana de diseño y desarrollo de producto: calzado, ropa y dotaciones corporativas e industriales."
             />
             <JsonLd />
@@ -92,18 +68,24 @@ export default function HomePage() {
             {/* ── HERO ──────────────────────────────────────────────────────
                 Sin Reveal: entra con CSS para que se vea en el primer pintado
                 (docs/04-diseno.md). El H1 solo se desplaza, nunca se desvanece. */}
-            <section className="glow glow-tr relative flex min-h-[100dvh] items-center overflow-hidden">
-                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 pb-24 pt-32 lg:grid-cols-[1.15fr_0.85fr]">
+            {/* Sin `glow glow-tr` desde el 2026-10-26: ese halo azulado arriba a la
+                derecha quedaba detrás del vídeo del zapato y oscurecía 5 niveles la
+                página justo en su esquina, dejando ver el recuadro del vídeo. */}
+            <section className="relative flex min-h-[100dvh] items-center overflow-hidden">
+                {/* A partir de xl el reparto pasa a 50/50 para dar más sitio al zapato
+                    (pedido el 2026-10-26). NO lo bajes a lg: a 1024 px «desarrollamos»
+                    mide 497 px y en una columna a partes iguales (468) no cabría. */}
+                <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-6 pb-24 pt-32 lg:grid-cols-[1.15fr_0.85fr] xl:grid-cols-2">
                     <div>
                         <p className="rise-in text-xs font-semibold uppercase tracking-[0.3em] text-primary">
                             4D — Cuarta Dimensión ES S.A.S.
                         </p>
                         <h1 className="rise-solid mt-6 text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
                             Diseñamos y desarrollamos{' '}
-                            <span className="text-primary">producto</span>: calzado, ropa y dotaciones.
+                            <span className="text-primary">calzado, ropa y dotaciones</span>.
                         </h1>
                         <p className="rise-in rise-delay-2 mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                            Somos una comercializadora internacional colombiana. No comercializamos catálogos: desarrollamos producto a medida, con dirección de diseño propia y producción verificable.
+                            Somos una empresa colombiana. Diseñamos soluciones a medida, con dirección de diseño propia y producción verificable.
                         </p>
                         <div className="rise-in rise-delay-3 mt-9 flex flex-wrap gap-4">
                             <Link
@@ -122,13 +104,13 @@ export default function HomePage() {
                         </div>
                     </div>
                     <div className="rise-in rise-delay-2">
-                        <Tesseract />
+                        <ShoeTurntable />
                     </div>
                 </div>
             </section>
 
             {/* ── MARQUEE ─────────────────────────────────────────────────── */}
-            <div className="marquee-mask overflow-hidden border-y border-border/60 py-4" aria-hidden="true">
+            <div className="marquee-mask overflow-hidden border-y border-foreground/30 py-4" aria-hidden="true">
                 <div className="marquee-track flex w-max items-center gap-10 whitespace-nowrap">
                     {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
                         <span key={i} className="flex items-center gap-10 text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
@@ -142,7 +124,7 @@ export default function HomePage() {
             {/* ── CIFRAS ────────────────────────────────────────────────────
                 Antes vivían en tres cajitas dentro de "Cómo trabajamos". Son el
                 dato más creíble del sitio: ahora abren la página a todo el ancho. */}
-            <section className="glow glow-c border-b border-border/60">
+            <section className="glow glow-c border-b border-foreground/30">
                 <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
                     <div className="grid gap-12 md:grid-cols-3 md:gap-8">
                         {stats.map((m, i) => (
@@ -154,7 +136,7 @@ export default function HomePage() {
                                         suffix={m.suffix ?? ''}
                                         className="stat-number block text-6xl font-extrabold text-primary sm:text-7xl lg:text-8xl"
                                     />
-                                    <p className="mt-5 max-w-xs border-t border-border/60 pt-5 text-sm leading-relaxed text-muted-foreground">
+                                    <p className="mt-5 max-w-xs border-t border-primary/60 pt-5 text-sm leading-relaxed text-muted-foreground">
                                         {m.label}
                                     </p>
                                 </div>
@@ -180,10 +162,10 @@ export default function HomePage() {
                         <Reveal delay={0.12}>
                             <div className="space-y-6 text-lg leading-relaxed text-muted-foreground lg:pt-6">
                                 <p className="border-l border-primary/40 pl-6 text-xl text-foreground/90">
-                                    4D Cuarta Dimensión ES S.A.S. es una comercializadora internacional que une visión estratégica, tecnología y diseño de producto. No comercializamos catálogos: desarrollamos productos con propósito, pensados para ganar en mercados exigentes.
+                                    4D Cuarta Dimensión ES S.A.S. es una empresa colombiana que une visión estratégica, tecnología y diseño de producto. No comercializamos catálogos: desarrollamos productos con propósito, pensados para ganar.
                                 </p>
                                 <p className="pl-6">
-                                    Trabajamos donde la mayoría se detiene: en la cuarta dimensión de cada proyecto, esa perspectiva que convierte una idea en un producto con identidad, calidad verificable y resultados medibles.
+                                    Trabajamos donde la mayoría se detiene: en la cuarta dimensión de cada proyecto, esa perspectiva que convierte una idea en un producto con identidad, calidad y resultados medibles.
                                 </p>
                             </div>
                         </Reveal>
@@ -194,12 +176,12 @@ export default function HomePage() {
             {/* ── LÍNEAS DE NEGOCIO ─────────────────────────────────────────
                 A sangre y alternadas. El número de línea es una marca de agua
                 gigante, no una etiqueta pequeña. */}
-            <section id="lineas" className="border-t border-border/60 bg-card/30">
+            <section id="lineas" className="border-t border-foreground/30 bg-card/30">
                 <div className="mx-auto max-w-6xl px-6 pt-20 md:pt-28">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Nuestras líneas de negocio</p>
                         <h2 className="mt-5 max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl">
-                            Tres dimensiones de producto.
+                            Cuatro dimensiones de producto.
                         </h2>
                     </Reveal>
                 </div>
@@ -209,21 +191,26 @@ export default function HomePage() {
                         <Reveal key={line.index} delay={0.05}>
                             <Link
                                 to={line.to}
-                                className="group block border-t border-border/60 transition-colors duration-500 hover:bg-background/60"
+                                className="group block border-t border-primary/60 transition-colors duration-500 hover:bg-background/60"
                             >
                                 <div
-                                    className={`mx-auto grid max-w-6xl items-center gap-8 px-6 py-14 md:py-20 lg:grid-cols-2 lg:gap-16 ${
-                                        i % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''
-                                    }`}
+                                    className={`mx-auto grid max-w-6xl items-center gap-8 px-6 py-14 md:py-20 lg:gap-16 ${
+                                        line.image ? 'lg:grid-cols-2' : ''
+                                    } ${i % 2 === 1 && line.image ? 'lg:[&>*:first-child]:order-2' : ''}`}
                                 >
-                                    <div className="media border border-border/70">
-                                        <img
-                                            src={line.image}
-                                            alt={line.alt}
-                                            loading="lazy"
-                                            className="aspect-[3/2] w-full object-cover"
-                                        />
-                                    </div>
+                                    {line.image && (
+                                        <div className="media border border-border/70">
+                                            <ImagenEntrada>
+                                                <img
+                                                    src={line.image}
+                                                    alt={line.alt}
+                                                    loading="lazy"
+                                                    style={line.posicion ? { objectPosition: line.posicion } : undefined}
+                                                    className="aspect-[3/2] w-full object-cover"
+                                                />
+                                            </ImagenEntrada>
+                                        </div>
+                                    )}
                                     <div className="relative">
                                         <span
                                             aria-hidden="true"
@@ -250,7 +237,7 @@ export default function HomePage() {
             </section>
 
             {/* ── CÓMO TRABAJAMOS ─────────────────────────────────────────── */}
-            <section className="glow glow-bl border-t border-border/60">
+            <section className="glow glow-bl border-t border-foreground/30">
                 <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Cómo trabajamos</p>
@@ -258,8 +245,9 @@ export default function HomePage() {
                     <div className="mt-10">
                         {values.map((v, i) => (
                             <Reveal key={v.word} delay={i * 0.06}>
-                                <div className="group grid items-baseline gap-2 border-t border-border/60 py-8 transition-colors duration-300 hover:bg-card/40 sm:grid-cols-[7rem_1fr_1.4fr] sm:gap-8 sm:px-4">
-                                    <span className="text-outline text-4xl font-extrabold transition-opacity duration-300 group-hover:opacity-60 sm:text-5xl">
+                                <div className="group relative grid items-baseline gap-2 py-8 transition-colors duration-300 hover:bg-card/40 sm:grid-cols-[7rem_1fr_1.4fr] sm:gap-8 sm:px-4">
+                                    <LineaDibujada delay={i * 0.06} />
+                                    <span className="text-outline text-4xl font-extrabold transition-colors duration-300 group-hover:text-primary sm:text-5xl">
                                         {String(i + 1).padStart(2, '0')}
                                     </span>
                                     <h3 className="text-3xl font-extrabold tracking-tight transition-colors duration-300 group-hover:text-primary sm:text-4xl">
@@ -276,7 +264,7 @@ export default function HomePage() {
             {/* ── PROYECTOS ─────────────────────────────────────────────────
                 Rejilla asimétrica: el primer caso ocupa el doble. Rompe el
                 patrón de 2×2 que tenían todas las secciones. */}
-            <section id="proyectos" className="border-t border-border/60 bg-card/30">
+            <section id="proyectos" className="border-t border-foreground/30 bg-card/30">
                 <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
                     <Reveal>
                         <div className="flex flex-wrap items-end justify-between gap-6">
@@ -285,16 +273,26 @@ export default function HomePage() {
                                 <h2 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">Proyectos con resultado.</h2>
                             </div>
                             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                                Una muestra de lo que ocurre cuando diseño, desarrollo y comercialización trabajan en la misma dimensión.
+                                Una muestra de lo que ocurre cuando la inspiración, diseño, desarrollo y calidad trabajan en la misma dimensión.
                             </p>
                         </div>
                     </Reveal>
-                    <div className="mt-14 grid gap-6 md:grid-cols-2">
-                        {projects.map((p, i) => (
-                            <div key={p.id} className={i === 0 ? 'md:col-span-2' : ''}>
-                                <ProjectCard project={p} delay={(i % 2) * 0.08} wide={i === 0} />
-                            </div>
-                        ))}
+                    {/* El primero va destacado a todo el ancho y el resto en fila.
+                        Con 4 proyectos y dos columnas quedaba 1 + 2 + 1, con media
+                        fila vacía (2026-10-26). Ahora: tres columnas en escritorio
+                        y, si en tableta sobra uno, ese ocupa la fila entera. */}
+                    <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {projects.map((p, i) => {
+                            const resto = projects.length - 1;
+                            const huerfanoEnTableta = i > 0 && resto % 2 === 1 && i === projects.length - 1;
+                            const clase =
+                                i === 0 ? 'md:col-span-2 lg:col-span-3' : huerfanoEnTableta ? 'md:col-span-2 lg:col-span-1' : '';
+                            return (
+                                <div key={p.id} className={clase}>
+                                    <ProjectCard project={p} delay={i === 0 ? 0 : ((i - 1) % 3) * 0.08} wide={i === 0} />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
@@ -302,7 +300,7 @@ export default function HomePage() {
             {/* ── METODOLOGÍA ───────────────────────────────────────────────
                 `relative` es obligatorio: useScroll mide contra este contenedor
                 y con position: static los offsets salen mal (P2-07). */}
-            <section id="metodologia" ref={methodRef} className="relative border-t border-border/60">
+            <section id="metodologia" ref={methodRef} className="relative border-t border-foreground/30">
                 <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Metodología</p>
@@ -333,7 +331,7 @@ export default function HomePage() {
             </section>
 
             {/* ── DIFERENCIACIÓN ────────────────────────────────────────── */}
-            <section className="glow glow-tr border-t border-border/60">
+            <section className="glow glow-tr border-t border-foreground/30">
                 <div className="mx-auto max-w-6xl px-6 py-28 md:py-40">
                     <Reveal>
                         <h2 className="max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
@@ -349,7 +347,7 @@ export default function HomePage() {
             </section>
 
             {/* ── CIERRE INFORMATIVO ──────────────────────────────────────── */}
-            <section className="border-t border-border/60 bg-card/40">
+            <section className="border-t border-foreground/30 bg-card/40">
                 <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
                     <Reveal>
                         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">Dónde operamos</p>
@@ -357,32 +355,49 @@ export default function HomePage() {
                             Colombia, con operación internacional.
                         </h2>
                         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                            Nuestra oficina principal está en Bogotá D.C. Comercializamos y entregamos en Latinoamérica, Norteamérica y Europa, con una red de aliados de manufactura en Colombia, Asia y Europa.
+                            Nuestra oficina principal está en Bogotá D.C. Producimos y comercializamos en Latinoamérica y Centroamérica, con una red de aliados y manufactureros.
                         </p>
                     </Reveal>
                     <Reveal delay={0.1}>
-                        <dl className="mt-14 grid gap-px border border-border/60 bg-border/60 sm:grid-cols-3">
-                            <div className="bg-background p-8 transition-colors duration-300 hover:bg-card/60">
-                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Correo</dt>
-                                <dd className="mt-3">
-                                    <a href="mailto:info@4dimensionsas.com" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
-                                        info@4dimensionsas.com
+                        {/* Tarjetas en vez de celdas pegadas (2026-10-26). La tarjeta
+                            ENTERA es el enlace: más fácil de acertar en el móvil. Los
+                            externos van con `noopener`: sin él la pestaña nueva puede
+                            manipular la nuestra con `window.opener`. */}
+                        <ul className="mt-14 grid gap-5 sm:grid-cols-3">
+                            {[
+                                { etiqueta: 'Correo', Icono: Mail, href: MAILTO, externo: false, lineas: [EMAIL], ayuda: 'escribir un correo' },
+                                { etiqueta: 'Teléfono', Icono: Phone, href: WHATSAPP_URL, externo: true, lineas: [TELEFONO_VISIBLE], ayuda: 'escribir por WhatsApp' },
+                                { etiqueta: 'Oficina', Icono: MapPin, href: MAPS_URL, externo: true, lineas: [DIRECCION_CALLE, DIRECCION_CIUDAD], ayuda: 'ver en Google Maps' },
+                            ].map(({ etiqueta, Icono, href, externo, lineas, ayuda }) => (
+                                <li key={etiqueta}>
+                                    <a
+                                        href={href}
+                                        {...(externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                                        className="tarjeta group flex h-full flex-col p-7"
+                                    >
+                                        <span className="flex items-center justify-between">
+                                            <span className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                                <Icono className="h-4 w-4 text-primary" aria-hidden="true" />
+                                                {etiqueta}
+                                            </span>
+                                            <ArrowUpRight
+                                                aria-hidden="true"
+                                                className="h-4 w-4 text-primary transition-transform duration-300 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+                                            />
+                                        </span>
+                                        <span className="mt-4 text-base font-medium text-primary underline-offset-4 group-hover:underline">
+                                            {lineas.map((l, i) => (
+                                                <React.Fragment key={l}>
+                                                    {i > 0 && <br />}
+                                                    {l}
+                                                </React.Fragment>
+                                            ))}
+                                        </span>
+                                        <span className="sr-only"> — {ayuda}</span>
                                     </a>
-                                </dd>
-                            </div>
-                            <div className="bg-background p-8 transition-colors duration-300 hover:bg-card/60">
-                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Teléfono</dt>
-                                <dd className="mt-3">
-                                    <a href="tel:+573165775539" className="text-sm text-foreground transition-colors duration-200 hover:text-primary">
-                                        +57 316 577 5539
-                                    </a>
-                                </dd>
-                            </div>
-                            <div className="bg-background p-8">
-                                <dt className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Oficina</dt>
-                                <dd className="mt-3 text-sm text-foreground">Cra. 34a #27a-22 sur<br />Bogotá D.C., Colombia</dd>
-                            </div>
-                        </dl>
+                                </li>
+                            ))}
+                        </ul>
                     </Reveal>
                 </div>
             </section>

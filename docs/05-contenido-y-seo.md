@@ -1,6 +1,6 @@
 # 05 — Contenido y SEO
 
-**Última actualización:** 2026-09-01
+**Última actualización:** 2026-10-27
 
 ---
 
@@ -75,7 +75,64 @@ Hoy vende en 2ª persona. Debe describir en 1ª:
 
 # Parte 2 · SEO
 
-## Estado actual: 9/10 — era 3/10 el 2026-09-01
+## Auditoría del 2026-10-27 — el código está bien, el servidor no
+
+El propietario preguntó si el sitio «tiene buen SEO y buen posicionamiento».
+Se auditó el build (las 7 rutas) y el sitio publicado.
+
+**En el build: bien.** Un `<title>`, una descripción, un `canonical`, un H1,
+JSON-LD, Open Graph y Twitter Card por ruta; `lang="es"`; todas las imágenes
+con `alt`; `sitemap.xml` con las 7 rutas; `robots.txt` correcto.
+
+**En el servidor publicado: tres fallos, y son los que frenan el
+posicionamiento** (medido con peticiones GET el 2026-10-27):
+
+| Petición | Responde | Efecto |
+|---|---|---|
+| `/nosotros` (y las demás rutas) | **301 → `/nosotros/`** | El canonical dice `/nosotros`: Google ve que la página buena redirige y **no la indexa**. Por eso solo está indexada la home |
+| `https://www.4dimensionsas.com/` | **200** (copia del sitio) | Dos direcciones para el mismo contenido: reparten la autoridad |
+| `/favicon.ico` | **404** | Sin icono en los resultados de Google |
+| `/insumos` | **404** | La v2 no está subida |
+
+Los cuatro se arreglan **subiendo la v2** con su `.htaccess` (ver
+`09-despliegue.md`). No hay nada más que tocar en el código para ellos.
+
+**Cambios hechos en el código ese día:**
+
+- **Títulos con palabras clave y lugar.** Antes «Calzado — Diseño y
+  desarrollo»; ahora «Diseño y desarrollo de calzado en Colombia». Ver la
+  tabla de abajo. Pasan de 60 caracteres a propósito: Google corta el final, y
+  lo que queda cortado es la marca, que ya sale en la URL. Primero va lo que
+  la gente busca.
+- **Imagen propia al compartir cada línea** (`public/og/*.jpg`, 1200×630,
+  sacadas de las fotos propias). Antes las 7 rutas compartían `og-image.jpg`.
+- **Insumos:** descripción de 59 a 152 caracteres, y ya en literal: con una
+  variable, `llms.txt` publicaba «No description available».
+- **`.htaccess`:** `www` → sin `www` con 301, y caché del navegador (un año
+  para `assets/` con hash, 30 días para fotos, sin caché para el HTML).
+
+**Lo que no depende del código** (en orden de impacto):
+
+1. Subir la v2 (arregla la tabla de arriba).
+2. Google Search Console: enviar `sitemap.xml` y pedir la indexación de las 7
+   rutas.
+3. **Perfil de Empresa de Google** (Google Maps) con la dirección de Bogotá:
+   es lo que más pesa para búsquedas locales como «dotaciones en Bogotá».
+4. Completar el JSON-LD (NIT, año de fundación, redes) → **P1-06**.
+5. Sustituir las 7 imágenes de banco que quedan → **P2-10**.
+
+### Títulos desde el 2026-10-27
+
+| Ruta | `<title>` |
+|---|---|
+| `/` | 4D Cuarta Dimensión \| Diseño de calzado, ropa y dotaciones en Colombia |
+| `/calzado` | Diseño y desarrollo de calzado en Colombia \| 4D Cuarta Dimensión |
+| `/ropa` | Diseño y desarrollo de ropa en Colombia \| 4D Cuarta Dimensión |
+| `/dotaciones` | Dotaciones y uniformes empresariales en Colombia \| 4D Cuarta Dimensión |
+| `/insumos` | Insumos para calzado y textil en Colombia \| 4D Cuarta Dimensión |
+| `/nosotros` `/contacto` | sin cambios |
+
+## Estado del 2026-09-01: 9/10 — era 3/10
 
 El bloque de visibilidad (**P0-02**, **P0-03**, **P0-04**) se resolvió el
 2026-09-01. Lo que queda son dos cosas que dependen del propietario y una

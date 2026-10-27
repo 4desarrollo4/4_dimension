@@ -64,7 +64,7 @@ C:\4 dimension\
 │   │   ├── tools/
 │   │   │   ├── generate-llms.js
 │   │   │   ├── generate-images.js ← iconos + og-image desde el logo
-│   │   │   └── prerender.js       ← 6 rutas + sitemap + robots
+│   │   │   └── prerender.js       ← 7 rutas + sitemap + robots
 │   │   └── src/
 │   │       ├── App.jsx           ← rutas (SIN Router)
 │   │       ├── main.jsx          ← entrada de navegador
@@ -73,7 +73,7 @@ C:\4 dimension\
 │   │       ├── components/       ← los 11 propios (JsonLd, Seo, Reveal…)
 │   │       ├── data/projects.js  ← datos de proyectos
 │   │       ├── lib/site.js       ← dominio, rutas y OG
-│   │       └── pages/            ← 6 páginas
+│   │       └── pages/            ← 7 páginas
 ├── db/schema.sql             ← tabla contact_requests (FUERA de public/)
 │   └── pocketbase/           ← sin usar desde 2026-09-02; camino de vuelta a VPS
 │       ├── pocketbase.exe    ← el único binario (sin versionar)
